@@ -5,26 +5,22 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\LoginRequest;
 use App\Models\User;
 
 class AuthController extends Controller
 {
-    /**
-     * Registro de usuario + creación de token
-     */
     public function register(RegisterRequest $request)
     {
         $user = User::create([
             'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'email' => $request->email,
-            'password' => $request->password, // se cifra automáticamente (cast 'hashed')
-            'phone' => $request->phone,
-            'role' => 'guest',
-            'is_active' => true,
+            'last_name'  => $request->last_name,
+            'email'      => $request->email,
+            'password'   => $request->password, // hashed
+            'phone'      => $request->phone,
+            'role'       => 'guest',
+            'is_active'  => true,
         ]);
 
         $token = $user->createToken('api-token')->plainTextToken;
@@ -32,13 +28,17 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Usuario registrado correctamente',
             'token'   => $token,
-            'user'    => $user,
+            'user'    => [
+                'id'         => $user->id,
+                'first_name' => $user->first_name,
+                'last_name'  => $user->last_name,
+                'email'      => $user->email,
+                'role'       => $user->role,
+                'is_active'  => $user->is_active,
+            ]
         ], 201);
     }
 
-    /**
-     * Login + creación de token
-     */
     public function login(LoginRequest $request)
     {
         $credenciales = [
@@ -47,58 +47,51 @@ class AuthController extends Controller
         ];
 
         if (!Auth::attempt($credenciales)) {
-            return response()->json([
-                'message' => 'Credenciales incorrectas',
-            ], 401);
+            return response()->json(['message' => 'Credenciales incorrectas'], 401);
         }
-    /** @var \App\Models\User $user */
+
         $user = Auth::user();
 
         if (!$user->is_active) {
-            return response()->json([
-                'message' => 'Usuario inactivo',
-            ], 403);
+            return response()->json(['message' => 'Usuario inactivo'], 403);
         }
 
-        /** @var \Laravel\Sanctum\PersonalAccessToken $token */
         $token = $user->createToken('api-token')->plainTextToken;
 
         return response()->json([
             'message' => 'Login correcto',
             'token'   => $token,
-            'user'    => $user,
+            'user'    => [
+                'id'         => $user->id,
+                'first_name' => $user->first_name,
+                'last_name'  => $user->last_name,
+                'email'      => $user->email,
+                'role'       => $user->role,
+                'is_active'  => $user->is_active,
+            ]
         ]);
     }
 
-    /**
-     * Revoca el token actual
-     */
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        /** @var \Laravel\Sanctum\PersonalAccessToken $token */
+        $token = $request->user()->currentAccessToken();
+        $token->delete();
 
-        return response()->json([
-            'message' => 'Token revocado correctamente',
-        ]);
+        return response()->json(['message' => 'Token revocado correctamente']);
     }
 
-    /**
-     * Revoca todos los tokens del usuario
-     */
-    public function logoutAll(Request $request)
-    {
-        $request->user()->tokens()->delete();
-
-        return response()->json([
-            'message' => 'Todos los tokens han sido revocados',
-        ]);
-    }
-
-    /**
-     * Devuelve el usuario autenticado por token
-     */
     public function user(Request $request)
     {
-        return response()->json($request->user());
+        return response()->json([
+            'user' => [
+                'id'         => $request->user()->id,
+                'first_name' => $request->user()->first_name,
+                'last_name'  => $request->user()->last_name,
+                'email'      => $request->user()->email,
+                'role'       => $request->user()->role,
+                'is_active'  => $request->user()->is_active,
+            ]
+        ]);
     }
 }

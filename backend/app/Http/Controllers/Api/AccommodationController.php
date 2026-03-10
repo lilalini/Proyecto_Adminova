@@ -221,4 +221,55 @@ class AccommodationController extends Controller
             'conflicts' => $unavailableDates->pluck('date')
         ]);
     }
+
+    /**
+ * GET /api/accommodations/public
+ * Listado público de alojamientos (para home y visitantes)
+ */
+public function publicList(Request $request)
+{
+    $query = Accommodation::where('status', 'published')
+                          ->with(['owner', 'media']);
+    
+    // Filtros básicos para visitantes
+    if ($request->has('city')) {
+        $query->where('city', 'like', '%' . $request->city . '%');
+    }
+    
+    if ($request->has('guests')) {
+        $query->where('max_guests', '>=', $request->guests);
+    }
+    
+    if ($request->has('check_in') && $request->has('check_out')) {
+        // Filtrar por disponibilidad (más complejo)
+    }
+    
+    $accommodations = $query->paginate(12);
+    
+    return AccommodationResource::collection($accommodations);
+}
+
+/**
+ * GET /api/accommodations/{id}/public
+ * Detalle público de un alojamiento (para visitantes)
+ */
+    public function publicShow($id)
+    {
+        $accommodation = Accommodation::with([
+            'owner', 
+            'media',
+            'reviews' => function($query) {
+                $query->where('status', 'published')
+                    ->with('guest')
+                    ->latest()
+                    ->limit(10);
+            }
+        ])->findOrFail($id);
+        
+        if ($accommodation->status !== 'published') {
+            return response()->json(['message' => 'Alojamiento no disponible'], 404);
+        }
+        
+        return new AccommodationResource($accommodation);
+    }
 }

@@ -147,4 +147,13 @@ public function update(UpdateAvailabilityRequest $request, $id)
 
         return response()->json(['message' => 'Calendario actualizado correctamente']);
     }
+
+    public function publicIndex($accommodationId)
+{
+    $availability = AvailabilityCalendar::where('accommodation_id', $accommodationId)
+                                         ->where('date', '>=', now())
+                                         ->limit(60)
+                                         ->get();
+    return response()->json(['data' => $availability]);
+}
 }

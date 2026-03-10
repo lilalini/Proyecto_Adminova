@@ -1,0 +1,193 @@
+<div class="space-y-8">
+  <!-- Bienvenida con nombre real -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-light text-gray-800">
+      Buenas tardes, <span class="font-semibold">{{ user?.first_name + ' ' + user?.last_name || 'Usuario' }}</span>
+    </h1>
+    <p class="text-gray-500 mt-1">Panel de control profesional</p>
+  </div>
+
+  <!-- Stats Grid con datos REALES -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <!-- Alojamientos -->
+    <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-500">Alojamientos</p>
+          <p class="text-3xl font-semibold text-gray-900 mt-2">{{ stats.accommodations }}</p>
+        </div>
+        <div class="w-12 h-12 bg-indigo-50 rounded-lg flex items-center justify-center">
+          <div class="w-12 h-12 bg-indigo-50 rounded-lg flex items-center justify-center">
+          <app-icon-svg name="building-2" className="text-indigo-600 w-6 h-6"></app-icon-svg>
+        </div>
+        </div>
+      </div>
+      <div class="mt-4 text-sm text-green-600 flex items-center gap-1">
+        <app-icon-svg name="trending-up" className="w-4 h-4"></app-icon-svg>
+        <span>activos</span>
+      </div>
+    </div>
+
+    <!-- Reservas -->
+    <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-500">Reservas</p>
+          <p class="text-3xl font-semibold text-gray-900 mt-2">{{ stats.bookings }}</p>
+        </div>
+        <div class="w-12 h-12 bg-emerald-50 rounded-lg flex items-center justify-center">
+          <div class="w-12 h-12 bg-emerald-50 rounded-lg flex items-center justify-center">
+  <app-icon-svg name="calendar-check" className="text-emerald-600 w-6 h-6"></app-icon-svg>
+</div>
+        </div>
+      </div>
+      <div class="mt-4 text-sm text-green-600 flex items-center gap-1">
+        <app-icon-svg name="trending-up" className="w-4 h-4"></app-icon-svg>
+        <span>este mes</span>
+      </div>
+    </div>
+
+    <!-- Huéspedes -->
+    <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-500">Huéspedes</p>
+          <p class="text-3xl font-semibold text-gray-900 mt-2">{{ stats.guests }}</p>
+        </div>
+        <div class="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center">
+          <div class="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center">
+       <app-icon-svg name="users" className="text-purple-600 w-6 h-6"></app-icon-svg>
+        </div>
+        </div>
+      </div>
+      <div class="mt-4 text-sm text-green-600 flex items-center gap-1">
+        <app-icon-svg name="trending-up" className="w-4 h-4"></app-icon-svg>
+        <span>registrados</span>
+      </div>
+    </div>
+
+    <!-- Ingresos -->
+    <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-500">Ingresos</p>
+          <p class="text-3xl font-semibold text-gray-900 mt-2">€{{ stats.revenue | number:'1.0-0' }}</p>
+        </div>
+        <div class="w-12 h-12 bg-amber-50 rounded-lg flex items-center justify-center">
+          <div class="w-12 h-12 bg-amber-50 rounded-lg flex items-center justify-center">
+  <app-icon-svg name="wallet" className="text-amber-600 w-6 h-6"></app-icon-svg>
+</div>
+        </div>
+      </div>
+      <div class="mt-4 text-sm text-green-600 flex items-center gap-1">
+        <app-icon-svg name="trending-up" className="w-4 h-4"></app-icon-svg>
+        <span>totales</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Acciones rápidas -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+    <a routerLink="/accommodations/create" 
+       class="group bg-white border border-gray-200 rounded-xl p-6 hover:border-indigo-300 hover:shadow-lg transition">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-indigo-50 rounded-lg flex items-center justify-center group-hover:bg-indigo-100">
+         <app-icon-svg name="plus" className="w-5 h-5"></app-icon-svg>
+        </div>
+        <div>
+          <h3 class="font-semibold text-gray-800">Nuevo alojamiento</h3>
+          <p class="text-sm text-gray-500">Añadir propiedad</p>
+        </div>
+      </div>
+    </a>
+
+    <a routerLink="/bookings/create" 
+       class="group bg-white border border-gray-200 rounded-xl p-6 hover:border-emerald-300 hover:shadow-lg transition">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-emerald-50 rounded-lg flex items-center justify-center group-hover:bg-emerald-100">
+         <app-icon-svg name="calendar-plus" className="text-emerald-600 w-6 h-6"></app-icon-svg>
+        </div>
+        <div>
+          <h3 class="font-semibold text-gray-800">Nueva reserva</h3>
+          <p class="text-sm text-gray-500">Registrar reserva</p>
+        </div>
+      </div>
+    </a>
+
+    <a routerLink="/guests/create" 
+       class="group bg-white border border-gray-200 rounded-xl p-6 hover:border-purple-300 hover:shadow-lg transition">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center group-hover:bg-purple-100">
+        <app-icon-svg name="user-plus" className="text-purple-600 w-6 h-6"></app-icon-svg>
+        </div>
+        <div>
+          <h3 class="font-semibold text-gray-800">Nuevo huésped</h3>
+          <p class="text-sm text-gray-500">Añadir huésped</p>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Últimas reservas -->
+  <div class="bg-white rounded-xl border border-gray-200 p-6">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-lg font-semibold text-gray-800">Últimas reservas</h2>
+      <a routerLink="/bookings" class="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
+        <span>Ver todas</span>
+        <app-icon-svg name="calendar" className="w-4 h-4"></app-icon-svg>
+      </a>
+    </div>
+    
+    <div class="space-y-4">
+      @if (recentBookings.length > 0) {
+        @for (booking of recentBookings; track booking.id) {
+          <div class="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center">
+              <app-icon-svg name="calendar" className="text-emerald-600 w-5 h-5"></app-icon-svg>
+              </div>
+              <div>
+                <p class="font-medium text-gray-800">Reserva #{{ booking.id }}</p>
+                <p class="text-sm text-gray-500">{{ booking.check_in | date }} - {{ booking.check_out | date }}</p>
+              </div>
+            </div>
+            <span class="text-sm font-medium text-gray-600">€{{ booking.total_amount | number:'1.2-2' }}</span>
+          </div>
+        }
+      } @else {
+        <p class="text-gray-500 text-center py-4">No hay reservas recientes</p>
+      }
+    </div>
+  </div>
+  
+  <!-- Últimos alojamientos -->
+<div class="bg-white rounded-xl border border-gray-200 p-6">
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-lg font-semibold text-gray-800">Últimos alojamientos</h2>
+    <a routerLink="/accommodations" class="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
+      <span>Ver todos</span>
+      <app-icon-svg name="arrow-right" className="w-4 h-4"></app-icon-svg>
+    </a>
+  </div>
+  
+  <div class="space-y-4">
+    @if (recentAccommodations.length > 0) {
+      @for (acc of recentAccommodations; track acc.id) {
+        <div class="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+          <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center">
+              <app-icon-svg name="building-2" className="text-indigo-600 w-5 h-5"></app-icon-svg>
+            </div>
+            <div>
+              <p class="font-medium text-gray-800">{{ acc.title }}</p>
+              <p class="text-sm text-gray-500">{{ acc.address }}</p>
+            </div>
+          </div>
+          <span class="text-sm font-medium text-gray-600">€{{ acc.base_price | number:'1.2-2' }}</span>
+        </div>
+      }
+    } @else {
+      <p class="text-gray-500 text-center py-4">No hay alojamientos recientes</p>
+    }
+  </div>
+</div>

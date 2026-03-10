@@ -96,4 +96,15 @@ class ReviewController extends Controller
 
         return new ReviewResource($review);
     }
+
+    public function publicIndex($accommodationId)
+    {
+        $reviews = Review::with('guest')
+                        ->where('accommodation_id', $accommodationId)
+                        ->where('status', 'published')
+                        ->latest()
+                        ->paginate(10);
+        
+        return response()->json(['data' => $reviews]);
+    }
 }

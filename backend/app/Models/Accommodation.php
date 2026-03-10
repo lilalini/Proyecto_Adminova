@@ -71,7 +71,7 @@ class Accommodation extends Model
         ];
     }
 
-    // Relaciones (comentadas hasta que existan los modelos)
+    // Relaciones 
 
     public function media()
     {

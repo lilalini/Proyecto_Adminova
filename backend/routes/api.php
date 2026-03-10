@@ -21,12 +21,24 @@ use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\MediaController;
 use App\Http\Controllers\Api\SyncLogController;
 
-// Rutas públicas
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+// Ruta de prueba (pública)
+Route::get('/test', function() {
+    return response()->json([
+        'message' => 'API funcionando correctamente',
+        'status' => 'ok'
+    ]);
+});
+
+    // Rutas públicas   
+    Route::get('/accommodations/public', [App\Http\Controllers\Api\AccommodationController::class, 'publicList']);
+    Route::get('/accommodations/{id}/public', [App\Http\Controllers\Api\AccommodationController::class, 'publicShow']);
+    Route::get('/availability/public/{accommodationId}', [App\Http\Controllers\Api\AvailabilityCalendarController::class, 'publicIndex']);
+    Route::get('/reviews/public/{accommodationId}', [App\Http\Controllers\Api\ReviewController::class, 'publicIndex']);
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
 
 // Rutas protegidas (todas en un solo grupo)
-Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware('auth:sanctum')->group(function () {
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
