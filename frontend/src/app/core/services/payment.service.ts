@@ -2,15 +2,11 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-
-export interface Payment {
-  id: number;
-  booking_id: number;
-  amount: number;
-  payment_method: string;
-  status: string;
-  created_at: string;
-}
+import { 
+  Payment, 
+  PaymentListResponse, 
+  PaymentResponse 
+} from '../models/payment.model';
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +16,43 @@ export class PaymentService {
 
   constructor(private http: HttpClient) {}
 
-  getAll(): Observable<{ data: Payment[] }> {
-    return this.http.get<{ data: Payment[] }>(this.apiUrl);
+  // Obtener todos los pagos (con paginación)
+  getAll(page: number = 1): Observable<PaymentListResponse> {
+    return this.http.get<PaymentListResponse>(`${this.apiUrl}?page=${page}`);
+  }
+
+  // Obtener un pago por ID
+  getOne(id: number): Observable<PaymentResponse> {
+    return this.http.get<PaymentResponse>(`${this.apiUrl}/${id}`);
+  }
+
+  // Crear nuevo pago
+  create(data: Partial<Payment>): Observable<PaymentResponse> {
+    return this.http.post<PaymentResponse>(this.apiUrl, data);
+  }
+
+  // Actualizar pago
+  update(id: number, data: Partial<Payment>): Observable<PaymentResponse> {
+    return this.http.put<PaymentResponse>(`${this.apiUrl}/${id}`, data);
+  }
+
+  // Eliminar pago
+  delete(id: number): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
+  }
+
+  // Obtener pagos por reserva
+  getByBooking(bookingId: number): Observable<PaymentListResponse> {
+    return this.http.get<PaymentListResponse>(`${this.apiUrl}?booking_id=${bookingId}`);
+  }
+
+  // Marcar pago como completado
+  markAsCompleted(id: number, transactionId?: string): Observable<PaymentResponse> {
+    return this.http.patch<PaymentResponse>(`${this.apiUrl}/${id}/complete`, { transaction_id: transactionId });
+  }
+
+  // Marcar pago como reembolsado
+  markAsRefunded(id: number, reason?: string): Observable<PaymentResponse> {
+    return this.http.patch<PaymentResponse>(`${this.apiUrl}/${id}/refund`, { reason });
   }
 }

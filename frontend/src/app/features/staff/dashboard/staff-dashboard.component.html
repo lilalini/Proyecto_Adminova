@@ -1,0 +1,97 @@
+<div class="max-w-7xl mx-auto px-4 pb-8">
+  <app-greeting [user]="user"></app-greeting>
+
+  
+    <div class="bg-white rounded-xl p-4 mt-6">
+    <h1 class="text-2xl font-semibold text-gray-800 mb-1">Panel de operaciones</h1>
+    <p class="text-gray-500">Gestiona check-ins, check-outs y tareas de limpieza</p>
+    </div>
+
+    <div class="mt-6">
+    @if (loading) {
+      <div class="text-center py-12">
+        <p class="text-gray-500">Cargando datos...</p>
+      </div>
+    }
+
+    @if (!loading) {
+      <!-- Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <app-icon-svg name="calendar-check" className="w-6 h-6 text-green-600"></app-icon-svg>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-gray-800">{{ stats.todayCheckIns }}</p>
+              <p class="text-sm text-gray-500">Check-ins hoy</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <app-icon-svg name="calendar" className="w-6 h-6 text-blue-600"></app-icon-svg>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-gray-800">{{ stats.todayCheckOuts }}</p>
+              <p class="text-sm text-gray-500">Check-outs hoy</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <app-icon-svg name="sparkles" className="w-6 h-6 text-purple-600"></app-icon-svg>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-gray-800">{{ stats.pendingTasks }}</p>
+              <p class="text-sm text-gray-500">Tareas pendientes</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hoy -->
+      <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+        <div class="p-4 border-b border-gray-200">
+          <h2 class="font-semibold text-gray-800">Hoy ({{ today | date:'dd/MM/yyyy' }})</h2>
+        </div>
+        <div class="divide-y divide-gray-100">
+          @for (booking of todayBookings; track booking.id) {
+            <div class="p-4 flex justify-between items-center">
+              <div>
+                <p class="font-medium text-gray-800">{{ booking.accommodation?.title || 'Alojamiento' }}</p>
+                <p class="text-sm text-gray-500">{{ booking.guest_name }}</p>
+                <p class="text-xs text-gray-400 mt-1">
+                  @if (booking.check_in === today) { Check-in: {{ formatDate(booking.check_in) }} }
+                  @if (booking.check_out === today) { Check-out: {{ formatDate(booking.check_out) }} }
+                </p>
+              </div>
+              <span class="text-sm text-gray-500">{{ booking.total_amount | number:'1.2-2' }} €</span>
+            </div>
+          }
+          @if (todayBookings.length === 0) {
+            <div class="p-8 text-center text-gray-500">No hay reservas para hoy</div>
+          }
+        </div>
+      </div>
+
+      <!-- Acciones rápidas -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <a routerLink="/bookings" class="bg-white rounded-xl shadow-lg p-4 hover:shadow-md transition flex items-center gap-3">
+          <app-icon-svg name="calendar-check" className="w-5 h-5 text-indigo-600"></app-icon-svg>
+          <span>Gestionar reservas</span>
+          <app-icon-svg name="chevron-right" className="w-4 h-4 text-gray-400 ml-auto"></app-icon-svg>
+        </a>
+        <a routerLink="/cleaning" class="bg-white rounded-xl shadow-lg p-4 hover:shadow-md transition flex items-center gap-3">
+          <app-icon-svg name="sparkles" className="w-5 h-5 text-purple-600"></app-icon-svg>
+          <span>Ver tareas de limpieza</span>
+          <app-icon-svg name="chevron-right" className="w-4 h-4 text-gray-400 ml-auto"></app-icon-svg>
+        </a>
+      </div>
+    }
+  </div>
+</div>

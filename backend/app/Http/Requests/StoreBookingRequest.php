@@ -23,7 +23,7 @@ class StoreBookingRequest extends FormRequest
     {
             return [
             'accommodation_id' => 'required|exists:accommodations,id',
-            'guest_id' => 'required|exists:guests,id',
+            'guest_id' => 'nullable|exists:guests,id',
             'check_in' => 'required|date',
             'check_out' => 'required|date|after:check_in',
             'nights' => 'required|integer|min:1',

@@ -21,11 +21,26 @@ class BookingPolicy
      */
     public function view(User $user, Booking $booking): bool
     {
-        if ($user->role === 'admin') return true;
+        // Admin puede ver todo
+        if ($user->role === 'admin') {
+            return true;
+        }
+        
+        // Owner puede ver reservas de sus alojamientos
         if ($user->role === 'owner') {
             return $user->id === $booking->accommodation->owner_id;
         }
-        return $user->id === $booking->guest_id;
+        
+        // Guest puede ver sus propias reservas
+        if ($user->role === 'guest') {
+            // Buscar guest asociado al user por email
+            $guest = \App\Models\Guest::where('email', $user->email)->first();
+            
+            return $booking->guest_id === $guest?->id 
+                || $booking->guest_email === $user->email;
+        }
+        
+        return false;
     }
 
     /**
@@ -39,25 +54,13 @@ class BookingPolicy
     /**
      * Determine whether the user can update the model.
      */
-     public function update(User $user, Booking $booking): bool
+    public function update(User $user, Booking $booking): bool
     {
-        /*// Admin puede actualizar cualquier booking
-        if ($user->role === 'admin') return true;
-        
-        // Owner solo puede actualizar bookings de sus propiedades
-        if ($user->role === 'owner') {
-            return $user->id === $booking->accommodation->owner_id;
-        }
-        
-        // Guest no puede actualizar (solo ver)
-        return false;
-        */
-            return match ($user->role) {
-                'admin' => true,
-                'owner' => $user->id === $booking->accommodation->owner_id,
-                default => false,
-            };
-        
+        return match ($user->role) {
+            'admin' => true,
+            'owner' => $user->id === $booking->accommodation->owner_id,
+            default => false, // Guest no puede actualizar
+        };
     }
 
 

@@ -6,50 +6,27 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('media', function (Blueprint $table) {
             $table->id();
-            // Relación polimórfica
-            $table->string('model_type');
-            $table->unsignedBigInteger('model_id');
-            
-            $table->string('collection_name')->default('default');
+
+            $table->morphs('model');
+            $table->uuid()->nullable()->unique();
+            $table->string('collection_name');
             $table->string('name');
             $table->string('file_name');
-            $table->string('file_path');
-            $table->bigInteger('file_size');
-            $table->string('mime_type');
-            $table->string('disk')->default('public');
-            
-            $table->integer('order')->default(0);
-            $table->boolean('is_main')->default(false);
-            
-            $table->string('alt_text')->nullable();
-            $table->string('title')->nullable();
-            $table->text('description')->nullable();
-            
-            $table->json('metadata')->nullable(); // dimensiones, GPS, etc.
-            
-            $table->timestamps();
-            $table->softDeletes();
-            
-            // Índices
-            $table->index(['model_type', 'model_id']);
-            $table->index('collection_name');
-            $table->index('is_main');
-            $table->index(['model_type', 'model_id', 'collection_name']);
-        });
-    }
+            $table->string('mime_type')->nullable();
+            $table->string('disk');
+            $table->string('conversions_disk')->nullable();
+            $table->unsignedBigInteger('size');
+            $table->json('manipulations');
+            $table->json('custom_properties');
+            $table->json('generated_conversions');
+            $table->json('responsive_images');
+            $table->unsignedInteger('order_column')->nullable()->index();
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('media');
+            $table->nullableTimestamps();
+        });
     }
 };

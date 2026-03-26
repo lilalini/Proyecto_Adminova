@@ -42,6 +42,8 @@ class UpdateAccommodationRequest extends FormRequest
             'check_out_time' => 'sometimes|string',
             'status' => 'sometimes|in:draft,published,maintenance,inactive',
             'cancellation_policy_id' => 'sometimes|exists:cancellation_policies,id',
+            'amenities' => 'nullable|array',
+            'house_rules' => 'nullable|array',
         ];
     }
 }

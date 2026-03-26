@@ -38,7 +38,9 @@ class AccommodationResource extends JsonResource
             'check_in_time' => $this->check_in_time,
             'check_out_time' => $this->check_out_time,
             'status' => $this->status,
-            'amenities' => $this->amenities,
+            'amenities' => is_string($this->amenities) 
+                ? json_decode($this->amenities, true) 
+                : ($this->amenities ?? []),
             'house_rules' => $this->house_rules,
             
             // Relaciones
@@ -56,13 +58,13 @@ class AccommodationResource extends JsonResource
             ],
             
             // Media (fotos)
-           /* 'main_image' => $this->media->where('is_main', true)->first()?->file_path,
-            'images' => $this->media->map(fn($media) => [
+           'main_image' => $this->media->where('is_main', true)->first()?->file_path,
+            'images' => $this->getMedia('gallery')->map(fn($media) => [
                 'id' => $media->id,
-                'url' => $media->file_path,
-                'is_main' => $media->is_main,
+                'url' => $media->getUrl(),
+                'is_main' => null,
             ]),
-            */
+            
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

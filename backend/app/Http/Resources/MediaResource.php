@@ -26,8 +26,10 @@ class MediaResource extends JsonResource
         'title' => $this->title,
         'description' => $this->description,
         'metadata' => $this->metadata,
-        'url' => $this->file_path ? asset('storage/' . $this->file_path) : null,
-        'thumbnail_url' => $this->file_path ? asset('storage/' . $this->file_path) : null,
+        'url' => $this->getUrl(), 
+        'thumbnail_url' => $this->hasGeneratedConversion('thumb') 
+            ? $this->getUrl('thumb') 
+            : $this->getUrl(), 
         'created_at' => $this->created_at?->toISOString(),
     ];
 }

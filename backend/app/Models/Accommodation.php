@@ -5,12 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Models\Media;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\Conversions\Conversion;
+use Spatie\MediaLibrary\MediaCollections\Models\Media as SpatieMedia;
 
-class Accommodation extends Model
+class Accommodation extends Model implements HasMedia 
 {
     /** @use HasFactory<\Database\Factories\AccommodationFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, InteractsWithMedia;
 
     protected $fillable = [
         'owner_id',
@@ -71,12 +74,33 @@ class Accommodation extends Model
         ];
     }
 
-    // Relaciones 
-
-    public function media()
+     public function registerMediaCollections(): void
     {
-        return $this->morphMany(Media::class, 'model');
+        $this->addMediaCollection('gallery');
     }
+
+    public function registerMediaConversions(?SpatieMedia $media = null): void
+    {
+        $this->addMediaConversion('thumb')
+            ->width(200)
+            ->height(200)
+            ->sharpen(10)
+            ->nonQueued();
+    }
+
+protected static function booted()
+{
+    // Cuando se hace force delete (eliminación real)
+    static::forceDeleting(function ($accommodation) {
+        $accommodation->clearMediaCollection();
+    });
+    
+    // Cuando se restaura
+    static::restored(function ($accommodation) {
+    });
+}
+
+    // Relaciones 
     
     public function owner()
     {
@@ -93,7 +117,7 @@ class Accommodation extends Model
         return $this->hasMany(Booking::class);
     }
 
-    public function availabilityCalendar()
+    public function availabilityCalendars()
     {
         return $this->hasMany(AvailabilityCalendar::class);
     }

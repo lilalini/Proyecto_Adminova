@@ -1,0 +1,99 @@
+<div class="max-w-7xl mx-auto px-4 pb-8">
+  <app-greeting [user]="user"></app-greeting>
+
+  
+    <div class="bg-white rounded-xl p-4 mt-6">
+    <h1 class="text-2xl font-semibold text-gray-800 mb-1">Panel del propietario</h1>
+    <p class="text-gray-500">Gestiona tus alojamientos y reservas</p>
+    </div>
+
+    <div class="mt-6">
+    @if (loading) {
+      <div class="text-center py-12">
+        <p class="text-gray-500">Cargando datos...</p>
+      </div>
+    }
+
+    @if (!loading) {
+      <!-- Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+              <app-icon-svg name="building-2" className="w-6 h-6 text-indigo-600"></app-icon-svg>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-gray-800">{{ stats.accommodations }}</p>
+              <p class="text-sm text-gray-500">Alojamientos</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
+              <app-icon-svg name="calendar-check" className="w-6 h-6 text-emerald-600"></app-icon-svg>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-gray-800">{{ stats.bookings }}</p>
+              <p class="text-sm text-gray-500">Reservas</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+              <app-icon-svg name="wallet" className="w-6 h-6 text-amber-600"></app-icon-svg>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-gray-800">{{ stats.revenue | number:'1.0-0' }} €</p>
+              <p class="text-sm text-gray-500">Ingresos</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Últimas reservas -->
+      <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+        <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+          <h2 class="font-semibold text-gray-800">Últimas reservas</h2>
+          <a routerLink="/my-bookings" class="text-sm text-indigo-600 hover:text-indigo-700">Ver todas →</a>
+        </div>
+        <div class="divide-y divide-gray-100">
+          @for (booking of recentBookings; track booking.id) {
+            <div class="p-4 flex justify-between items-center">
+              <div>
+                <p class="font-medium text-gray-800">Reserva #{{ booking.id }}</p>
+                <p class="text-sm text-gray-500">{{ formatDate(booking.check_in) }} - {{ formatDate(booking.check_out) }}</p>
+              </div>
+              <span class="font-medium text-indigo-600">{{ booking.total_amount | number:'1.2-2' }} €</span>
+            </div>
+          }
+          @if (recentBookings.length === 0) {
+            <div class="p-8 text-center text-gray-500">No hay reservas recientes</div>
+          }
+        </div>
+      </div>
+
+      <!-- Mis alojamientos -->
+      <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+          <h2 class="font-semibold text-gray-800">Mis alojamientos</h2>
+          <a routerLink="/my-accommodations" class="text-sm text-indigo-600 hover:text-indigo-700">Ver todos →</a>
+        </div>
+        <div class="divide-y divide-gray-100">
+          @for (acc of recentAccommodations; track acc.id) {
+            <div class="p-4">
+              <p class="font-medium text-gray-800">{{ acc.title }}</p>
+              <p class="text-sm text-gray-500">{{ acc.address }}</p>
+            </div>
+          }
+          @if (recentAccommodations.length === 0) {
+            <div class="p-8 text-center text-gray-500">No hay alojamientos</div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>

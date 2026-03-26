@@ -1,0 +1,32 @@
+<div class="bg-white rounded-xl shadow-sm p-4 flex items-center justify-between">
+  @if (loading) {
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 bg-gray-200 rounded-full animate-pulse"></div>
+      <div>
+        <div class="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+        <div class="h-3 bg-gray-200 rounded w-16 mt-1 animate-pulse"></div>
+      </div>
+    </div>
+  } @else if (error) {
+    <div class="flex items-center gap-3">
+      <app-icon-svg name="cloud-off" className="w-8 h-8 text-gray-400"></app-icon-svg>
+      <div>
+        <p class="text-sm text-gray-500">Clima no disponible</p>
+      </div>
+    </div>
+  } @else {
+    <div class="flex items-center gap-3">
+      <app-icon-svg [name]="getWeatherIcon(weather.weathercode)" 
+                    className="w-8 h-8 text-indigo-500"></app-icon-svg>
+      <div>
+        <p class="text-sm font-medium text-gray-700">{{ weather.temperature }}°C</p>
+        <p class="text-xs text-gray-500">{{ weather.description }}</p>
+      </div>
+    </div>
+    @if (locationName) {
+      <div class="text-right">
+        <p class="text-xs text-gray-400">{{ locationName }}</p>
+      </div>
+    }
+  }
+</div>

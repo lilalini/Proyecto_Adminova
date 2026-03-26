@@ -29,12 +29,28 @@ export class LoginComponent {
 
     this.auth.login(this.credentials).subscribe({
       next: () => {
-        this.router.navigate(['/dashboard']);
+        const redirectUrl = localStorage.getItem('redirectAfterLogin') || this.getDashboardByRole();
+        localStorage.removeItem('redirectAfterLogin');
+        this.router.navigate([redirectUrl]);
       },
       error: (error) => {
         this.errorMessage = error.error?.message || 'Error al iniciar sesión';
         this.loading = false;
       }
     });
+  }
+
+  goToRegister() {
+    this.router.navigate(['/register']);
+  }
+
+  private getDashboardByRole(): string {
+    const role = this.auth.getRole();
+    switch(role) {
+      case 'admin': return '/admin/dashboard';
+      case 'owner': return '/owner/dashboard';
+      case 'staff': return '/staff/dashboard';
+      default: return '/dashboard';
+    }
   }
 }

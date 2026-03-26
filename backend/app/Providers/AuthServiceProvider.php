@@ -36,12 +36,13 @@ use App\Models\Media;
 use App\Policies\MediaPolicy;
 use App\Models\SyncLog;
 use App\Policies\SyncLogPolicy;
+use App\Policies\AccommodationMediaPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
 {
     protected $policies = [
-        Accommodation::class => AccommodationPolicy::class,
+        /*Accommodation::class => AccommodationPolicy::class,
         Booking::class => BookingPolicy::class,
         Guest::class => GuestPolicy::class,
         Owner::class => OwnerPolicy::class,
@@ -58,6 +59,7 @@ class AuthServiceProvider extends ServiceProvider
         Document::class => DocumentPolicy::class,
         Media::class => MediaPolicy::class,
         SyncLog::class => SyncLogPolicy::class,
+        Accommodation::class => AccommodationMediaPolicy::class,*/
     ];
 
     public function boot(): void

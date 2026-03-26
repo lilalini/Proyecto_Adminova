@@ -1,0 +1,321 @@
+<div class="max-w-4xl mx-auto p-6">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">Editar alojamiento</h1>
+    <button (click)="goBack()" 
+        class="text-gray-600 hover:text-gray-900 flex items-center gap-1">
+  <app-icon-svg name="arrow-left" className="w-4 h-4"></app-icon-svg>
+  Volver al listado
+</button>
+  </div>
+
+  @if (loading) {
+    <div class="text-center py-12">
+      <p class="text-gray-500">Cargando alojamiento...</p>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (!loading && accommodation) {
+    <form [formGroup]="accommodationForm" (ngSubmit)="onSubmit()" class="bg-white rounded-lg shadow-lg p-6 space-y-6">
+      
+      <!-- ===== INFORMACIÓN BÁSICA ===== -->
+      <div class="border-b border-gray-200 pb-4">
+        <h2 class="text-lg font-semibold mb-4">Información básica</h2>
+        
+        <!-- Título -->
+        <div class="mb-4">
+          <label for="title" class="block text-gray-700 text-sm font-bold mb-2">Nombre del alojamiento *</label>
+          <input
+            id="title"
+            type="text"
+            formControlName="title"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+          />
+        </div>
+
+        <!-- Descripción -->
+        <div class="mb-4">
+          <label for="description" class="block text-gray-700 text-sm font-bold mb-2">Descripción *</label>
+          <textarea
+            id="description"
+            formControlName="description"
+            rows="4"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+          ></textarea>
+        </div>
+
+        <!-- Tipo de propiedad -->
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2">Tipo de propiedad *</label>
+          <select 
+            formControlName="property_type" 
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+            title="Tipo de propiedad">
+            <option value="">Selecciona un tipo</option>
+            <option *ngFor="let type of propertyTypes" [value]="type.value">{{type.label}}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- ===== CARACTERÍSTICAS ===== -->
+      <div class="border-b border-gray-200 pb-4">
+        <h2 class="text-lg font-semibold mb-4">Características</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <!-- Habitaciones -->
+            <label for="bedrooms" class="block text-gray-700 text-sm font-bold mb-2">Habitaciones *</label>
+            <input 
+            type="number" 
+            formControlName="bedrooms" 
+            min="1" 
+            placeholder="Ej: 2"
+            title="Número de habitaciones"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+          </div>
+          <div>
+            <!-- Baños -->
+            <label for="bathrooms" class="block text-gray-700 text-sm font-bold mb-2">Baños *</label>
+            <input 
+            type="number" 
+            formControlName="bathrooms" 
+            min="1" 
+            placeholder="Ej: 1"
+            title="Número de baños"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+          </div>
+          <div>
+           <!-- Máx. huéspedes -->
+            <label for="max_guests" class="block text-gray-700 text-sm font-bold mb-2">Máx. huéspedes *</label>
+            <input 
+            type="number" 
+            formControlName="max_guests" 
+            min="1" 
+            placeholder="Ej: 4"
+            title="Número máximo de huéspedes"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+          </div>
+          <div>
+            <!-- Metros cuadrados -->
+            <label for="size_m2" class="block text-gray-700 text-sm font-bold mb-2">Metros cuadrados *</label>
+            <input 
+            type="number" 
+            formControlName="size_m2" 
+            min="1" 
+            placeholder="Ej: 75"
+            title="Superficie en metros cuadrados"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== UBICACIÓN ===== -->
+      <div class="border-b border-gray-200 pb-4">
+        <h2 class="text-lg font-semibold mb-4">Ubicación</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="md:col-span-2">
+            <!-- Dirección -->
+                <label for="address" class="block text-gray-700 text-sm font-bold mb-2">Dirección *</label>
+                <input 
+                type="text" 
+                formControlName="address" 
+                placeholder="Ej: Calle Mayor 123"
+                title="Dirección completa"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+          </div>
+          <div>
+            <!-- Ciudad -->
+                <label for="city" class="block text-gray-700 text-sm font-bold mb-2">Ciudad *</label>
+                <input 
+                type="text" 
+                formControlName="city" 
+                placeholder="Ej: Madrid"
+                title="Ciudad"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+          </div>
+          <div>
+            <!-- Código Postal -->
+            <label for="postal_code" class="block text-gray-700 text-sm font-bold mb-2">Código Postal *</label>
+            <input 
+            type="text" 
+            formControlName="postal_code" 
+            placeholder="Ej: 28013"
+            title="Código postal"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+        </div>
+          <div class="md:col-span-2">
+            <!-- País -->
+                <label for="country" class="block text-gray-700 text-sm font-bold mb-2">País (código) *</label>
+                <input 
+                type="text" 
+                formControlName="country" 
+                maxlength="2" 
+                placeholder="Ej: ES"
+                title="Código de país (2 letras)"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PRECIOS ===== -->
+      <div class="border-b border-gray-200 pb-4">
+        <h2 class="text-lg font-semibold mb-4">Precios</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <!-- Precio base -->
+                <label for="base_price" class="block text-gray-700 text-sm font-bold mb-2">Precio/noche (€) *</label>
+                <input 
+                type="number" 
+                formControlName="base_price" 
+                min="0" 
+                step="0.01" 
+                placeholder="Ej: 120.00"
+                title="Precio por noche en euros"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+          </div>
+          <div>
+            <!-- Gastos limpieza -->
+            <label for="cleaning_fee" class="block text-gray-700 text-sm font-bold mb-2">Gastos limpieza (€)</label>
+            <input 
+            type="number" 
+            formControlName="cleaning_fee" 
+            min="0" 
+            step="0.01" 
+            placeholder="Ej: 25.00"
+            title="Gastos de limpieza (opcional)"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+          </div>
+          <div>
+            <!-- Depósito seguridad -->
+                <label for="security_deposit" class="block text-gray-700 text-sm font-bold mb-2">Depósito (€)</label>
+                <input 
+                type="number" 
+                formControlName="security_deposit" 
+                min="0" 
+                step="0.01" 
+                placeholder="Ej: 200.00"
+                title="Depósito de seguridad (opcional)"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== ESTANCIA Y POLÍTICAS ===== -->
+      <div class="border-b border-gray-200 pb-4">
+        <h2 class="text-lg font-semibold mb-4">Estancia y políticas</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <!-- Estancia mínima -->
+            <label for="minimum_stay" class="block text-gray-700 text-sm font-bold mb-2">Estancia mínima *</label>
+            <input 
+            type="number" 
+            formControlName="minimum_stay" 
+            min="1" 
+            placeholder="Ej: 2"
+            title="Noches mínimas de estancia"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+          </div>
+          <div>
+            <!-- Estancia máxima -->
+            <label for="maximum_stay" class="block text-gray-700 text-sm font-bold mb-2">Estancia máxima</label>
+            <input 
+            type="number" 
+            formControlName="maximum_stay" 
+            min="1" 
+            placeholder="Ej: 30"
+            title="Noches máximas de estancia (opcional)"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+          </div>
+          <div>
+            <!-- Check-in time -->
+                <label for="check_in_time" class="block text-gray-700 text-sm font-bold mb-2">Check-in *</label>
+                <input 
+                type="time" 
+                formControlName="check_in_time" 
+                placeholder="15:00"
+                title="Hora de entrada"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+          </div>
+          <div>
+            <!-- Check-out time -->
+                <label for="check_out_time" class="block text-gray-700 text-sm font-bold mb-2">Check-out *</label>
+                <input 
+                type="time" 
+                formControlName="check_out_time" 
+                placeholder="11:00"
+                title="Hora de salida"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+          </div>
+          <div class="md:col-span-2">
+            <!-- Política de cancelación -->
+                <label for="cancellation_policy_id" class="block text-gray-700 text-sm font-bold mb-2">Política de cancelación *</label>
+                <select 
+                formControlName="cancellation_policy_id" 
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                title="Selecciona la política de cancelación">
+                <option *ngFor="let policy of cancellationPolicies" [value]="policy.id">{{policy.name}}</option>
+                </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== SERVICIOS Y NORMAS ===== -->
+      <div class="border-b border-gray-200 pb-4">
+        <h2 class="text-lg font-semibold mb-4">Servicios y normas</h2>
+        
+        <!-- Amenities dinámicos -->
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2">Servicios</label>
+          <div *ngFor="let amenityCtrl of amenitiesControls; let i = index" class="flex items-center mb-2">
+            <input [formControl]="amenityCtrl" placeholder="Ej: WiFi, Parking" class="w-full px-3 py-2 border border-gray-300 rounded-l-lg">
+            <button type="button" (click)="removeAmenity(i)" class="bg-red-500 text-white px-3 py-2 rounded-r-lg">✕</button>
+          </div>
+          <button type="button" (click)="addAmenity()" class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm">+ Añadir servicio</button>
+        </div>
+
+        <!-- Normas dinámicas -->
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2">Normas</label>
+          <div *ngFor="let ruleCtrl of rulesControls; let i = index" class="flex items-center mb-2">
+            <input [formControl]="ruleCtrl" placeholder="Ej: No fumar" class="w-full px-3 py-2 border border-gray-300 rounded-l-lg">
+            <button type="button" (click)="removeRule(i)" class="bg-red-500 text-white px-3 py-2 rounded-r-lg">✕</button>
+          </div>
+          <button type="button" (click)="addRule()" class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm">+ Añadir norma</button>
+        </div>
+      </div>
+
+      <!-- Error message -->
+      @if (errorMessage) {
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+          {{ errorMessage }}
+        </div>
+      }
+
+      <!-- Botones de acción -->
+      <div class="flex justify-end space-x-4 pt-4">
+        <button type="button" (click)="goToList()" 
+            class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+             Cancelar
+        </button>
+        <button type="submit" [disabled]="submitting || accommodationForm.invalid"
+                class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+          {{ submitting ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+      </div>
+    </form>
+
+     <!-- Sección de fotos (después del formulario) -->
+     <div class="mt-8 border-t border-gray-200 pt-8">
+     <h2 class="text-xl font-semibold mb-4">Gestionar fotos</h2>
+     <app-upload [accommodationId]="accommodationId"></app-upload>
+    </div>
+  }
+</div>

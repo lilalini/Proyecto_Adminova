@@ -1,118 +1,33 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
-import { AccommodationService } from '../../core/services/accommodation.service';
-import { BookingService } from '../../core/services/booking.service';
-import { GuestService } from '../../core/services/guest.service';
-import { PaymentService } from '../../core/services/payment.service';
-import { User } from '../../core/models/user.model';
-import { IconSvgComponent } from '../../shared/components/icon-svg.component'; 
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [
-    CommonModule, 
-    RouterModule,
-    IconSvgComponent  
-  ],
-  templateUrl: './dashboard.component.html',
+  template: `<div class="flex items-center justify-center min-h-screen"><p class="text-gray-500">Redirigiendo...</p></div>`,
 })
 export class DashboardComponent implements OnInit {
-  user: User | null = null;
-  
-  stats = {
-    accommodations: 0,
-    bookings: 0,
-    guests: 0,
-    revenue: 0
-  };
-
-  recentBookings: any[] = [];
-  recentAccommodations: any[] = [];
-
-  constructor(
-    private auth: AuthService,
-    private router: Router,
-    private accommodationService: AccommodationService,
-    private bookingService: BookingService,
-    private guestService: GuestService,
-    private paymentService: PaymentService
-  ) {}
+  constructor(private auth: AuthService, private router: Router) {}
 
   ngOnInit() {
     this.auth.currentUser$.subscribe(user => {
-      this.user = user;
-    });
-    
-    this.loadRealData();
-  }
-
-  loadRealData() {
-    // Alojamientos
-    this.accommodationService.getAll().subscribe({
-      next: (res) => {
-        this.stats.accommodations = res.data.length;
-        this.recentAccommodations = res.data.slice(-5);
+      if (!user) {
+        this.router.navigate(['/login']);
+        return;
       }
-    });
 
-    // Reservas
-    this.bookingService.getAll().subscribe({
-      next: (res) => {
-        this.stats.bookings = res.data.length;
-        this.recentBookings = res.data.slice(-5);
-        this.calculateRevenue();
+      if (user.role === 'admin') {
+        this.router.navigate(['/admin/dashboard']);
+      } else if (user.role === 'owner') {
+        this.router.navigate(['/owner/dashboard']);
+      } else if (user.role === 'staff') {
+        this.router.navigate(['/staff/dashboard']);
+      } else if (user.role === 'guest') {
+        this.router.navigate(['/guest/dashboard']);
+      } else {
+        this.router.navigate(['/']);
       }
-    });
-
-    // Huéspedes
-    this.guestService.getAll().subscribe({
-      next: (res) => this.stats.guests = res.data.length
-    });
-  }
-
-/*
-    loadRealData() {
-  // Reservas
-  this.bookingService.getAll().subscribe({
-    next: (res) => {
-      console.log('RESERVAS CRUDAS:', res.data); // ← MIRA ESTO
-      this.stats.bookings = res.data.length;
-      this.recentBookings = res.data.slice(-5);
-      this.calculateRevenue();
-    }
-  });
-
-  // Alojamientos
-  this.accommodationService.getAll().subscribe({
-    next: (res) => {
-      console.log('ALOJAMIENTOS CRUDOS:', res.data); // ← Y ESTO
-      this.stats.accommodations = res.data.length;
-      this.recentAccommodations = res.data.slice(-5);
-    }
-  });
-}
-
-*/
-
-
-  calculateRevenue() {
-    this.paymentService.getAll().subscribe({
-      next: (res) => {
-        const total = res.data.reduce((sum: number, payment: any) => 
-          sum + (payment.amount || 0), 0
-        );
-        this.stats.revenue = Math.round(total); 
-      }
-    });
-  }
-
-  logout() {
-    this.auth.logout().subscribe({
-      next: () => this.router.navigate(['/login']),
-      error: () => this.router.navigate(['/login'])
     });
   }
 }

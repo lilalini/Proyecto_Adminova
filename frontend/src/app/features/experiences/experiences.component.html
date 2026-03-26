@@ -1,0 +1,137 @@
+<div class="bg-gray-50 min-h-screen">
+  <!-- Hero Section -->
+  <div class="bg-gradient-to-r from-indigo-700 via-purple-700 to-pink-700 text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 text-center">
+      <h1 class="text-4xl md:text-5xl font-bold mb-4">Descubre experiencias únicas</h1>
+      <p class="text-xl text-indigo-100 max-w-2xl mx-auto">
+        Vive aventuras inolvidables, conoce la cultura local y crea recuerdos que durarán para siempre
+      </p>
+    </div>
+  </div>
+
+  <!-- Experiencias Destacadas -->
+  <div class="max-w-7xl mx-auto px-4 py-12">
+    <div class="mb-12">
+      <h2 class="text-3xl font-bold text-gray-800 mb-2">Experiencias destacadas</h2>
+      <p class="text-gray-600">Las favoritas de nuestros huéspedes</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      @for (exp of experiences; track exp.id) {
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition cursor-pointer group"
+             (click)="openModal(exp)">
+          <!-- Imagen -->
+          <div class="h-56 overflow-hidden">
+            <img [src]="exp.image" 
+                 [alt]="exp.title"
+                 title="{{ exp.title }}"
+                 class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+          </div>
+          
+          <!-- Contenido -->
+          <div class="p-6">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm text-indigo-600 font-medium">{{ exp.location }}</span>
+              <span class="text-sm text-gray-500">{{ exp.duration }}</span>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ exp.title }}</h3>
+            <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ exp.description }}</p>
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-2xl font-bold text-indigo-600">€{{ exp.price }}</span>
+                <span class="text-gray-500 text-sm">/persona</span>
+              </div>
+              <button class="text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1"
+                      [attr.aria-label]="'Ver detalles de ' + exp.title"
+                      title="Ver detalles">
+                Ver detalles
+                <app-icon-svg name="arrow-right" className="w-4 h-4"></app-icon-svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Sección de contacto adicional -->
+  <div class="bg-white py-16">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+      <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <app-icon-svg name="message-circle" className="w-10 h-10 text-indigo-600"></app-icon-svg>
+      </div>
+      <h2 class="text-3xl font-bold text-gray-800 mb-4">¿Buscas algo más personalizado?</h2>
+      <p class="text-gray-600 mb-8">Contáctanos y diseñaremos una experiencia a tu medida</p>
+      <a routerLink="/contact" 
+         class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3 rounded-xl transition">
+        Contactar con nosotros
+        <app-icon-svg name="mail" className="w-5 h-5"></app-icon-svg>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de experiencia -->
+@if (showModal && selectedExperience) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" (click)="closeModal()">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+      <!-- Imagen -->
+      <div class="relative h-64">
+        <img [src]="selectedExperience.image" 
+             [alt]="selectedExperience.title"
+             title="{{ selectedExperience.title }}"
+             class="w-full h-full object-cover">
+        <button (click)="closeModal()" 
+                class="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition"
+                aria-label="Cerrar"
+                title="Cerrar">
+          <app-icon-svg name="x" className="w-5 h-5"></app-icon-svg>
+        </button>
+      </div>
+
+      <!-- Contenido -->
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-sm rounded-full">{{ selectedExperience.location }}</span>
+            <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full">{{ selectedExperience.duration }}</span>
+          </div>
+          <span class="text-2xl font-bold text-indigo-600">€{{ selectedExperience.price }}<span class="text-sm text-gray-500">/persona</span></span>
+        </div>
+
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">{{ selectedExperience.title }}</h2>
+        <p class="text-gray-600 mb-6">{{ selectedExperience.description }}</p>
+
+        <div class="border-t border-gray-200 pt-6 mb-6">
+          <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+            <app-icon-svg name="check-circle" className="w-5 h-5 text-green-500"></app-icon-svg>
+            Incluye
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+            @for (item of selectedExperience.includes; track item) {
+              <div class="flex items-center gap-2 text-gray-600 text-sm">
+                <app-icon-svg name="check" className="w-4 h-4 text-green-500"></app-icon-svg>
+                <span>{{ item }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="flex gap-3">
+          <button (click)="contactUs()" 
+                  class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition"
+                  aria-label="Reservar experiencia"
+                  title="Reservar experiencia">
+            Reservar experiencia
+          </button>
+          <button (click)="closeModal()" 
+                  class="px-6 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition"
+                  aria-label="Cerrar"
+                  title="Cerrar">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

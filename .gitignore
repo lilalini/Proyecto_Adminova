@@ -40,3 +40,11 @@ yarn-error.log*
 .env
 .env.local
 .env.*.local
+
+# Media uploads (archivos subidos por usuarios)
+backend/storage/media-library/
+backend/public/uploads/
+
+# PHP info (seguridad)
+phpinfo.php
+*.phpinfo

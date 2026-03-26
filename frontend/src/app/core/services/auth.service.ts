@@ -78,4 +78,10 @@ export class AuthService {
   }
 
   getTokenValue(): string | null { return this.getToken(); }
+
+  // En auth.service.ts
+  updateCurrentUser(user: User) {
+    this.currentUserSubject.next(user);
+  }
 }
+

@@ -1,0 +1,127 @@
+<header class="bg-gradient-to-r from-indigo-700 via-purple-700 to-pink-700 text-white shadow-xl sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-20">
+      <!-- Logo -->
+      <a routerLink="/" class="flex items-center space-x-3">
+        <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg">
+          <span class="text-2xl font-bold bg-gradient-to-r from-indigo-700 to-pink-700 bg-clip-text text-transparent">A</span>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold tracking-tight">ADMINOVA</h1>
+          <p class="text-xs text-indigo-200">Gestión profesional</p>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <nav class="hidden md:flex items-center space-x-8">
+        @if (isLoggedIn) {
+          <!-- admin -->
+          @if (userRole === 'admin') {
+            <a routerLink="/admin/dashboard" class="text-white hover:text-pink-200 transition font-medium">Dashboard</a>
+            <a routerLink="/accommodations" class="text-white hover:text-pink-200 transition font-medium">Alojamientos</a>
+            <a routerLink="/bookings" class="text-white hover:text-pink-200 transition font-medium">Reservas</a>
+            <a routerLink="/guests" class="text-white hover:text-pink-200 transition font-medium">Huéspedes</a>
+          }
+          <!-- owner -->
+          @if (userRole === 'owner') {
+            <a routerLink="/owner/dashboard" class="text-white hover:text-pink-200 transition font-medium">Dashboard</a>
+            <a routerLink="/my-accommodations" class="text-white hover:text-pink-200 transition font-medium">Mis alojamientos</a>
+            <a routerLink="/my-bookings" class="text-white hover:text-pink-200 transition font-medium">Reservas</a>
+          }
+          <!-- staff -->
+          @if (userRole === 'staff') {
+            <a routerLink="/staff/dashboard" class="text-white hover:text-pink-200 transition font-medium">Dashboard</a>
+            <a routerLink="/bookings" class="text-white hover:text-pink-200 transition font-medium">Reservas</a>
+            <a routerLink="/cleaning" class="text-white hover:text-pink-200 transition font-medium">Limpieza</a>
+          }
+          <!-- guest -->
+          @if (userRole === 'guest') {
+            <a routerLink="/guest/dashboard" class="text-white hover:text-pink-200 transition font-medium">Mi área</a>
+            <a routerLink="/my-bookings" class="text-white hover:text-pink-200 transition font-medium">Mis reservas</a>
+            <a routerLink="/guest/profile" class="text-white hover:text-pink-200 transition font-medium">Mi perfil</a>
+          }
+        }
+      </nav>
+
+      <!-- User menu / Auth buttons -->
+      <div class="flex items-center space-x-4">
+        @if (isLoggedIn) {
+          <div class="flex items-center space-x-4">
+            <div class="w-10 h-10 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
+              <span class="text-white font-semibold">{{ iniciales }}</span>
+            </div>
+            <button (click)="logout()" 
+                    class="text-white/80 hover:text-white text-sm hidden sm:block"
+                    type="button"
+                    title="Cerrar sesión">
+              Salir
+            </button>
+          </div>
+        } @else {
+          <div class="hidden sm:flex items-center space-x-4">
+            <a routerLink="/login" class="text-white hover:text-pink-200">Iniciar sesión</a>
+            <a routerLink="/register" class="bg-white text-indigo-700 px-4 py-2 rounded-lg hover:bg-indigo-50 transition">
+              Registrarse
+            </a>
+          </div>
+        }
+
+        <!-- Mobile menu button -->
+        <button (click)="toggleMobileMenu()" 
+                class="md:hidden text-white focus:outline-none"
+                type="button"
+                aria-label="Abrir menú"
+                title="Abrir menú de navegación">
+          <app-icon-svg name="menu" className="w-6 h-6"></app-icon-svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation -->
+    @if (isMobileMenuOpen) {
+      <div class="md:hidden py-4 border-t border-white/20">
+        <div class="flex justify-end mb-2">
+          <button (click)="toggleMobileMenu()" 
+                  type="button"
+                  aria-label="Cerrar menú"
+                  title="Cerrar menú de navegación"
+                  class="text-white p-1">
+            <app-icon-svg name="x" className="w-5 h-5"></app-icon-svg>
+          </button>
+        </div>
+        <nav class="flex flex-col space-y-3">
+          @if (isLoggedIn) {
+            <!-- admin mobile -->
+            @if (userRole === 'admin') {
+              <a routerLink="/admin/dashboard" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Dashboard</a>
+              <a routerLink="/accommodations" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Alojamientos</a>
+              <a routerLink="/bookings" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Reservas</a>
+              <a routerLink="/guests" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Huéspedes</a>
+            }
+            <!-- owner mobile -->
+            @if (userRole === 'owner') {
+              <a routerLink="/owner/dashboard" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Dashboard</a>
+              <a routerLink="/my-accommodations" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Mis alojamientos</a>
+              <a routerLink="/my-bookings" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Reservas</a>
+            }
+            <!-- staff mobile -->
+            @if (userRole === 'staff') {
+              <a routerLink="/staff/dashboard" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Dashboard</a>
+              <a routerLink="/bookings" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Reservas</a>
+              <a routerLink="/cleaning" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Limpieza</a>
+            }
+            <!-- guest mobile -->
+            @if (userRole === 'guest') {
+              <a routerLink="/guest/dashboard" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Mi área</a>
+              <a routerLink="/my-bookings" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Mis reservas</a>
+              <a routerLink="/guest/profile" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Mi perfil</a>
+            }
+          } @else {
+            <a routerLink="/login" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Iniciar sesión</a>
+            <a routerLink="/register" (click)="toggleMobileMenu()" class="bg-white text-indigo-700 px-4 py-2 rounded-lg inline-block text-center">Registrarse</a>
+          }
+        </nav>
+      </div>
+    }
+  </div>
+</header>

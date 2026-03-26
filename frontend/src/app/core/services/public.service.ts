@@ -2,65 +2,11 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-
-// ==================== INTERFACES ====================
-
-export interface Owner {
-  id: number;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone?: string;
-}
-
-export interface Media {
-  id: number;
-  url: string;
-  type: string;
-  is_primary: boolean;
-}
-
-export interface Review {
-  id: number;
-  guest_name: string;
-  rating: number;
-  comment: string;
-  created_at: string;
-}
-
-export interface Availability {
-  id: number;
-  date: string;
-  price: number;
-  available: boolean;
-  min_stay: number;
-}
-
-export interface Accommodation {
-  id: number;
-  title: string;
-  slug: string;
-  description: string;
-  base_price: number;
-  cleaning_fee?: number;
-  security_deposit?: number;
-  bedrooms: number;
-  bathrooms: number;
-  max_guests: number;
-  size_m2: number;
-  address: string;
-  city: string;
-  country: string;
-  latitude?: string;
-  longitude?: string;
-  amenities?: string[];
-  status: 'published' | 'draft' | 'inactive';
-  owner?: Owner;
-  media?: Media[];
-  reviews?: Review[];
-  created_at: string;
-  updated_at: string;
-}
+import { Accommodation } from '../models/accommodation.model';
+import { AvailabilityCalendar } from '../models/availability-calendar.model';
+import { Review } from '../models/review.model';
+import { Media } from '../models/media.model';
+import { Owner } from '../models/owner.model';
 
 export interface ApiResponse<T> {
   data: T;
@@ -81,8 +27,6 @@ export interface ApiResponse<T> {
   };
 }
 
-// ==================== SERVICIO ====================
-
 @Injectable({
   providedIn: 'root'
 })
@@ -93,22 +37,26 @@ export class PublicService {
 
   // ========== ALOJAMIENTOS ==========
   
-  getAccommodations(): Observable<ApiResponse<Accommodation[]>> {
-    return this.http.get<ApiResponse<Accommodation[]>>(`${this.apiUrl}/accommodations/public`);
+  getAccommodations(page: number = 1): Observable<ApiResponse<Accommodation[]>> {
+    return this.http.get<ApiResponse<Accommodation[]>>(`${this.apiUrl}/accommodations/public?page=${page}`);
   }
 
   getAccommodation(id: number): Observable<ApiResponse<Accommodation>> {
     return this.http.get<ApiResponse<Accommodation>>(`${this.apiUrl}/accommodations/${id}/public`);
   }
 
-  // ========== DISPONIBILIDAD ==========
-  
-  getAvailability(accommodationId: number): Observable<ApiResponse<Availability[]>> {
-    return this.http.get<ApiResponse<Availability[]>>(`${this.apiUrl}/availability/public/${accommodationId}`);
+    searchAccommodations(params: any): Observable<ApiResponse<Accommodation[]>> {
+    return this.http.get<ApiResponse<Accommodation[]>>(`${this.apiUrl}/accommodations/public`, { params });
   }
 
-  checkAvailability(accommodationId: number, checkIn: string, checkOut: string): Observable<{ available: boolean; price: number }> {
-    return this.http.post<{ available: boolean; price: number }>(`${this.apiUrl}/availability/check`, {
+  // ========== DISPONIBILIDAD ==========
+  
+  getAvailability(accommodationId: number): Observable<ApiResponse<AvailabilityCalendar[]>> {
+    return this.http.get<ApiResponse<AvailabilityCalendar[]>>(`${this.apiUrl}/availability/public/${accommodationId}`);
+  }
+
+  checkAvailability(accommodationId: number, checkIn: string, checkOut: string): Observable<{ available: boolean; price: number; conflicts?: string[] }> {
+    return this.http.post<{ available: boolean; price: number; conflicts?: string[] }>(`${this.apiUrl}/availability/check`, {
       accommodation_id: accommodationId,
       check_in: checkIn,
       check_out: checkOut
@@ -117,8 +65,8 @@ export class PublicService {
 
   // ========== RESEÑAS ==========
   
-  getReviews(accommodationId: number): Observable<ApiResponse<Review[]>> {
-    return this.http.get<ApiResponse<Review[]>>(`${this.apiUrl}/reviews/public/${accommodationId}`);
+  getReviews(accommodationId: number, page: number = 1): Observable<ApiResponse<Review[]>> {
+    return this.http.get<ApiResponse<Review[]>>(`${this.apiUrl}/reviews/public/${accommodationId}?page=${page}`);
   }
 
   createReview(accommodationId: number, review: { rating: number; comment: string }): Observable<ApiResponse<Review>> {

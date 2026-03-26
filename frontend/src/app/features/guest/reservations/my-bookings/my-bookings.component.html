@@ -1,0 +1,40 @@
+<div class="max-w-7xl mx-auto px-4 py-8">
+  <h1 class="text-3xl font-bold text-gray-800 mb-6">Mis reservas</h1>
+
+  @if (loading) {
+    <div class="text-center py-12">
+      <p class="text-gray-500">Cargando tus reservas...</p>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (!loading && !errorMessage) {
+    @if (bookings.length === 0) {
+      <div class="bg-white rounded-xl shadow-lg p-12 text-center">
+        <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <app-icon-svg name="calendar" className="w-10 h-10 text-gray-400"></app-icon-svg>
+        </div>
+        <h2 class="text-xl font-semibold text-gray-700 mb-2">No tienes reservas</h2>
+        <p class="text-gray-500 mb-6">Explora nuestros alojamientos y reserva tu próxima estancia</p>
+        <a routerLink="/" class="inline-block bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700">
+          Ver alojamientos
+        </a>
+      </div>
+    } @else {
+      <div class="flex flex-col gap-4">
+        @for (booking of bookings; track booking.id) {
+          <app-booking-card 
+            [booking]="booking" 
+            [showActions]="true"
+            (bookingCancelled)="loadMyBookings()">
+          </app-booking-card>
+        }
+      </div>
+    }
+  }
+</div>

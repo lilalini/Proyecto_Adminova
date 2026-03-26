@@ -2,15 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-
-export interface Availability {
-  id: number;
-  accommodation_id: number;
-  date: string;
-  price: number;
-  available: boolean;
-  min_stay: number;
-}
+import { 
+  AvailabilityCalendar, 
+  AvailabilityCalendarListResponse,
+  AvailabilityCheckRequest,
+  AvailabilityCheckResponse 
+} from '../models/availability-calendar.model';
 
 @Injectable({
   providedIn: 'root'
@@ -20,15 +17,30 @@ export class AvailabilityService {
 
   constructor(private http: HttpClient) {}
 
-  getByAccommodation(accommodationId: number): Observable<{ data: Availability[] }> {
-    return this.http.get<{ data: Availability[] }>(`${this.apiUrl}?accommodation_id=${accommodationId}`);
+  // Obtener disponibilidad por alojamiento
+  getByAccommodation(accommodationId: number): Observable<AvailabilityCalendarListResponse> {
+    return this.http.get<AvailabilityCalendarListResponse>(`${this.apiUrl}?accommodation_id=${accommodationId}`);
   }
 
-  checkAvailability(accommodationId: number, checkIn: string, checkOut: string): Observable<{ available: boolean; price: number }> {
-    return this.http.post<{ available: boolean; price: number }>(`${this.apiUrl}/check`, {
+  // Verificar disponibilidad en un rango de fechas
+  checkAvailability(accommodationId: number, checkIn: string, checkOut: string): Observable<AvailabilityCheckResponse> {
+    const request: AvailabilityCheckRequest = {
       accommodation_id: accommodationId,
       check_in: checkIn,
       check_out: checkOut
-    });
+    };
+    return this.http.post<AvailabilityCheckResponse>(`${this.apiUrl}/check`, request);
+  }
+
+  // Crear o actualizar disponibilidad
+  updateRange(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/update-range`, data);
+  }
+
+  // Obtener disponibilidad por rango de fechas
+  getByDateRange(accommodationId: number, startDate: string, endDate: string): Observable<AvailabilityCalendarListResponse> {
+    return this.http.get<AvailabilityCalendarListResponse>(
+      `${this.apiUrl}?accommodation_id=${accommodationId}&start=${startDate}&end=${endDate}`
+    );
   }
 }

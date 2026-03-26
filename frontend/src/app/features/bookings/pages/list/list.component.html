@@ -1,0 +1,66 @@
+<div class="space-y-6">
+  <!-- Cabecera -->
+  <div class="flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-gray-800">Reservas</h1>
+    <a routerLink="/bookings/create" 
+       class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+      <app-icon-svg name="plus" className="w-5 h-5"></app-icon-svg>
+      Nueva reserva
+    </a>
+  </div>
+
+  <!-- Estado de carga -->
+  @if (loading) {
+    <div class="text-center py-12">
+      <p class="text-gray-500">Cargando reservas...</p>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (errorMessage) {
+    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+      {{ errorMessage }}
+    </div>
+  }
+
+  <!-- Listado de reservas con BOOKING-CARD -->
+  @if (!loading && !errorMessage) {
+    <div class="space-y-4">
+      @for (booking of bookings; track booking.id) {
+        <app-booking-card 
+          [booking]="booking" 
+          [showActions]="true"
+          (bookingCancelled)="loadBookings()">  
+        </app-booking-card>
+      }
+    </div>
+
+    <!-- Paginación -->
+    @if (pagination) {
+      <div class="flex items-center justify-between mt-6">
+        <div class="text-sm text-gray-700">
+          Mostrando {{ pagination.from }} a {{ pagination.to }} de {{ pagination.total }} reservas
+        </div>
+        <div class="flex space-x-2">
+          <button (click)="loadPage(pagination.current_page - 1)" 
+                  [disabled]="pagination.current_page === 1"
+                  class="px-3 py-1 border rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+            Anterior
+          </button>
+          <span class="px-3 py-1">Página {{ pagination.current_page }} de {{ pagination.last_page }}</span>
+          <button (click)="loadPage(pagination.current_page + 1)" 
+                  [disabled]="pagination.current_page === pagination.last_page"
+                  class="px-3 py-1 border rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+            Siguiente
+          </button>
+        </div>
+      </div>
+    }
+
+    @if (bookings.length === 0) {
+      <div class="text-center py-12">
+        <p class="text-gray-500">No hay reservas creadas</p>
+      </div>
+    }
+  }
+</div>

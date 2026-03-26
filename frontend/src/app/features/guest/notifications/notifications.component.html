@@ -1,0 +1,71 @@
+<div class="max-w-3xl mx-auto px-4 py-8">
+  <!-- Cabecera -->
+  <div class="flex items-center gap-3 mb-6">
+    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+      <app-icon-svg name="bell" className="w-6 h-6 text-purple-600"></app-icon-svg>
+    </div>
+    <h1 class="text-2xl font-bold text-gray-800">Notificaciones</h1>
+    @if (!loading && notifications.length > 0) {
+        <span class="ml-2 bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full">
+        {{ unreadCount }} nuevas
+        </span>
+        }
+  </div>
+
+  @if (loading) {
+    <div class="text-center py-12">
+      <p class="text-gray-500">Cargando notificaciones...</p>
+    </div>
+  }
+
+  @if (!loading && notifications.length === 0) {
+    <div class="bg-white rounded-xl shadow-lg p-12 text-center">
+      <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <app-icon-svg name="bell" className="w-10 h-10 text-gray-400"></app-icon-svg>
+      </div>
+      <h2 class="text-xl font-semibold text-gray-700 mb-2">No hay notificaciones</h2>
+      <p class="text-gray-500">Te avisaremos cuando tengas novedades</p>
+    </div>
+  }
+
+  @if (!loading && notifications.length > 0) {
+    <div class="space-y-3">
+      @for (notification of notifications; track notification.id) {
+        <div 
+          class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition cursor-pointer"
+          [class.border-l-4]="!notification.read"
+          [class.border-l-purple-500]="!notification.read"
+          (click)="markAsRead(notification.id)"
+        >
+          <div class="flex gap-4">
+            <div class="flex-shrink-0">
+              <div class="w-10 h-10 rounded-lg flex items-center justify-center"
+                   [class.bg-purple-100]="!notification.read"
+                   [class.bg-gray-100]="notification.read">
+                <app-icon-svg [name]="notification.icon" 
+                              className="w-5 h-5"
+                              [class.text-purple-600]="!notification.read"
+                              [class.text-gray-400]="notification.read">
+                </app-icon-svg>
+              </div>
+            </div>
+            <div class="flex-1">
+              <div class="flex justify-between items-start">
+                <div>
+                  <h3 class="font-semibold text-gray-800"
+                      [class.font-medium]="notification.read">
+                    {{ notification.title }}
+                  </h3>
+                  <p class="text-sm text-gray-500 mt-1">{{ notification.message }}</p>
+                </div>
+                <span class="text-xs text-gray-400 whitespace-nowrap ml-4">
+                  {{ formatDate(notification.date) }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

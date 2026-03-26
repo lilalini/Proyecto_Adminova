@@ -1,57 +1,198 @@
 <div class="min-h-screen bg-gray-50">
-  <!-- HERO SECTION con buscador -->
+  <!-- HERO SECTION con buscador mejorado -->
   <div class="bg-gradient-to-r from-indigo-700 via-purple-700 to-pink-700 text-white">
     <div class="max-w-7xl mx-auto px-4 py-20">
-      <h1 class="text-5xl font-bold mb-4">Encuentra tu alojamiento ideal</h1>
-      <p class="text-xl text-indigo-100 mb-8">Miles de propiedades en los mejores destinos</p>
+      <div class="text-center mb-12">
+        <h1 class="text-5xl font-bold mb-4">Encuentra tu alojamiento ideal</h1>
+        <p class="text-xl text-indigo-100">Miles de propiedades en los mejores destinos</p>
+      </div>
       
-      <!-- Buscador simple -->
-      <div class="bg-white rounded-lg shadow-xl p-4 max-w-3xl">
-        <div class="flex flex-col md:flex-row gap-4">
+      <!-- Buscador profesional -->
+      <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-4xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <!-- Destino -->
+          <div class="relative">
+            <app-icon-svg name="map-pin" className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"></app-icon-svg>
           <input 
             type="text" 
+            [(ngModel)]="searchCity"
+            (keydown.enter)="onSearchEnter($event)"
+            #cityInput
             placeholder="¿Dónde quieres ir?" 
-            class="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-          >
-          <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-lg font-semibold transition">
-            Buscar
+            class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 text-gray-900"
+            title="Ciudad o destino"
+          />
+          </div>
+
+          <!-- Check-in -->
+          <div class="relative">
+            <app-icon-svg name="calendar" className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"></app-icon-svg>
+            <input 
+              type="date" 
+              [(ngModel)]="searchCheckIn"
+              class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 text-gray-900"
+              title="Fecha de entrada"
+            />
+          </div>
+
+          <!-- Check-out -->
+          <div class="relative">
+            <app-icon-svg name="calendar" className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"></app-icon-svg>
+            <input 
+              type="date" 
+              [(ngModel)]="searchCheckOut"
+              class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 text-gray-900"
+              title="Fecha de salida"
+            />
+          </div>
+
+          <!-- Huéspedes -->
+          <div class="relative">
+            <app-icon-svg name="users" className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"></app-icon-svg>
+            <select 
+              [(ngModel)]="searchGuests"
+              class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 text-gray-900 appearance-none bg-white"
+              title="Número de huéspedes">
+              @for (num of [1,2,3,4,5,6,7,8]; track num) {
+                <option [value]="num">{{ num }} {{ num === 1 ? 'huésped' : 'huéspedes' }}</option>
+              }
+            </select>
+            <app-icon-svg name="chevron-down" className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"></app-icon-svg>
+          </div>
+        </div>
+
+        <!-- Botón de búsqueda -->
+        <div class="mt-6">
+          <button (click)="performSearch()" 
+                  class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl transition transform hover:scale-[1.02] flex items-center justify-center gap-2">
+            <app-icon-svg name="search" className="w-5 h-5"></app-icon-svg>
+            Buscar alojamientos
           </button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- SECCIÓN DE ALOJAMIENTOS DESTACADOS -->
+  <!-- SECCIÓN DE ALOJAMIENTOS -->
   <div class="max-w-7xl mx-auto px-4 py-16">
-    <h2 class="text-3xl font-bold text-gray-800 mb-2">Alojamientos destacados</h2>
-    <p class="text-gray-600 mb-8">Los favoritos de nuestros huéspedes</p>
+    <!-- Contador y ordenación -->
+    <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
+      <div class="bg-indigo-100 text-indigo-800 text-sm font-medium px-4 py-2 rounded-full">
+        {{ total }} {{ total === 1 ? 'propiedad disponible' : 'propiedades disponibles' }}
+      </div>
+      
+      <div class="w-64">
+        <select 
+          (change)="onSortChange($event)"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white text-sm"
+          title="Ordenar propiedades">
+          <option value="newest">Más recientes primero</option>
+          <option value="price_desc">Precio: mayor a menor</option>
+          <option value="price_asc">Precio: menor a mayor</option>
+          <option value="bedrooms_desc">Más dormitorios primero</option>
+          <option value="bedrooms_asc">Menos dormitorios primero</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Filtros activos -->
+    @if (hasActiveFilters()) {
+      <div class="mb-8 flex flex-wrap gap-2">
+        <span class="text-sm text-gray-500">Filtros activos:</span>
+        @if (searchCity) {
+          <span class="bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full flex items-center gap-1">
+            {{ searchCity }}
+            <button (click)="clearFilter('city')" class="hover:text-red-500">✕</button>
+          </span>
+        }
+        @if (searchCheckIn) {
+          <span class="bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full flex items-center gap-1">
+            {{ searchCheckIn | date:'dd/MM/yy' }} → {{ searchCheckOut | date:'dd/MM/yy' }}
+            <button (click)="clearFilter('dates')" class="hover:text-red-500">✕</button>
+          </span>
+        }
+        @if (searchGuests > 1) {
+          <span class="bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full flex items-center gap-1">
+            {{ searchGuests }} huéspedes
+            <button (click)="clearFilter('guests')" class="hover:text-red-500">✕</button>
+          </span>
+        }
+        <button (click)="clearAllFilters()" class="text-indigo-600 text-sm hover:underline">Limpiar todos</button>
+      </div>
+    }
 
     @if (loading) {
       <div class="text-center py-12">
         <p class="text-gray-500">Cargando alojamientos...</p>
       </div>
     } @else {
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        @for (acc of featuredAccommodations; track acc.id) {
-          <a [routerLink]="['/accommodations', acc.id]" class="group">
-            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition">
-              <!-- Imagen placeholder -->
-              <div class="h-48 bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
-                <span class="text-indigo-400 text-4xl">🏨</span>
-              </div>
-              
-              <div class="p-4">
-                <h3 class="font-semibold text-gray-800 group-hover:text-indigo-600">{{ acc.title }}</h3>
-                <p class="text-sm text-gray-500 mt-1">{{ acc.city }}, {{ acc.country }}</p>
-                
-                <div class="flex justify-between items-center mt-4">
-                  <span class="text-lg font-bold text-indigo-600">€{{ acc.base_price }}</span>
-                  <span class="text-sm text-gray-400">/noche</span>
+      @if (accommodations.length === 0) {
+        <div class="text-center py-12">
+          <p class="text-gray-500">No se encontraron propiedades</p>
+        </div>
+      } @else {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          @for (acc of accommodations; track acc.id) {
+            <a [routerLink]="['/accommodations', acc.id]" class="group">
+              <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition">
+                <div class="h-48 overflow-hidden">
+                  @if (acc.images && acc.images.length > 0) {
+                    <img [src]="acc.images[0].url" 
+                        alt="Imagen del alojamiento"
+                        class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
+                  } @else {
+                    <div class="w-full h-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
+                      <span class="text-indigo-400 text-4xl">🏨</span>
+                    </div>
+                  }
+                </div>
+                <div class="p-4">
+                  <h3 class="font-semibold text-gray-800 group-hover:text-indigo-600">{{ acc.title }}</h3>
+                  <p class="text-sm text-gray-500 mt-1">{{ acc.city }}, {{ acc.country }}</p>
+                  <div class="flex justify-between items-center mt-4">
+                    <span class="text-lg font-bold text-indigo-600">€{{ acc.base_price }}</span>
+                    <span class="text-sm text-gray-400">/noche</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </a>
-        }
+            </a>
+          }
+        </div>
+      }
+    }
+
+    <!-- Paginación -->
+    @if (!loading && lastPage > 1) {
+      <div class="flex justify-center items-center gap-2 mt-12">
+        <button 
+          (click)="goToPage(currentPage - 1)" 
+          [disabled]="currentPage === 1"
+          class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition">
+          Anterior
+        </button>
+        
+        <div class="flex gap-1">
+          @for (page of [].constructor(lastPage); let i = $index; track i) {
+            <button 
+              (click)="goToPage(i + 1)"
+              [class.bg-indigo-600]="currentPage === i + 1"
+              [class.text-white]="currentPage === i + 1"
+              [class.bg-white]="currentPage !== i + 1"
+              [class.text-gray-700]="currentPage !== i + 1"
+              [class.border]="currentPage !== i + 1"
+              [class.border-gray-300]="currentPage !== i + 1"
+              class="w-10 h-10 rounded-lg hover:bg-gray-50 transition">
+              {{ i + 1 }}
+            </button>
+          }
+        </div>
+        
+        <button 
+          (click)="goToPage(currentPage + 1)" 
+          [disabled]="currentPage === lastPage"
+          class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition">
+          Siguiente
+        </button>
       </div>
     }
   </div>

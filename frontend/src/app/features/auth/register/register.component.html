@@ -49,37 +49,49 @@
         />
       </div>
 
+            <div class="mb-4">
+        <input 
+          type="tel" 
+          [(ngModel)]="userData.phone" 
+          name="phone" 
+          placeholder="Teléfono (opcional)" 
+          class="w-full px-3 py-2 border rounded-lg">
+      </div>
+
+      <!-- Contraseña -->
       <div class="mb-4">
-        <label for="password" class="block text-gray-700 text-sm font-bold mb-2">
-          Contraseña
-        </label>
+        <label class="block text-gray-700 text-sm font-bold mb-2">Contraseña</label>
         <input
-          id="password"
           type="password"
           [(ngModel)]="userData.password"
           name="password"
           required
           minlength="8"
-          placeholder="••••••••"
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+          placeholder="Mínimo 8 caracteres"
+          title="Contraseña (mínimo 8 caracteres)"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg"
         />
+        @if (userData.password && userData.password.length < 8) {
+          <p class="text-red-500 text-sm mt-1">Mínimo 8 caracteres</p>
+        }
       </div>
 
+      <!-- Confirmar contraseña -->
       <div class="mb-6">
-        <label for="password_confirmation" class="block text-gray-700 text-sm font-bold mb-2">
-          Confirmar contraseña
-        </label>
+        <label class="block text-gray-700 text-sm font-bold mb-2">Confirmar contraseña</label>
         <input
-          id="password_confirmation"
           type="password"
           [(ngModel)]="userData.password_confirmation"
           name="password_confirmation"
           required
-          placeholder="••••••••"
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+          placeholder="Repite tu contraseña"
+          title="Confirmar contraseña"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg"
         />
+        @if (userData.password_confirmation && userData.password !== userData.password_confirmation) {
+          <p class="text-red-500 text-sm mt-1">Las contraseñas no coinciden</p>
+        }
       </div>
-
       <div *ngIf="errorMessage" class="mb-4 text-red-600 text-sm" role="alert">
         {{ errorMessage }}
       </div>

@@ -42,7 +42,13 @@ Route::get('/test', function() {
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
-    
+
+// Media de alojamientos 
+    Route::post('/accommodations/{accommodation}/media', [App\Http\Controllers\Api\AccommodationMediaController::class, 'store']);
+    Route::delete('/accommodations/{accommodation}/media/{mediaId}', [App\Http\Controllers\Api\AccommodationMediaController::class, 'destroy']);
+    // Rutas de reservas
+    Route::get('/bookings/my', [BookingController::class, 'myBookings']);
+    Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancelByGuest']);
     // CRUDs
     Route::apiResource('accommodations', AccommodationController::class);
     Route::apiResource('bookings', BookingController::class);
@@ -60,6 +66,8 @@ Route::get('/test', function() {
     Route::apiResource('notifications', NotificationController::class)->only([
         'index', 'show', 'destroy'
     ]);
+    // Rutas extra
+    Route::post('/bookings/{booking}/confirm-payment', [BookingController::class, 'confirmPayment']);
     Route::post('/availability/update-range', [AvailabilityCalendarController::class, 'updateRange']);
     Route::apiResource('availability', AvailabilityCalendarController::class);
     Route::post('/apartment-channels/{apartment_channel}/sync', [ApartmentChannelController::class, 'sync']);

@@ -12,7 +12,7 @@ class Media extends Model
     /** @use HasFactory<\Database\Factories\MediaFactory> */
     use HasFactory, SoftDeletes;
 
-    protected $table = 'media';
+    protected $table = 'legacy_media';
     protected $appends = ['url', 'thumbnail_url'];
 
     protected $fillable = [

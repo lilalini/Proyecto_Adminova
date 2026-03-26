@@ -35,13 +35,15 @@ class StoreAccommodationRequest extends FormRequest
             'country' => 'required|string|size:2',
             'base_price' => 'required|numeric|min:0',
             'cleaning_fee' => 'nullable|numeric|min:0',
-            'security_deposit' => 'nullable|numeric|min:0',
+            'security_deposit' => 'required|numeric|min:0',
             'minimum_stay' => 'required|integer|min:1',
             'maximum_stay' => 'nullable|integer|min:1',
             'check_in_time' => 'required|string',
             'check_out_time' => 'required|string',
             'status' => 'sometimes|in:draft,published,maintenance,inactive',
             'cancellation_policy_id' => 'required|exists:cancellation_policies,id',
+            'amenities' => 'nullable|array',
+            'house_rules' => 'nullable|array',
         ];
     }
 }

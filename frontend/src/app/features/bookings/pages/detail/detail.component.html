@@ -1,0 +1,112 @@
+<div class="max-w-3xl mx-auto px-4 py-8">
+  <!-- Cabecera con icono -->
+  <div class="flex items-center gap-3 mb-6">
+    <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+      <app-icon-svg name="calendar-check" className="w-6 h-6 text-indigo-600"></app-icon-svg>
+    </div>
+    <h1 class="text-3xl font-bold text-gray-800">Detalles de la reserva</h1>
+  </div>
+
+  @if (loading) {
+    <div class="text-center py-12">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent"></div>
+      <p class="text-gray-500 mt-2">Cargando reserva...</p>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
+      <app-icon-svg name="alert-circle" className="w-5 h-5 text-red-600"></app-icon-svg>
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (!loading && !errorMessage && booking) {
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+      <!-- Cabecera de la reserva -->
+      <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-4">
+        <div class="flex justify-between items-center">
+          <h2 class="text-xl font-semibold text-white">
+            Reserva #{{ booking.booking_reference || booking.id }}
+          </h2>
+          <span class="px-3 py-1 rounded-full text-sm font-semibold {{ getStatusClass(booking.status) }}">
+            {{ getStatusText(booking.status) }}
+          </span>
+        </div>
+      </div>
+      
+      <!-- Contenido -->
+      <div class="p-6 space-y-6">
+        <!-- Alojamiento -->
+        @if (booking.accommodation) {
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <app-icon-svg name="building-2" className="w-6 h-6 text-indigo-600"></app-icon-svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-800">{{ booking.accommodation.title }}</h3>
+              <p class="text-sm text-gray-500">{{ booking.accommodation.address }}</p>
+            </div>
+          </div>
+        } @else {
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <app-icon-svg name="building-2" className="w-6 h-6 text-gray-400"></app-icon-svg>
+            </div>
+            <p class="text-gray-500">Alojamiento no disponible</p>
+          </div>
+        }
+
+        <!-- Fechas -->
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <app-icon-svg name="calendar" className="w-6 h-6 text-emerald-600"></app-icon-svg>
+          </div>
+          <div>
+            <h3 class="font-semibold text-gray-800">Fechas</h3>
+            <p class="text-sm text-gray-500">
+              {{ formatDate(booking.check_in) }} - {{ formatDate(booking.check_out) }}
+            </p>
+            <p class="text-sm text-gray-500">{{ booking.nights }} noches</p>
+          </div>
+        </div>
+
+        <!-- Huéspedes -->
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <app-icon-svg name="users" className="w-6 h-6 text-purple-600"></app-icon-svg>
+          </div>
+          <div>
+            <h3 class="font-semibold text-gray-800">Huéspedes</h3>
+            <p class="text-sm text-gray-500">{{ booking.adults }} adultos</p>
+            @if (booking.children) {
+              <p class="text-sm text-gray-500">{{ booking.children }} niños</p>
+            }
+            @if (booking.guest_name) {
+              <p class="text-sm text-gray-500 mt-2">Titular: {{ booking.guest_name }}</p>
+            }
+          </div>
+        </div>
+
+        <!-- Precio -->
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <app-icon-svg name="wallet" className="w-6 h-6 text-amber-600"></app-icon-svg>
+          </div>
+          <div>
+            <h3 class="font-semibold text-gray-800">Precio total</h3>
+            <p class="text-2xl font-bold text-indigo-600">{{ booking.total_amount | number:'1.2-2' }} €</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón volver -->
+      <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+        <a routerLink="/my-bookings" class="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 transition">
+          <app-icon-svg name="arrow-left" className="w-4 h-4"></app-icon-svg>
+          Volver a mis reservas
+        </a>
+      </div>
+    </div>
+  }
+</div>
