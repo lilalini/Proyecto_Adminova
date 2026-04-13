@@ -15,6 +15,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(prepend: [
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
+
+        // para API: devolver 401 en lugar de redirigir
+        $middleware->redirectGuestsTo(fn($request) => 
+            $request->expectsJson() 
+                ? abort(401, 'No autenticado')
+                : route('login')
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

@@ -46,8 +46,8 @@ class DatabaseSeeder extends Seeder
             MessageSeeder::class,                      // necesita users, owners, guests, bookings
 
             // NIVEL 5: Polimórficas y logs
-            DocumentSeeder::class,                     // necesita users, owners, guests, accommodations
-            MediaSeeder::class,                         // necesita accommodations, owners, guests, users
+            DocumentSeeder::class,                     // necesita users, owners, guests, accommodations 
+            //MediaSeeder::class,                         // necesita accommodations, owners, guests, users OJO, lo comento porque al final decidi usar spatie y no hace falta tabla personalizada en este caso
             SyncLogSeeder::class,                        // necesita apartment_channels
         ]);
     

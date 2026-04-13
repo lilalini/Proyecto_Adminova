@@ -54,29 +54,39 @@
     </div>
 
 <!-- BARRA DE ACCIONES CON FONDO GRIS (OCUPA TODO EL ANCHO) -->
-  @if (showActions) {
-    <div class="bg-gray-100 px-6 py-4 border-t border-gray-200">
-      <div class="flex justify-between items-center">
-        <span class="text-xs text-gray-500">Ref: {{ booking.booking_reference || booking.id }}</span>
-        
-        <div class="flex items-center gap-3">
-          <a [routerLink]="['/bookings', booking.id]" 
-             class="text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center gap-1">
-            Ver detalles
-            <app-icon-svg name="arrow-right" className="w-4 h-4"></app-icon-svg>
-          </a>
+@if (showActions) {
+  <div class="bg-gray-100 px-6 py-4 border-t border-gray-200">
+    <div class="flex justify-between items-center">
+      <span class="text-xs text-gray-500">Ref: {{ booking.booking_reference || booking.id }}</span>
+      
+      <div class="flex items-center gap-3">
 
-          @if (canCancel()) {
-            <button (click)="openCancelModal(booking.id)" 
-                    class="text-red-600 hover:text-red-800 text-sm font-medium flex items-center gap-1">
-              <app-icon-svg name="x-circle" className="w-4 h-4"></app-icon-svg>
-              Cancelar
-            </button>
-          }
-        </div>
+        <!-- Factura (solo después de check-out) -->
+        @if (booking.status === 'checked_out') {
+          <button 
+            (click)="generateInvoice()" 
+            class="text-emerald-600 hover:text-emerald-800 text-sm font-medium flex items-center gap-1">
+            <app-icon-svg name="file-text" className="w-4 h-4"></app-icon-svg>
+            Factura
+          </button>
+        }
+
+        <a [routerLink]="['/bookings', booking.id]" 
+           class="text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center gap-1">
+          Ver detalles
+          <app-icon-svg name="arrow-right" className="w-4 h-4"></app-icon-svg>
+        </a>
+
+        @if (canCancel()) {
+          <button (click)="openCancelModal(booking.id)" 
+                  class="text-red-600 hover:text-red-800 text-sm font-medium flex items-center gap-1">
+            <app-icon-svg name="x-circle" className="w-4 h-4"></app-icon-svg>
+            Cancelar
+          </button>
+        }
       </div>
     </div>
-  
+  </div>
 }
 
     <!-- Modal de cancelación -->

@@ -16,6 +16,9 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\AvailabilityCalendar;
 use Carbon\CarbonPeriod;
+use App\Services\PdfService;
+use App\Http\Resources\DocumentResource;
+use App\Models\LoyaltyPoint;
 
 class BookingController extends Controller
 {
@@ -79,11 +82,21 @@ class BookingController extends Controller
         $guest = Guest::where('email', $user->email)->first();
         if (!$guest) {
             $guest = Guest::create([
+                'user_id'    => $user->id,
                 'first_name' => $user->first_name,
                 'last_name' => $user->last_name,
                 'email' => $user->email,
                 'phone' => $user->phone ?? '',
                 'source' => 'direct'
+            ]);
+
+        // Bono de bienvenida
+            LoyaltyPoint::create([
+                'guest_id' => $guest->id,
+                'points' => 300,
+                'type' => 'earned',
+                'description' => 'Bono de bienvenida',
+                'expiry_date' => now()->addYear(),
             ]);
         }
         
@@ -243,5 +256,63 @@ class BookingController extends Controller
                 ->where('date', $date->format('Y-m-d'))
                 ->update(['status' => 'available']);
         }
+    }
+
+    /**
+ * Descarga confirmación de reserva (siempre disponible)
+ * No guarda en documents, solo descarga directa
+ */
+    public function downloadConfirmation(Booking $booking, PdfService $pdfService)
+    {
+        if (!Gate::allows('view', $booking)) {
+            return response()->json(['message' => 'No autorizado'], 403);
+        }
+
+        $pdf = $pdfService->render('pdfs.booking_confirmation', compact('booking'));
+
+        return response($pdf)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="confirmacion-' . $booking->booking_reference . '.pdf"');
+    }
+
+        public function generateInvoice(Booking $booking, PdfService $pdfService)
+    {
+        if (!Gate::allows('view', $booking)) {
+            return response()->json(['message' => 'No autorizado'], 403);
+        }
+
+        // Solo permitir generar factura si la reserva está completada
+        if ($booking->status !== 'checked_out') {
+            return response()->json([
+                'message' => 'La factura solo se puede generar después del check-out'
+            ], 422);
+        }
+
+        $pdfContent = $pdfService->generateInvoice($booking);
+        
+        $document = $pdfService->saveAndRegister(
+            $pdfContent,
+            'invoice',
+            $booking,
+            'Factura reserva #' . $booking->booking_reference
+        );
+
+        return response()->json([
+            'message' => 'Factura generada',
+            'document' => new DocumentResource($document)
+        ]);
+    }
+
+    public function downloadInvoice(Booking $booking, PdfService $pdfService)
+    {
+        if (!Gate::allows('view', $booking)) {
+            return response()->json(['message' => 'No autorizado'], 403);
+        }
+
+        $pdfContent = $pdfService->generateInvoice($booking);
+        
+        return response($pdfContent)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="factura-' . $booking->booking_reference . '.pdf"');
     }
 }

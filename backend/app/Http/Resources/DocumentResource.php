@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\UserResource;
 
 class DocumentResource extends JsonResource
 {
@@ -23,6 +24,9 @@ class DocumentResource extends JsonResource
             'file_name' => $this->file_name,
             'file_path' => $this->file_path,
             'file_size' => $this->file_size,
+            'file_url' => $this->file_path 
+                ? asset('storage/' . $this->file_path) 
+                : null,
             'mime_type' => $this->mime_type,
             'is_signed' => $this->is_signed,
             'signed_at' => $this->signed_at,

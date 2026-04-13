@@ -14,7 +14,7 @@ export interface Booking {
   children: number;
   infants: number;
   pets: number;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  status: 'pending' | 'confirmed' | 'checked_in' | 'checked_out' | 'cancelled' | 'completed';
   total_amount: number;
   paid_amount: number;
   balance_due: number;

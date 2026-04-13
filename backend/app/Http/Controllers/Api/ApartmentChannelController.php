@@ -96,7 +96,7 @@ class ApartmentChannelController extends Controller
             return response()->json(['message' => 'No autorizado'], 403);
         }
 
-        // Aquí iría la lógica de sincronización con el canal
+        // Aquí implementare la lógica de sincronización con el canal
         $apartmentChannel->update([
             'last_sync_at' => now(),
             'last_sync_status' => 'success',

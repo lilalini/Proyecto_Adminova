@@ -255,7 +255,7 @@ class AccommodationController extends Controller
         }
         
         if ($request->has('check_in') && $request->has('check_out')) {
-            // Filtrar por disponibilidad (más complejo)
+            // Filtrar por disponibilidad 
         }
         
         $accommodations = $query->paginate(6);

@@ -1,0 +1,50 @@
+<div class="max-w-7xl mx-auto px-4 py-8">
+  <div class="bg-white rounded-xl p-4 mb-6">
+    <h1 class="text-2xl font-semibold text-gray-800 mb-1">Mis documentos</h1>
+    <p class="text-gray-500">Facturas, contratos y documentos legales</p>
+  </div>
+
+  @if (loading) {
+    <div class="text-center py-8">
+      <p class="text-gray-500">Cargando documentos...</p>
+    </div>
+  }
+
+  @if (error) {
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+      {{ error }}
+    </div>
+  }
+
+  @if (!loading && documents.length === 0) {
+    <div class="bg-white rounded-xl p-8 text-center">
+      <p class="text-gray-500">No tienes documentos disponibles.</p>
+    </div>
+  }
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    @for (doc of documents; track doc.id) {
+      <div class="bg-white rounded-xl shadow-lg p-4 hover:shadow-xl transition">
+        <div class="flex items-start justify-between">
+          <div class="flex items-center gap-3">
+            <app-icon-svg name="file-text" className="w-8 h-8 text-amber-600"></app-icon-svg>
+            <div>
+              <h3 class="font-medium text-gray-800">{{ doc.title }}</h3>
+              <p class="text-xs text-gray-400">{{ doc.created_at | date:'dd/MM/yyyy' }}</p>
+              <span class="inline-block text-xs text-gray-500 mt-1">{{ doc.document_type }}</span>
+            </div>
+          </div>
+          <button 
+            type="button"
+            (click)="downloadDocument(doc)" 
+            class="text-indigo-600 hover:text-indigo-800"
+            [attr.title]="'Descargar ' + doc.title"
+          >
+            <app-icon-svg name="download" className="w-5 h-5"></app-icon-svg>
+            <span class="sr-only">Descargar {{ doc.title }}</span>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>

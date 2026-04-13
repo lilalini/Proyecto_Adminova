@@ -1,4 +1,4 @@
-import { Component, OnInit   } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
@@ -17,10 +17,13 @@ export class RegisterComponent implements OnInit {
     email: '',
     password: '',
     password_confirmation: '',
-    phone: ''
+    phone: '',
+    accepts_terms: false,        // <--- AÑADIDO
+    accepts_newsletter: false    // <--- AÑADIDO
   };
   errorMessage = '';
   loading = false;
+  submitted = false;              // <--- AÑADIDO (para mostrar error del checkbox)
 
   constructor(
     private auth: AuthService,
@@ -36,6 +39,15 @@ export class RegisterComponent implements OnInit {
   }
 
   onSubmit() {
+    this.submitted = true;
+    this.errorMessage = '';
+
+    // Validar términos y condiciones
+    if (!this.userData.accepts_terms) {
+      this.errorMessage = 'Debes aceptar los términos y condiciones';
+      return;
+    }
+
     // Validar que las contraseñas coincidan
     if (this.userData.password !== this.userData.password_confirmation) {
       this.errorMessage = 'Las contraseñas no coinciden';
@@ -49,15 +61,13 @@ export class RegisterComponent implements OnInit {
     }
 
     this.loading = true;
-    this.errorMessage = '';
 
     this.auth.register(this.userData).subscribe({
-next: () => {
-  const redirectUrl = localStorage.getItem('redirectAfterLogin') || '/dashboard';
-  localStorage.removeItem('redirectAfterLogin');
-  // Forzar navegación completa para recargar el estado
-  window.location.href = redirectUrl;
-},
+      next: () => {
+        const redirectUrl = localStorage.getItem('redirectAfterLogin') || '/dashboard';
+        localStorage.removeItem('redirectAfterLogin');
+        window.location.href = redirectUrl;
+      },
       error: (error) => {
         this.errorMessage = error.error?.message || 'Error al registrarse';
         this.loading = false;

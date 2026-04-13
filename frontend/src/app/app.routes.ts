@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
 import { GuestGuard } from './core/guards/guest.guard';
 import { RoleGuard } from './core/guards/role.guard';
+import { ProfileCompleteGuard } from './core/guards/profile-complete.guard';
 
 export const routes: Routes = [
 
@@ -24,12 +25,19 @@ export const routes: Routes = [
     canActivate: [GuestGuard]  // ← Solo invitados
   },
 
+  {
+  path: 'terms',
+  loadComponent: () =>
+    import('./features/terms/terms.component').then(m => m.TermsComponent)
+},
+
   // ==================== RUTAS PROTEGIDAS (requieren autenticación) ====================
   {
     path: 'checkout',
     loadComponent: () =>
       import('./features/bookings/pages/checkout/checkout.component')
         .then(m => m.CheckoutComponent),
+    canActivate: [AuthGuard, ProfileCompleteGuard]
   },
 
   {
@@ -101,6 +109,14 @@ export const routes: Routes = [
         .then(m => m.MyBookingsComponent),
     canActivate: [AuthGuard]
   },
+
+  {
+  path: 'guest/documents',
+  loadComponent: () =>
+    import('./features/guest/documents/documents.component')
+      .then(m => m.DocumentsComponent),
+  canActivate: [AuthGuard]
+},
 
 
   // ==================== ADMIN ====================

@@ -11,6 +11,7 @@ class Guest extends Model
     use HasFactory;
 
      protected $fillable = [
+        'user_id', 
         'first_name',
         'last_name',
         'email',
@@ -27,6 +28,7 @@ class Guest extends Model
         'source', // direct, booking, airbnb, expedia
         'source_data', // JSON con datos raw de la OTA
         'external_id', // ID en la OTA
+        'accepts_newsletter', 
     ];
 
     protected function casts(): array
@@ -80,5 +82,10 @@ class Guest extends Model
             $q->where('status', 'confirmed')
             ->where('check_in', '>', now());
         });
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

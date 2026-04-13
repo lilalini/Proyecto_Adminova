@@ -1,4 +1,4 @@
-<div class="max-w-2xl mx-auto px-4 py-8">
+<div class="max-w-3xl mx-auto px-4 py-8">
   <!-- Cabecera -->
   <div class="flex items-center gap-3 mb-6">
     <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
@@ -16,82 +16,266 @@
   @if (!loading) {
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
       <form (ngSubmit)="onSubmit()" #profileForm="ngForm">
-        <div class="p-6 space-y-4">
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-              <input
-                id="first_name"
-                type="text"
-                [(ngModel)]="profile.first_name"
-                name="first_name"
-                required
-                placeholder="Tu nombre"
-                title="Nombre del usuario"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300"
-              />
-            </div>
-            <div>
-              <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
-              <input
-                id="last_name"
-                type="text"
-                [(ngModel)]="profile.last_name"
-                name="last_name"
-                required
-                placeholder="Tu apellido"
-                title="Apellido del usuario"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300"
-              />
+        <div class="p-6 space-y-6">
+          
+          <!-- Sección: Datos personales -->
+          <div>
+            <h2 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Datos personales</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+                <input
+                  id="first_name"
+                  type="text"
+                  [(ngModel)]="profile.first_name"
+                  name="first_name"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300"
+                />
+              </div>
+              <div>
+                <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Apellido *</label>
+                <input
+                  id="last_name"
+                  type="text"
+                  [(ngModel)]="profile.last_name"
+                  name="last_name"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300"
+                />
+              </div>
+              <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                <input
+                  id="email"
+                  type="email"
+                  [(ngModel)]="profile.email"
+                  name="email"
+                  readonly
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                />
+                <p class="text-xs text-gray-400 mt-1">El email no se puede cambiar</p>
+              </div>
+              <div>
+                <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
+                <input
+                  id="phone"
+                  type="tel"
+                  [(ngModel)]="profile.phone"
+                  name="phone"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300"
+                />
+              </div>
+              <div>
+                <label for="birth_date" class="block text-sm font-medium text-gray-700 mb-1">Fecha de nacimiento</label>
+                <input
+                  id="birth_date"
+                  type="date"
+                  [(ngModel)]="profile.birth_date"
+                  name="birth_date"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300"
+                />
+              </div>
+              <div>
+                <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Género</label>
+                <select
+                  id="gender"
+                  [(ngModel)]="profile.gender"
+                  name="gender"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300"
+                >
+                  <option value="">Seleccionar</option>
+                  @for (g of genders; track g.value) {
+                    <option [value]="g.value">{{ g.label }}</option>
+                  }
+                </select>
+              </div>
             </div>
           </div>
 
+          <!-- Sección: Preferencias -->
           <div>
-            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              id="email"
-              type="email"
-              [(ngModel)]="profile.email"
-              name="email"
-              readonly
-              placeholder="correo@ejemplo.com"
-              title="Correo electrónico (no modificable)"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
-            />
-            <p class="text-xs text-gray-400 mt-1">El email no se puede cambiar</p>
+            <h2 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Preferencias</h2>
+            <div class="flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="accepts_newsletter"
+                [(ngModel)]="profile.accepts_newsletter"
+                name="accepts_newsletter"
+                class="mt-1 w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
+              />
+              <div>
+                <label for="accepts_newsletter" class="text-sm font-medium text-gray-700">
+                  Deseo recibir el boletín de noticias con ofertas exclusivas
+                </label>
+                <p class="text-xs text-gray-500">Al aceptar, recibirás <strong>300 puntos de bienvenida</strong> que podrás usar en tu primera reserva.</p>
+              </div>
+            </div>
           </div>
 
+          <!-- Sección: Documento de identidad -->
           <div>
-            <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-            <input
-              id="phone"
-              type="tel"
-              [(ngModel)]="profile.phone"
-              name="phone"
-              placeholder="Ej: 600123456"
-              title="Teléfono de contacto"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300"
-            />
+            <h2 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Documento de identidad</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="document_type" class="block text-sm font-medium text-gray-700 mb-1">Tipo de documento *</label>
+                <select
+                  id="document_type"
+                  [(ngModel)]="profile.document_type"
+                  name="document_type"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300"
+                >
+                  <option value="">Seleccionar</option>
+                  @for (doc of documentTypes; track doc.value) {
+                    <option [value]="doc.value">{{ doc.label }}</option>
+                  }
+                </select>
+              </div>
+              <div>
+                <label for="document_number" class="block text-sm font-medium text-gray-700 mb-1">Número de documento *</label>
+                <input
+                  id="document_number"
+                  type="text"
+                  [(ngModel)]="profile.document_number"
+                  name="document_number"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300"
+                />
+              </div>
+              <div>
+                <label for="nationality" class="block text-sm font-medium text-gray-700 mb-1">Nacionalidad</label>
+                <input
+                  id="nationality"
+                  type="text"
+                  [(ngModel)]="profile.nationality"
+                  name="nationality"
+                  placeholder="Ej: Española"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300"
+                />
+              </div>
+            </div>
           </div>
+
+
+          <div>
+          <label for="country" class="block text-sm font-medium text-gray-700 mb-1">País *</label>
+          <select
+            id="country"
+            [(ngModel)]="profile.country"
+            name="country"
+            required
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300"
+          >
+            <option value="">Seleccionar país</option>
+            @for (c of countries; track c.code) {
+              <option [value]="c.code">{{ c.name }}</option>
+            }
+          </select>
         </div>
 
-        <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
-          @if (successMessage) {
-            <div class="mb-3 text-green-600 text-sm">{{ successMessage }}</div>
+
+
+          <!-- Sección: Dirección -->
+          <div>
+            <h2 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Dirección</h2>
+            <div class="space-y-4">
+              <div>
+                <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Dirección *</label>
+                <input
+                  id="address"
+                  type="text"
+                  [(ngModel)]="profile.address"
+                  name="address"
+                  required
+                  placeholder="Calle, número, piso"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300"
+                />
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label for="city" class="block text-sm font-medium text-gray-700 mb-1">Ciudad *</label>
+                  <input
+                    id="city"
+                    type="text"
+                    [(ngModel)]="profile.city"
+                    name="city"
+                    required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300"
+                  />
+                </div>
+                <div>
+                  <label for="postal_code" class="block text-sm font-medium text-gray-700 mb-1">Código postal</label>
+                  <input
+                    id="postal_code"
+                    type="text"
+                    [(ngModel)]="profile.postal_code"
+                    name="postal_code"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300"
+                  />
+                </div>
+              </div>
+              <div>
+                <label for="country" class="block text-sm font-medium text-gray-700 mb-1">País *</label>
+                <input
+                  id="country"
+                  type="text"
+                  [(ngModel)]="profile.country"
+                  name="country"
+                  required
+                  placeholder="Ej: España"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Alerta de perfil incompleto -->
+          @if (!isProfileComplete()) {
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <app-icon-svg name="alert-circle" className="w-5 h-5 text-amber-600 mt-0.5"></app-icon-svg>
+                <div>
+                  <p class="text-sm font-medium text-amber-800">Perfil incompleto</p>
+                  <p class="text-xs text-amber-700 mt-1">Completa todos los campos obligatorios (*) para poder realizar reservas.</p>
+                </div>
+              </div>
+            </div>
           }
-          @if (errorMessage) {
-            <div class="mb-3 text-red-600 text-sm">{{ errorMessage }}</div>
-          }
-          <div class="flex justify-end gap-3">
-            <button
-              type="submit"
-              [disabled]="saving || !profileForm.valid"
-              class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+        </div>
+
+      <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+        @if (successMessage) {
+          <div class="mb-3 text-green-600 text-sm">{{ successMessage }}</div>
+        }
+        @if (errorMessage) {
+          <div class="mb-3 text-red-600 text-sm">{{ errorMessage }}</div>
+        }
+        <div class="flex flex-wrap justify-end gap-3">
+          <a
+            routerLink="/guest/dashboard"
+            class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+          >
+            Volver al dashboard
+          </a>
+          <button
+            type="submit"
+            [disabled]="saving"
+            class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+          >
+            {{ saving ? 'Guardando...' : 'Guardar cambios' }}
+          </button>
+          @if (isProfileComplete() && returnUrl !== '/guest/dashboard') {
+            <a
+              [routerLink]="returnUrl"
+              class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
             >
-              {{ saving ? 'Guardando...' : 'Guardar cambios' }}
-            </button>
-          </div>
+              Continuar con la reserva
+            </a>
+          }
         </div>
+      </div>
       </form>
     </div>
   }

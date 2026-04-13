@@ -50,4 +50,16 @@ export class GuestService {
   getByBooking(bookingId: number): Observable<GuestListResponse> {
     return this.http.get<GuestListResponse>(`${this.apiUrl}?booking_id=${bookingId}`);
   }
+
+    getByUserId(userId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/by-user/${userId}`);
+  }
+
+    isProfileComplete(userId: number): Observable<{ complete: boolean; missing_fields: string[] }> {
+      return this.http.get<{ complete: boolean; missing_fields: string[] }>(`${this.apiUrl}/profile-complete/${userId}`);
+  }
+
+  updateByUserId(userId: number, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/by-user/${userId}`, data);
+  }
 }

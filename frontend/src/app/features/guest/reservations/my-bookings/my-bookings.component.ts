@@ -6,6 +6,8 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { Booking } from '../../../../core/models/booking.model';
 import { IconSvgComponent } from '../../../../shared/components/icon-svg/icon-svg.component';
 import { BookingCardComponent } from '../../../bookings/components/booking-card/booking-card.component';
+import { ActivatedRoute } from '@angular/router';
+
 
 @Component({
   selector: 'app-my-bookings',
@@ -17,22 +19,38 @@ export class MyBookingsComponent implements OnInit {
   bookings: Booking[] = [];
   loading = true;
   errorMessage = '';
+  onlyUpcoming = false;
 
   constructor(
     private bookingService: BookingService,
-    private auth: AuthService
+    private auth: AuthService,
+    private route: ActivatedRoute
   ) {}
 
-  ngOnInit() {
-    this.loadMyBookings();
+ ngOnInit() {
+    // leer parámetro de la URL
+    this.route.queryParams.subscribe(params => {
+      this.onlyUpcoming = params['upcoming'] === 'true';
+      this.loadMyBookings();
+    });
   }
 
   loadMyBookings() {
     this.loading = true;
-    // Endpoint específico para guest
     this.bookingService.getMyBookings().subscribe({
       next: (response) => {
-        this.bookings = response.data;
+        const today = new Date().toISOString().split('T')[0];
+        
+        if (this.onlyUpcoming) {
+          // filtrar solo próximas (pendientes/confirmadas y fecha futura)
+          this.bookings = response.data.filter(booking => 
+            (booking.status === 'pending' || booking.status === 'confirmed') &&
+            booking.check_in >= today
+          );
+        } else {
+          this.bookings = response.data;
+        }
+        
         this.loading = false;
       },
       error: (error) => {

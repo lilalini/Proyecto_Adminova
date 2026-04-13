@@ -72,4 +72,29 @@ export class DetailComponent implements OnInit {
     };
     return texts[status] || status;
   }
+
+/**
+   * Descarga la confirmación de reserva (PDF)
+   */
+  downloadConfirmation(): void {
+    if (!this.booking) {
+      alert('No hay información de la reserva');
+      return;
+    }
+
+    this.bookingService.downloadConfirmation(this.booking.id).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `confirmacion-${this.booking!.id}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (error) => {
+        console.error('Error descargando confirmación:', error);
+        alert('No se pudo descargar la confirmación');
+      }
+    });
+  }
 }

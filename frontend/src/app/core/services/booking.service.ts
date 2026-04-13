@@ -59,7 +59,23 @@ export class BookingService {
     return this.http.post(`${this.apiUrl}/${bookingId}/confirm-payment`, {});
   }
 
-    cancelBooking(bookingId: number, reason?: string): Observable<any> {
+  /**
+   * Descarga la confirmación de reserva (PDF)
+   */
+  downloadConfirmation(bookingId: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${bookingId}/download-confirmation`, {
+      responseType: 'blob'
+    });
+  }
+
+  /**
+   * Genera y guarda la factura definitiva (solo después de check-out)
+   */
+  generateInvoice(bookingId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${bookingId}/generate-invoice`, {});
+  }
+
+  cancelBooking(bookingId: number, reason?: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/${bookingId}/cancel`, { reason });
   }
 

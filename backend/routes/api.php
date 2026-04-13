@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AccommodationController;
@@ -36,6 +35,7 @@ Route::get('/test', function() {
     Route::get('/reviews/public/{accommodationId}', [App\Http\Controllers\Api\ReviewController::class, 'publicIndex']);
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+    Route::get('/guests/by-user/{userId}', [GuestController::class, 'findByUserId']);
 
 // Rutas protegidas (todas en un solo grupo)
     Route::middleware('auth:sanctum')->group(function () {
@@ -49,6 +49,9 @@ Route::get('/test', function() {
     // Rutas de reservas
     Route::get('/bookings/my', [BookingController::class, 'myBookings']);
     Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancelByGuest']);
+    
+    Route::get('/guests/profile-complete/{userId}', [GuestController::class, 'isProfileComplete']);
+    Route::put('/guests/by-user/{userId}', [GuestController::class, 'updateByUserId']);
     // CRUDs
     Route::apiResource('accommodations', AccommodationController::class);
     Route::apiResource('bookings', BookingController::class);
@@ -89,4 +92,7 @@ Route::get('/test', function() {
     Route::post('/media/{media}/set-main', [MediaController::class, 'setMain']);
     Route::apiResource('media', MediaController::class);
     Route::apiResource('sync-logs', SyncLogController::class)->only(['index', 'show', 'destroy']);
+    Route::get('/bookings/{booking}/download-confirmation', [BookingController::class, 'downloadConfirmation']);
+    Route::post('/bookings/{booking}/generate-invoice', [BookingController::class, 'generateInvoice']);
+    Route::get('/bookings/{booking}/download-invoice', [BookingController::class, 'downloadInvoice']);
 });

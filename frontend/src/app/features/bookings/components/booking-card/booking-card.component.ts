@@ -32,6 +32,38 @@ export class BookingCardComponent {
 
   constructor(private bookingService: BookingService) {} // ← INYECTAR
 
+   downloadConfirmation(): void {
+    this.bookingService.downloadConfirmation(this.booking.id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `confirmacion-${this.booking.id}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (error) => {
+        console.error('Error descargando confirmación:', error);
+        alert('No se pudo descargar la confirmación');
+      }
+    });
+  }
+
+  generateInvoice(): void {
+    this.bookingService.generateInvoice(this.booking.id).subscribe({
+      next: () => {
+        alert('Factura generada correctamente. Puedes verla en "Mis documentos"');
+      },
+      error: (error) => {
+        if (error.status === 422) {
+          alert('La factura solo se puede generar después del check-out');
+        } else {
+          alert('Error al generar la factura');
+        }
+      }
+    });
+  }
+
   formatDate(date: string): string {
     return new Date(date).toLocaleDateString('es-ES', {
       day: '2-digit',
@@ -68,24 +100,17 @@ export class BookingCardComponent {
     });
   }
 
-   /* canCancel(): boolean {
-    const today = new Date().toISOString().split('T')[0]; // '2026-03-19'
-    const checkIn = this.booking.check_in.split('T')[0];   // '2026-03-19' para ID 102
-    return (this.booking.status === 'pending' || this.booking.status === 'confirmed') 
-            && checkIn >= today; // Usar >= para incluir el mismo día
-    }*/
-
-            canCancel(): boolean {
-  const today = new Date().toISOString().split('T')[0];
-  const checkIn = this.booking.check_in.split('T')[0];
-  const statusOk = this.booking.status === 'pending' || this.booking.status === 'confirmed';
-  const dateOk = checkIn >= today;
-  
-  console.log('Reserva ID:', this.booking.id);
-  console.log('Status:', this.booking.status, '| Status OK:', statusOk);
-  console.log('Check-in:', checkIn, '| Hoy:', today, '| Date OK:', dateOk);
-  console.log('Resultado:', statusOk && dateOk);
-  
-  return statusOk && dateOk;
-}
+     canCancel(): boolean {
+      const today = new Date().toISOString().split('T')[0];
+      const checkIn = this.booking.check_in.split('T')[0];
+      const statusOk = this.booking.status === 'pending' || this.booking.status === 'confirmed';
+      const dateOk = checkIn >= today;
+      
+      console.log('Reserva ID:', this.booking.id);
+      console.log('Status:', this.booking.status, '| Status OK:', statusOk);
+      console.log('Check-in:', checkIn, '| Hoy:', today, '| Date OK:', dateOk);
+      console.log('Resultado:', statusOk && dateOk);
+      
+      return statusOk && dateOk;
+    }
 }
