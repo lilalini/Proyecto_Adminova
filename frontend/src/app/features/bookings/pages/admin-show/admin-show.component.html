@@ -1,0 +1,82 @@
+<div class="max-w-3xl mx-auto px-4 py-8">
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+        <app-icon-svg name="eye" className="w-6 h-6 text-indigo-600"></app-icon-svg>
+      </div>
+      <h1 class="text-2xl font-bold text-gray-800">Detalle de reserva</h1>
+    </div>
+    <div class="flex gap-3">
+      <a [routerLink]="['/admin/bookings', booking?.id, 'edit']" 
+         class="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700">
+        Editar reserva
+      </a>
+      <a routerLink="/admin/bookings" 
+         class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+        Volver
+      </a>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="text-center py-12">
+      <p class="text-gray-500">Cargando...</p>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (booking && !loading) {
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+      <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-4">
+        <div class="flex justify-between items-center">
+          <h2 class="text-xl font-semibold text-white">
+            Reserva #{{ booking.booking_reference }}
+          </h2>
+          <span class="px-3 py-1 rounded-full text-sm font-semibold {{ getStatusClass(booking.status) }}">
+            {{ getStatusText(booking.status) }}
+          </span>
+        </div>
+      </div>
+
+      <div class="p-6 space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h3 class="text-sm font-medium text-gray-500">Cliente</h3>
+            <p class="mt-1 text-gray-900">{{ booking.guest_name }}</p>
+            <p class="text-sm text-gray-500">{{ booking.guest_email }}</p>
+            <p class="text-sm text-gray-500">{{ booking.guest_phone }}</p>
+          </div>
+          <div>
+            <h3 class="text-sm font-medium text-gray-500">Alojamiento</h3>
+            <p class="mt-1 text-gray-900">{{ booking.accommodation?.title }}</p>
+            <p class="text-sm text-gray-500">{{ booking.accommodation?.address }}</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <h3 class="text-sm font-medium text-gray-500">Fechas</h3>
+            <p class="mt-1 text-gray-900">{{ formatDate(booking.check_in) }} - {{ formatDate(booking.check_out) }}</p>
+            <p class="text-sm text-gray-500">{{ booking.nights }} noches</p>
+          </div>
+          <div>
+            <h3 class="text-sm font-medium text-gray-500">Huéspedes</h3>
+            <p class="mt-1 text-gray-900">{{ booking.adults }} adultos</p>
+            @if (booking.children) {
+              <p class="text-sm text-gray-500">{{ booking.children }} niños</p>
+            }
+          </div>
+          <div>
+            <h3 class="text-sm font-medium text-gray-500">Total</h3>
+            <p class="mt-1 text-2xl font-bold text-indigo-600">€{{ booking.total_amount | number:'1.2-2' }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

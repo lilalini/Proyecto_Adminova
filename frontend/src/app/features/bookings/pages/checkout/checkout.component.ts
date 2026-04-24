@@ -8,6 +8,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { Accommodation } from '../../../../core/models/accommodation.model';
 import { IconSvgComponent } from '../../../../shared/components/icon-svg/icon-svg.component';
 import { BookingResponseWithToken } from '../../../../core/models/booking.model';
+import { GuestService } from '../../../../core/services/guest.service';
 
 @Component({
   selector: 'app-checkout',
@@ -44,7 +45,8 @@ export class CheckoutComponent implements OnInit {
     private router: Router,
     private publicService: PublicService,
     private bookingService: BookingService,
-    public auth: AuthService
+    public auth: AuthService,
+    private guestService: GuestService
   ) {}
 
   ngOnInit() {
@@ -77,16 +79,28 @@ export class CheckoutComponent implements OnInit {
     });
   }
 
-  loadGuestData() {
-    this.auth.currentUser$.subscribe(user => {
-      if (user) {
-        this.guestData.first_name = (user as any).first_name || '';
-        this.guestData.last_name = (user as any).last_name || '';
-        this.guestData.email = user.email || '';
-        this.guestData.phone = (user as any).phone || '';
-      }
-    });
-  }
+    loadGuestData() {
+      this.auth.currentUser$.subscribe(user => {
+        if (user && user.email) {
+          // Buscar el guest por email
+          this.guestService.getByEmail(user.email).subscribe({
+            next: (response) => {
+              const guest = response.data[0];
+              if (guest) {
+                this.guestData.first_name = guest.first_name;
+                this.guestData.last_name = guest.last_name;
+                this.guestData.email = guest.email;
+                this.guestData.phone = guest.phone || '';
+              }
+            },
+            error: () => {
+              // Si no hay guest, usar datos del usuario (solo email)
+              this.guestData.email = user.email;
+            }
+          });
+        }
+      });
+    }
 
   onSubmit() {
     if (!this.auth.isAuthenticated()) {

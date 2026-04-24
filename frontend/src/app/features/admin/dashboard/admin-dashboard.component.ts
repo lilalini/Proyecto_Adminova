@@ -12,6 +12,7 @@ import { Booking } from '../../../core/models/booking.model';
 import { IconSvgComponent } from '../../../shared/components/icon-svg/icon-svg.component';
 import { GreetingComponent } from '../../../shared/components/greeting/greeting.component';
 import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component'; 
+import { DashboardUpdateService } from '../../../core/services/dashboard-update.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -28,6 +29,9 @@ import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.
 export class AdminDashboardComponent implements OnInit {
   user: User | null = null;
   loading = true;  
+
+  revenuePercentage = 0;
+  revenueTrend: 'up' | 'down' = 'up';
   
   stats = {
     accommodations: 0,
@@ -45,7 +49,8 @@ export class AdminDashboardComponent implements OnInit {
     private accommodationService: AccommodationService,
     private bookingService: BookingService,
     private guestService: GuestService,
-    private paymentService: PaymentService
+    private paymentService: PaymentService,
+    private dashboardUpdate: DashboardUpdateService
   ) {}
 
   today = new Date();
@@ -55,54 +60,81 @@ export class AdminDashboardComponent implements OnInit {
       this.user = user;
     });
     this.loadRealData();
+
+      // Escuchar cambios para recargar datos
+    this.dashboardUpdate.refresh$.subscribe(shouldRefresh => {
+      if (shouldRefresh) {
+        this.loadRealData();
+      }
+    });
   }
 
- loadRealData() {
-  let completedRequests = 0;
-  const totalRequests = 4; // accommodations, bookings, guests, payments
+    loadRealData() {
+      let completedRequests = 0;
+      const totalRequests = 4;
 
-  const checkComplete = () => {
-    completedRequests++;
-    if (completedRequests === totalRequests) {
-      this.loading = false;
-    }
-  };
+      const checkComplete = () => {
+        completedRequests++;
+        if (completedRequests === totalRequests) {
+          this.loading = false;
+          this.loadComparisons();
+        }
+      };
 
-  // Alojamientos
-  this.accommodationService.getAll().subscribe({
-    next: (res) => {
-      this.stats.accommodations = res.meta?.total || res.data.length;
-      this.recentAccommodations = res.data.slice(-5);
-      checkComplete();
-    }
-  });
+      // Alojamientos (ordenados por fecha descendente)
+      this.accommodationService.getAll().subscribe({
+        next: (res) => {
+          this.stats.accommodations = res.meta?.total || res.data.length;
+          // Ordenar por created_at descendente (más recientes primero)
+          const sorted = [...res.data].sort((a, b) => 
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+          this.recentAccommodations = sorted.slice(0, 5);
+          checkComplete();
+        },
+        error: () => checkComplete()
+      });
 
-  // Reservas
-  this.bookingService.getAll().subscribe({
-    next: (res) => {
-      this.stats.bookings = res.meta?.total || res.data.length;
-      this.recentBookings = res.data.slice(-5);
-      checkComplete();
-    }
-  });
+      // Reservas (ordenadas por fecha descendente)
+      this.bookingService.getAll().subscribe({
+        next: (res) => {
+          this.stats.bookings = res.meta?.total || res.data.length;
+// Ordenar por id descendente (mayor ID = más reciente)
+    const sorted = [...res.data].sort((a, b) => b.id - a.id);
+    this.recentBookings = sorted.slice(0, 5);
+    checkComplete();
+        },
+        error: () => checkComplete()
+      });
 
-  // Huéspedes
-  this.guestService.getAll().subscribe({
-    next: (res) => {
-      this.stats.guests = res.meta?.total || res.data.length;
-      checkComplete();
-    }
-  });
+      // Huéspedes
+      this.guestService.getAll().subscribe({
+        next: (res) => {
+          this.stats.guests = res.meta?.total || res.data.length;
+          checkComplete();
+        },
+        error: () => checkComplete()
+      });
 
-  // Pagos (ingresos)
-  this.paymentService.getAll().subscribe({
-    next: (res) => {
-      const total = res.data.reduce((sum, payment) => sum + (payment.amount || 0), 0);
-      this.stats.revenue = Math.round(total);
-      checkComplete();
+      // Pagos (ingresos)
+      this.paymentService.getTotalRevenue().subscribe({
+        next: (res) => {
+          this.stats.revenue = res.total;
+          checkComplete();
+        },
+        error: () => checkComplete()
+      });
     }
-  });
-}
+
+    loadComparisons() {
+      this.paymentService.getRevenueComparison().subscribe({
+        next: (res) => {
+          this.revenuePercentage = res.percentage;
+          this.revenueTrend = res.trend as 'up' | 'down';
+        },
+        error: (err) => console.error('Error cargando comparación ingresos:', err)
+      });
+    }
 
 // Mantén calculateRevenue si lo usas en otro lugar, si no, bórralo
   logout() {

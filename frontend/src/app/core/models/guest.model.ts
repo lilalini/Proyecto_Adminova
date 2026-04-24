@@ -13,7 +13,7 @@ export interface Guest {
   city?: string;
   postal_code?: string;
   country?: string;
-  source: 'direct' | 'booking' | 'airbnb' | 'expedia';
+  source: 'direct' | 'booking' | 'airbnb' | 'expedia' | 'admin';
   source_data?: any; // JSON con datos raw de la OTA
   external_id?: string;
   created_at: string;
@@ -42,3 +42,5 @@ export interface GuestListResponse {
 export interface GuestResponse {
   data: Guest;
 }
+
+export type GuestSource = 'direct' | 'booking' | 'airbnb' | 'expedia' | 'admin';

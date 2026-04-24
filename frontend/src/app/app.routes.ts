@@ -135,6 +135,48 @@ export const routes: Routes = [
   data: { roles: ['admin'] }
 },
 
+{
+  path: 'admin/bookings',
+  loadComponent: () =>
+    import('./features/bookings/pages/admin-list/admin-list.component')
+      .then(m => m.AdminListComponent),
+  canActivate: [AuthGuard, RoleGuard],
+  data: { roles: ['admin'] }
+},
+{
+  path: 'admin/bookings/create',
+  loadComponent: () =>
+    import('./features/bookings/pages/admin-create/admin-create.component')
+      .then(m => m.AdminCreateComponent),
+  canActivate: [AuthGuard, RoleGuard],
+  data: { roles: ['admin'] }
+},
+{
+  path: 'admin/guests/create',
+  loadComponent: () =>
+    import('./features/guest/pages/admin-create/admin-create.component')
+      .then(m => m.AdminCreateGuestComponent),
+  canActivate: [AuthGuard, RoleGuard],
+  data: { roles: ['admin'] }
+},
+{
+  path: 'admin/bookings/:id/edit',
+  loadComponent: () =>
+    import('./features/bookings/pages/admin-edit/admin-edit.component')
+      .then(m => m.AdminEditComponent),
+  canActivate: [AuthGuard, RoleGuard],
+  data: { roles: ['admin'] }
+},
+
+{
+  path: 'admin/bookings/:id/show',
+  loadComponent: () =>
+    import('./features/bookings/pages/admin-show/admin-show.component')
+      .then(m => m.AdminShowComponent),
+  canActivate: [AuthGuard, RoleGuard],
+  data: { roles: ['admin'] }
+},
+
 
   // ==================== OWNER ====================
     {

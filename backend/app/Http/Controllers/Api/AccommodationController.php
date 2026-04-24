@@ -77,6 +77,7 @@ class AccommodationController extends Controller
         // 4. Eager Loading para evitar N+1 queries
         $query->with(['owner', 'cancellationPolicy', 'media']);
         
+        $query->orderBy('id', 'desc');
         // 5. Paginación (10 por página)
         $accommodations = $query->paginate(10);
         
@@ -243,6 +244,30 @@ class AccommodationController extends Controller
         $query = Accommodation::where('status', 'published')
                             ->whereNull('deleted_at')
                             ->with(['owner', 'media']);
+
+            if ($request->has('sort')) {
+            switch ($request->sort) {
+                case 'newest':
+                    $query->orderBy('created_at', 'desc');
+                    break;
+                case 'price_desc':
+                    $query->orderBy('base_price', 'desc');
+                    break;
+                case 'price_asc':
+                    $query->orderBy('base_price', 'asc');
+                    break;
+                case 'bedrooms_desc':
+                    $query->orderBy('bedrooms', 'desc');
+                    break;
+                case 'bedrooms_asc':
+                    $query->orderBy('bedrooms', 'asc');
+                    break;
+                default:
+                    $query->orderBy('created_at', 'desc');
+            }
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }                    
         
          // Filtro por ciudad con unaccent (quita tildes) e ILIKE (ignora mayúsculas) ojo, en PostgreSQL, en MySQL se usaría LIKE normal
         if ($request->has('city')) {

@@ -5,7 +5,7 @@
   <div class="bg-white rounded-xl p-4 mt-6">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-semibold text-gray-800 mb-1">Analytics</h1>
+        <h1 class="text-2xl font-semibold text-gray-800 mb-1">Estadísticas</h1>
         <p class="text-gray-500">Métricas y tendencias de tu negocio</p>
       </div>
       <a routerLink="/admin/dashboard" class="text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
@@ -38,10 +38,16 @@
               <app-icon-svg name="wallet" className="w-6 h-6 text-emerald-600"></app-icon-svg>
             </div>
           </div>
-          <div class="mt-4 text-sm text-green-600 flex items-center gap-1">
-            <app-icon-svg name="trending-up" className="w-4 h-4"></app-icon-svg>
-            <span>+12% vs mes anterior</span>
-          </div>
+            <div class="mt-4 text-sm flex items-center gap-1"
+                [class.text-green-600]="revenueTrend === 'up'"
+                [class.text-red-600]="revenueTrend === 'down'">
+              <app-icon-svg [name]="revenueTrend === 'up' ? 'trending-up' : 'trending-down'" className="w-4 h-4"></app-icon-svg>
+              @if (revenueMessage) {
+                <span>{{ revenueMessage }}</span>
+              } @else {
+                <span>{{ revenueTrend === 'up' ? '+' : '-' }}{{ revenuePercentage }}% vs mes anterior</span>
+              }
+            </div>
         </div>
 
         <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition">
@@ -53,10 +59,16 @@
             <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <app-icon-svg name="calendar-check" className="w-6 h-6 text-blue-600"></app-icon-svg>
             </div>
-          </div>
-          <div class="mt-4 text-sm text-green-600 flex items-center gap-1">
-            <app-icon-svg name="trending-up" className="w-4 h-4"></app-icon-svg>
-            <span>+8% este mes</span>
+              </div>
+                  <div class="mt-4 text-sm flex items-center gap-1"
+            [class.text-green-600]="bookingTrend === 'up'"
+            [class.text-red-600]="bookingTrend === 'down'">
+          <app-icon-svg [name]="bookingTrend === 'up' ? 'trending-up' : 'trending-down'" className="w-4 h-4"></app-icon-svg>
+          @if (bookingMessage) {
+            <span>{{ bookingMessage }}</span>
+          } @else {
+            <span>{{ bookingTrend === 'up' ? '+' : '-' }}{{ bookingPercentage }}% este mes</span>
+          }
           </div>
         </div>
 
@@ -70,10 +82,16 @@
               <app-icon-svg name="receipt" className="w-6 h-6 text-purple-600"></app-icon-svg>
             </div>
           </div>
-          <div class="mt-4 text-sm text-green-600 flex items-center gap-1">
-            <app-icon-svg name="trending-up" className="w-4 h-4"></app-icon-svg>
-            <span>+5% vs mes anterior</span>
-          </div>
+            <div class="mt-4 text-sm flex items-center gap-1"
+                [class.text-green-600]="averageTrend === 'up'"
+                [class.text-red-600]="averageTrend === 'down'">
+              <app-icon-svg [name]="averageTrend === 'up' ? 'trending-up' : 'trending-down'" className="w-4 h-4"></app-icon-svg>
+              @if (averageMessage) {
+                <span>{{ averageMessage }}</span>
+              } @else {
+                <span>{{ averageTrend === 'up' ? '+' : '-' }}{{ averagePercentage }}% vs mes anterior</span>
+              }
+            </div>
         </div>
       </div>
 
@@ -129,26 +147,34 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
-              @for (booking of recentBookings; track booking.id) {
-                <tr class="hover:bg-gray-50">
-                  <td class="px-6 py-4 text-sm text-gray-900">#{{ booking.id }}</td>
-                  <td class="px-6 py-4 text-sm text-gray-600">{{ booking.guest_name }}</td>
-                  <td class="px-6 py-4 text-sm text-gray-500">
-                    {{ booking.check_in | date:'dd/MM/yy' }} - {{ booking.check_out | date:'dd/MM/yy' }}
-                  </td>
-                  <td class="px-6 py-4 text-sm font-medium text-gray-900">€{{ booking.total_amount | number:'1.2-2' }}</td>
-                  <td class="px-6 py-4">
-                    <span class="px-2 py-1 text-xs rounded-full" 
-                          [class.bg-yellow-100]="booking.status === 'pending'"
-                          [class.bg-green-100]="booking.status === 'confirmed'"
-                          [class.bg-red-100]="booking.status === 'cancelled'"
-                          [class.bg-blue-100]="booking.status === 'completed'">
-                      {{ booking.status }}
-                    </span>
-                  </td>
-                </tr>
-              }
-            </tbody>
+                @for (booking of recentBookings; track booking.id) {
+                  <tr class="hover:bg-gray-50 cursor-pointer" [routerLink]="['/admin/bookings', booking.id, 'show']">
+                    <td class="px-6 py-4 text-sm font-medium text-indigo-600">#{{ booking.id }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">{{ booking.guest_name }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">
+                      {{ booking.check_in | date:'dd/MM/yy' }} - {{ booking.check_out | date:'dd/MM/yy' }}
+                    </td>
+                    <td class="px-6 py-4 text-sm font-medium text-gray-900">€{{ booking.total_amount | number:'1.2-2' }}</td>
+                    <td class="px-6 py-4">
+                      <span class="px-2 py-1 text-xs rounded-full" 
+                            [class.bg-yellow-100]="booking.status === 'pending'"
+                            [class.bg-green-100]="booking.status === 'confirmed'"
+                            [class.bg-red-100]="booking.status === 'cancelled'"
+                            [class.bg-blue-100]="booking.status === 'completed'"
+                            [class.bg-purple-100]="booking.status === 'checked_in'"
+                            [class.bg-gray-100]="booking.status === 'checked_out'">
+                        @if (booking.status === 'pending') { Pendiente }
+                        @else if (booking.status === 'confirmed') { Confirmada }
+                        @else if (booking.status === 'cancelled') { Cancelada }
+                        @else if (booking.status === 'completed') { Completada }
+                        @else if (booking.status === 'checked_in') { Check-in }
+                        @else if (booking.status === 'checked_out') { Check-out }
+                        @else { {{ booking.status }} }
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
           </table>
         </div>
       </div>

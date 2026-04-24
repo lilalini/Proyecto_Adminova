@@ -1,0 +1,135 @@
+<div class="space-y-6">
+  <div class="flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-gray-800">Reservas</h1>
+    <a routerLink="/admin/bookings/create" 
+       class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+      <app-icon-svg name="plus" className="w-5 h-5"></app-icon-svg>
+      Nueva reserva
+    </a>
+  </div>
+
+  @if (loading) {
+    <div class="text-center py-12">
+      <p class="text-gray-500">Cargando reservas...</p>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (!loading && !errorMessage) {
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Referencia</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fechas</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            @for (booking of bookings; track booking.id) {
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4">
+                  <div class="text-sm font-medium text-gray-900">{{ booking.booking_reference }}</div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="text-sm text-gray-900">{{ booking.guest_name }}</div>
+                  <div class="text-xs text-gray-500">{{ booking.guest_email }}</div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="text-sm text-gray-900">{{ booking.check_in | date:'dd/MM/yyyy' }} - {{ booking.check_out | date:'dd/MM/yyyy' }}</div>
+                  <div class="text-xs text-gray-500">{{ booking.nights }} noches</div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="text-sm font-medium text-gray-900">€{{ booking.total_amount | number:'1.2-2' }}</div>
+                </td>
+                <td class="px-6 py-4">
+                  <span class="px-2 py-1 text-xs rounded-full {{ getStatusClass(booking.status) }}">
+                    {{ getStatusText(booking.status) }}
+                  </span>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex items-center justify-end space-x-3">
+                    <a *ngIf="booking.id" [routerLink]="['/admin/bookings', booking.id, 'show']" 
+                      class="inline-flex items-center p-2 text-indigo-600 hover:text-indigo-900 rounded-full hover:bg-indigo-50 transition"
+                      title="Ver detalle">
+                      <app-icon-svg name="eye" className="w-5 h-5"></app-icon-svg>
+                      <span class="sr-only">Ver</span>
+                    </a>
+                    <a [routerLink]="['/admin/bookings', booking.id, 'edit']" 
+                      class="inline-flex items-center p-2 text-amber-600 hover:text-amber-900 rounded-full hover:bg-amber-50 transition"
+                      title="Modificar reserva">
+                      <app-icon-svg name="edit" className="w-5 h-5"></app-icon-svg>
+                      <span class="sr-only">Modificar</span>
+                    </a>
+                    <button (click)="confirmDelete(booking.id, booking.booking_reference)" 
+                            class="inline-flex items-center p-2 text-red-600 hover:text-red-900 rounded-full hover:bg-red-50 transition"
+                            title="Eliminar reserva">
+                      <app-icon-svg name="trash-2" className="w-5 h-5"></app-icon-svg>
+                      <span class="sr-only">Eliminar</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (pagination) {
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+          <div class="text-sm text-gray-700">
+            Mostrando {{ pagination.from }} a {{ pagination.to }} de {{ pagination.total }} reservas
+          </div>
+          <div class="flex space-x-2">
+            <button (click)="loadPage(pagination.current_page - 1)" 
+                    [disabled]="pagination.current_page === 1"
+                    class="px-3 py-1 border rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+              Anterior
+            </button>
+            <span class="px-3 py-1">Página {{ pagination.current_page }} de {{ pagination.last_page }}</span>
+            <button (click)="loadPage(pagination.current_page + 1)" 
+                    [disabled]="pagination.current_page === pagination.last_page"
+                    class="px-3 py-1 border rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+              Siguiente
+            </button>
+          </div>
+        </div>
+      }
+
+      @if (bookings.length === 0) {
+        <div class="text-center py-12">
+          <p class="text-gray-500">No hay reservas creadas</p>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (showDeleteModal) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-2">Confirmar eliminación</h3>
+      <p class="text-gray-600 mb-6">{{ deleteModalMessage }}</p>
+      
+      <div class="flex justify-end gap-3">
+        <button (click)="cancelDelete()" 
+                class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">
+          Cancelar
+        </button>
+        <button (click)="deleteBooking()" 
+                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+}

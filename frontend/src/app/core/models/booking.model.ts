@@ -4,7 +4,7 @@ import { Guest } from './guest.model';
 export interface Booking {
   id: number;
   booking_reference: string;
-  accommodation: Accommodation;
+  accommodation: Accommodation | null;
   guest: Guest;
   channel: Channel;
   check_in: string;
@@ -24,6 +24,7 @@ export interface Booking {
   guest_phone: string;
   created_at: string;
   updated_at: string;
+  source?: string;
 }
 
 export interface Channel {
@@ -62,3 +63,5 @@ export interface BookingResponseWithToken {
   data: Booking;
   token: string;
 }
+
+export type BookingStatus = 'pending' | 'confirmed' | 'checked_in' | 'checked_out' | 'cancelled' | 'completed';

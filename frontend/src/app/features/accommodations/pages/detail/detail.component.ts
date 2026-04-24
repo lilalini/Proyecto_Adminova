@@ -14,8 +14,9 @@ import { AvailabilityCalendar } from '../../../../core/models/availability-calen
 import { User } from '../../../../core/models/user.model';
 import { Media } from '../../../../core/models/media.model';
 import { BookingResponse } from '../../../../core/models/booking.model';
-import { WeatherService } from '../../../../core/services/weather.service';
+import { WeatherService, CurrentWeather, DailyForecast } from '../../../../core/services/weather.service';
 import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
+
 
 @Component({
   selector: 'app-accommodation-detail',
@@ -57,8 +58,8 @@ export class AccommodationDetailComponent implements OnInit {
   modalCurrentImage = '';
 
   // Clima
-  weather: any = null;
-  forecast: any[] = [];
+  weather: CurrentWeather | null = null;
+  forecast: DailyForecast[] = [];
   weatherLoading = true;
   weatherError = false;
   showForecast = false;

@@ -9,9 +9,6 @@ use App\Models\Payment;
 
 class PaymentSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $bookings = Booking::all();
@@ -53,13 +50,12 @@ class PaymentSeeder extends Seeder
                         'amount' => $amount,
                         'currency' => 'EUR',
                         'status' => $status,
-                        'payment_date' => $booking->confirmed_at ?? now(),
+                        'payment_date' => $booking->created_at, 
                         'receipt_sent' => $status === 'completed',
                         'receipt_sent_at' => $status === 'completed' ? now() : null,
                     ]);
                 }
             }
         }
-    
     }
 }

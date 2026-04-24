@@ -36,6 +36,7 @@ Route::get('/test', function() {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
     Route::get('/guests/by-user/{userId}', [GuestController::class, 'findByUserId']);
+    
 
 // Rutas protegidas (todas en un solo grupo)
     Route::middleware('auth:sanctum')->group(function () {
@@ -52,6 +53,13 @@ Route::get('/test', function() {
     
     Route::get('/guests/profile-complete/{userId}', [GuestController::class, 'isProfileComplete']);
     Route::put('/guests/by-user/{userId}', [GuestController::class, 'updateByUserId']);
+    //PAGOS
+    Route::get('/payments/monthly-revenue', [PaymentController::class, 'monthlyRevenue']);
+    Route::get('/payments/total-revenue', [PaymentController::class, 'totalRevenue']);
+    Route::get('/payments/revenue-comparison', [PaymentController::class, 'revenueComparison']);
+    Route::get('/payments/monthly-comparison', [PaymentController::class, 'monthlyComparison']);
+    Route::get('/bookings/comparison', [BookingController::class, 'bookingComparison']);
+    Route::get('/bookings/average-comparison', [BookingController::class, 'averageComparison']);
     // CRUDs
     Route::apiResource('accommodations', AccommodationController::class);
     Route::apiResource('bookings', BookingController::class);
@@ -95,4 +103,6 @@ Route::get('/test', function() {
     Route::get('/bookings/{booking}/download-confirmation', [BookingController::class, 'downloadConfirmation']);
     Route::post('/bookings/{booking}/generate-invoice', [BookingController::class, 'generateInvoice']);
     Route::get('/bookings/{booking}/download-invoice', [BookingController::class, 'downloadInvoice']);
+    Route::get('/payments/monthly-revenue', [PaymentController::class, 'monthlyRevenue']);
+    Route::get('/payments/total-revenue', [PaymentController::class, 'totalRevenue']);
 });

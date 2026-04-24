@@ -25,6 +25,8 @@ export class HomeComponent implements OnInit {
   searchCheckOut: string = '';
   searchGuests: number = 1;
 
+  currentSort: string = 'newest';
+
   constructor(private publicService: PublicService) {}
 
   ngOnInit() {
@@ -35,29 +37,9 @@ export class HomeComponent implements OnInit {
     return city.trim();
   }
 
-  loadAccommodations(page: number = 1) {
-    this.loading = true;
-    this.currentPage = page;
-    
-    this.publicService.getAccommodations(page).subscribe({
-      next: (response) => {
-        this.accommodations = response.data;
-        this.lastPage = response.meta?.last_page || 1;
-        this.total = response.meta?.total || 0;
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error cargando alojamientos:', error);
-        this.loading = false;
-      }
-    });
-  }
-
-  onSortChange(event: Event) {
-    const order = (event.target as HTMLSelectElement).value;
+  private sortAccommodations() {
     const sorted = [...this.accommodations];
-    
-    switch (order) {
+    switch (this.currentSort) {
       case 'newest':
         sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         break;
@@ -73,9 +55,35 @@ export class HomeComponent implements OnInit {
       case 'bedrooms_asc':
         sorted.sort((a, b) => a.bedrooms - b.bedrooms);
         break;
+      default:
+        sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }
-    
     this.accommodations = sorted;
+  }
+
+  loadAccommodations(page: number = 1) {
+    this.loading = true;
+    this.currentPage = page;
+    
+    this.publicService.getAccommodations(page).subscribe({
+      next: (response) => {
+        this.accommodations = response.data;
+        this.lastPage = response.meta?.last_page || 1;
+        this.total = response.meta?.total || 0;
+        this.sortAccommodations();
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error cargando alojamientos:', error);
+        this.loading = false;
+      }
+    });
+  }
+
+  onSortChange(event: Event) {
+    const order = (event.target as HTMLSelectElement).value;
+    this.currentSort = order;
+    this.sortAccommodations();
   }
 
   onSearchEnter(event: Event) {
@@ -108,6 +116,7 @@ export class HomeComponent implements OnInit {
         this.lastPage = response.meta?.last_page || 1;
         this.total = response.meta?.total || 0;
         this.currentPage = response.meta?.current_page || 1;
+        this.sortAccommodations();
         this.loading = false;
       },
       error: (error) => {
@@ -142,6 +151,7 @@ export class HomeComponent implements OnInit {
           this.lastPage = response.meta?.last_page || 1;
           this.total = response.meta?.total || 0;
           this.currentPage = response.meta?.current_page || 1;
+          this.sortAccommodations();
           this.loading = false;
         },
         error: (error) => {
