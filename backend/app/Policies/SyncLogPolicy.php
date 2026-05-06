@@ -45,7 +45,7 @@ class SyncLogPolicy
      */
     public function delete(User $user, SyncLog $syncLog): bool
     {
-        return false;
+        return $user->role === 'admin';
     }
 
     /**

@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Gate;
 
 class UpdateReviewRequest extends FormRequest
 {
@@ -12,8 +11,7 @@ class UpdateReviewRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $review = $this->route('review');
-        return Gate::allows('update', $review);
+        return true;
     }
 
     /**

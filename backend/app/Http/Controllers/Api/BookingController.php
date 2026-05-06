@@ -8,61 +8,60 @@ use App\Http\Requests\UpdateBookingRequest;
 use App\Http\Resources\BookingResource;
 use App\Models\Booking;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
+use App\Models\Payment;
 use Illuminate\Support\Str;
 use App\Models\Guest;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
-use App\Models\AvailabilityCalendar;
-use Carbon\CarbonPeriod;
 use App\Services\PdfService;
 use App\Http\Resources\DocumentResource;
 use App\Models\LoyaltyPoint;
+use App\Services\CalendarService;
+use App\Models\Notification;
+use App\Models\Owner;
 
 class BookingController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function __construct(
+        protected CalendarService $calendarService
+    ) {}
+
     public function index(Request $request)
     {
         $user = $request->user();
-        
-        // Si no hay usuario autenticado, error 401
-        if (!$user) {
-            return response()->json(['message' => 'No autenticado'], 401);
-        }
-        
         $query = Booking::with(['accommodation', 'guest', 'channel']);
 
         if ($user->role === 'guest') {
             $query->where('guest_id', $user->id);
         } elseif ($user->role === 'owner') {
-            $query->whereHas('accommodation', fn($q) => $q->where('owner_id', $user->id));
+            $owner = Owner::where('user_id', $user->id)->first();
+            if ($owner) {
+                $query->whereHas('accommodation', fn($q) => $q->where('owner_id', $owner->id));
+            } else {
+                $query->whereRaw('1 = 0');
+            }
         }
 
-        $bookings = $query->paginate(15);
-        return BookingResource::collection($bookings);
+        return BookingResource::collection($query->orderBy('id', 'desc')->paginate(15));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreBookingRequest $request)
     {
         $validated = $request->validated();
-        
-        // Si hay usuario autenticado, lo usamos
+
+        if (!$this->calendarService->isAvailable($validated['accommodation_id'], $validated['check_in'], $validated['check_out'])) {
+            return response()->json([
+                'message' => 'El alojamiento no está disponible en las fechas seleccionadas'
+            ], 422);
+        }
+
         $user = $request->user();
-        
-        // Si NO hay usuario autenticado (guest checkout)
+
         if (!$user) {
-            // Buscar si ya existe un guest con este email
             $user = User::where('email', $validated['guest_email'])->first();
-            
+
             if (!$user) {
-                // Crear usuario guest automáticamente
                 $user = User::create([
                     'first_name' => explode(' ', $validated['guest_name'])[0],
                     'last_name' => explode(' ', $validated['guest_name'])[1] ?? '',
@@ -70,27 +69,24 @@ class BookingController extends Controller
                     'phone' => $validated['guest_phone'] ?? '',
                     'role' => 'guest',
                     'is_guest' => true,
-                    'password' => Hash::make(Str::random(16))
+                    'password' => Hash::make(Str::random(16)),
                 ]);
             }
-            
-            // Autenticar al guest para esta petición
+
             Auth::login($user);
         }
-        
-        // Buscar o crear guest asociado en tabla guests
+
         $guest = Guest::where('email', $user->email)->first();
         if (!$guest) {
             $guest = Guest::create([
-                'user_id'    => $user->id,
+                'user_id' => $user->id,
                 'first_name' => $user->first_name,
                 'last_name' => $user->last_name,
                 'email' => $user->email,
                 'phone' => $user->phone ?? '',
-                'source' => 'direct'
+                'source' => 'direct',
             ]);
 
-        // Bono de bienvenida
             LoyaltyPoint::create([
                 'guest_id' => $guest->id,
                 'points' => 300,
@@ -99,175 +95,171 @@ class BookingController extends Controller
                 'expiry_date' => now()->addYear(),
             ]);
         }
-        
+
         $validated['guest_id'] = $guest->id;
         $validated['booking_reference'] = 'BKG-' . strtoupper(Str::random(8));
-        
+
         $booking = Booking::create($validated);
         $booking->load(['accommodation', 'guest']);
+        $this->calendarService->markAsBooked($booking);
+
+        Notification::create([
+            'notifiable_type' => 'App\\Models\\User',
+            'notifiable_id' => $user->id,
+            'title' => 'Reserva creada',
+            'body' => 'Tu reserva en ' . $booking->accommodation->title . ' ha sido creada correctamente. Por favor, realiza el pago para confirmarla.',
+            'type' => 'booking_created',
+            'is_read' => false
+        ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'data' => new BookingResource($booking),
-            'token' => $token
+            'token' => $token,
         ], 201);
-}
+    }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Booking $booking)
     {
-        if (!Gate::allows('view', $booking)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
+        $this->authorize('view', $booking);
         $booking->load(['accommodation', 'guest', 'channel']);
         return new BookingResource($booking);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UpdateBookingRequest $request, Booking $booking)
     {
-        if (!Gate::allows('update', $booking)) {
-            return response()->json(['message' => 'No autorizado'], 403);
+        // Autorización PRIMERO
+        $this->authorize('update', $booking);
+
+        // Luego verificar disponibilidad si cambian las fechas
+        if ($request->has('check_in') || $request->has('check_out')) {
+            $checkIn = $request->check_in ?? $booking->check_in;
+            $checkOut = $request->check_out ?? $booking->check_out;
+
+            if (!$this->calendarService->isAvailable($booking->accommodation_id, $checkIn, $checkOut, $booking->id)) {
+                return response()->json([
+                    'message' => 'Las nuevas fechas no están disponibles'
+                ], 422);
+            }
+
+            $this->calendarService->markAsAvailable($booking);
+            $booking->update($request->validated());
+            $this->calendarService->markAsBooked($booking->fresh());
+        } else {
+            $booking->update($request->validated());
         }
 
-        $booking->update($request->validated());
         $booking->load(['accommodation', 'guest', 'channel']);
-
         return new BookingResource($booking);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-     public function destroy(Booking $booking)
+    public function destroy(Booking $booking)
     {
-        if (!Gate::allows('delete', $booking)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
+        $this->authorize('delete', $booking);
         $booking->delete();
         return response()->json(null, 204);
     }
 
-    /**
- * Get bookings for the authenticated guest.
- */
     public function myBookings(Request $request)
     {
         $user = $request->user();
-        
-        if (!$user) {
-            return response()->json(['message' => 'No autenticado'], 401);
-        }
-
-        // Buscar guest asociado al usuario
         $guest = Guest::where('email', $user->email)->first();
-        
-        $query = Booking::with(['accommodation'])
-                        ->where('guest_email', $user->email);
-        
-        if ($guest) {
-            $query->orWhere('guest_id', $guest->id);
-        }
 
-        $bookings = $query->latest()->paginate(10);
-        
+        $bookings = Booking::with(['accommodation'])
+            ->where(function($q) use ($user, $guest) {
+                $q->where('guest_email', $user->email)
+                  ->orWhere('guest_id', $guest?->id);
+            })
+            ->latest()
+            ->paginate(10);
+
         return BookingResource::collection($bookings);
     }
 
-        public function confirmPayment(Booking $booking)
+    public function confirmPayment(Request $request, Booking $booking)
     {
+        $this->authorize('confirmPayment', $booking);
+
+        Payment::create([
+            'booking_id' => $booking->id,
+            'guest_id' => $booking->guest_id,
+            'payment_reference' => 'PAY-' . strtoupper(Str::random(10)),
+            'amount' => $booking->total_amount,
+            'currency' => 'EUR',
+            'status' => 'completed',
+            'payment_date' => now(),
+            'payment_type' => 'full',
+            'method' => $request->input('method', 'transfer'),
+            'user_id' => Auth::id(),
+        ]);
+
         $booking->update([
             'status' => 'confirmed',
             'payment_status' => 'paid',
-            'confirmed_at' => now()
+            'confirmed_at' => now(),
         ]);
-        
-        return new BookingResource($booking);
+
+        // Crear notificación
+        Notification::create([
+            'notifiable_type' => 'App\\Models\\User',
+            'notifiable_id' => $booking->guest->user_id,
+            'title' => 'Pago confirmado',
+            'body' => 'El pago de tu reserva #' . $booking->booking_reference . ' ha sido confirmado',
+            'type' => 'payment_confirmed',
+            'is_read' => false
+        ]);
+
+        return new BookingResource($booking->fresh());
     }
 
     public function cancelByGuest(Booking $booking, Request $request)
     {
         $user = $request->user();
-        
-        // Verificar que la reserva pertenece al guest
+
         if ($booking->guest_email !== $user->email) {
             return response()->json(['message' => 'No autorizado'], 403);
         }
-        
-        // Verificar que la reserva puede cancelarse (no pasada, no ya cancelada)
+
         if ($booking->status === 'cancelled') {
             return response()->json(['message' => 'La reserva ya está cancelada'], 400);
         }
-        
+
         if ($booking->check_in < now()) {
             return response()->json(['message' => 'No se puede cancelar una estancia pasada'], 400);
         }
-        
-        // Obtener política de cancelación
+
         $policy = $booking->accommodation->cancellationPolicy;
         $daysBeforeCheckin = now()->diffInDays($booking->check_in, false);
-        
-        // Calcular reembolso según política
+
         $refundAmount = 0;
         $penaltyAmount = 0;
-        
+
         if ($daysBeforeCheckin >= $policy->free_cancellation_days) {
-            // Cancelación gratuita
             $refundAmount = $booking->total_amount;
         } else {
-            // Aplicar penalización
             $penaltyAmount = ($booking->total_amount * $policy->penalty_percentage) / 100;
             $refundAmount = $booking->total_amount - $penaltyAmount;
         }
-        
-        // Actualizar estado
-        $booking->status = 'cancelled';
-        $booking->cancelled_at = now();
-        $booking->cancellation_reason = $request->reason ?? 'Cancelado por el huésped';
-        $booking->save();
-        
-        // Liberar disponibilidad en el calendario
-        $this->releaseAvailability($booking);
-        
+
+        $booking->update([
+            'status' => 'cancelled',
+            'cancelled_at' => now(),
+            'cancellation_reason' => $request->reason ?? 'Cancelado por el huésped',
+        ]);
+
+        $this->calendarService->markAsAvailable($booking);
+
         return response()->json([
             'message' => 'Reserva cancelada correctamente',
             'refund_amount' => $refundAmount,
-            'penalty' => $penaltyAmount
+            'penalty' => $penaltyAmount,
         ]);
     }
 
-    private function releaseAvailability(Booking $booking)
-    {
-        // Liberar las fechas en availability_calendars
-        $start = $booking->check_in;               
-        $end = $booking->check_out->copy()->subDay(); // ← copy() para no modificar original
-        
-        $dates = CarbonPeriod::create($start, $end);
-        
-        foreach ($dates as $date) {
-            AvailabilityCalendar::where('accommodation_id', $booking->accommodation_id)
-                ->where('date', $date->format('Y-m-d'))
-                ->update(['status' => 'available']);
-        }
-    }
-
-    /**
- * Descarga confirmación de reserva (siempre disponible)
- * No guarda en documents, solo descarga directa
- */
     public function downloadConfirmation(Booking $booking, PdfService $pdfService)
     {
-        if (!Gate::allows('view', $booking)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
+        $this->authorize('view', $booking);
         $pdf = $pdfService->render('pdfs.booking_confirmation', compact('booking'));
 
         return response($pdf)
@@ -275,13 +267,10 @@ class BookingController extends Controller
             ->header('Content-Disposition', 'attachment; filename="confirmacion-' . $booking->booking_reference . '.pdf"');
     }
 
-        public function generateInvoice(Booking $booking, PdfService $pdfService)
+    public function generateInvoice(Booking $booking, PdfService $pdfService)
     {
-        if (!Gate::allows('view', $booking)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
+        $this->authorize('view', $booking);
 
-        // Solo permitir generar factura si la reserva está completada
         if ($booking->status !== 'checked_out') {
             return response()->json([
                 'message' => 'La factura solo se puede generar después del check-out'
@@ -289,7 +278,6 @@ class BookingController extends Controller
         }
 
         $pdfContent = $pdfService->generateInvoice($booking);
-        
         $document = $pdfService->saveAndRegister(
             $pdfContent,
             'invoice',
@@ -299,20 +287,86 @@ class BookingController extends Controller
 
         return response()->json([
             'message' => 'Factura generada',
-            'document' => new DocumentResource($document)
+            'document' => new DocumentResource($document),
         ]);
     }
 
     public function downloadInvoice(Booking $booking, PdfService $pdfService)
     {
-        if (!Gate::allows('view', $booking)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
+        $this->authorize('view', $booking);
         $pdfContent = $pdfService->generateInvoice($booking);
-        
+
         return response($pdfContent)
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'attachment; filename="factura-' . $booking->booking_reference . '.pdf"');
+    }
+
+    public function bookingComparison(Request $request)
+    {
+        $user = $request->user();
+        $query = Booking::query();
+        
+        if ($user->role === 'owner') {
+            $owner = \App\Models\Owner::where('user_id', $user->id)->first();
+            if ($owner) {
+                $query->whereHas('accommodation', fn($q) => $q->where('owner_id', $owner->id));
+            } else {
+                $query->whereRaw('1 = 0');
+            }
+        }
+
+        $currentMonth = (clone $query)
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+
+        $previousMonth = (clone $query)
+            ->whereMonth('created_at', now()->subMonth()->month)
+            ->whereYear('created_at', now()->subMonth()->year)
+            ->count();
+
+        $percentage = $previousMonth > 0
+            ? round(($currentMonth - $previousMonth) / $previousMonth * 100)
+            : ($currentMonth > 0 ? 100 : 0);
+
+        return response()->json([
+            'percentage' => abs($percentage),
+            'trend' => $percentage >= 0 ? 'up' : 'down',
+            'current_month' => $currentMonth,
+            'previous_month' => $previousMonth,
+        ]);
+    }
+
+    public function averageComparison(Request $request)
+    {
+        $user = $request->user();
+        $query = Booking::query();
+
+        if ($user->role === 'owner') {
+            $query->whereHas('accommodation', fn($q) => $q->where('owner_id', $user->id));
+        } elseif ($user->role === 'guest') {
+            $query->where('guest_id', $user->id);
+        }
+
+        $currentAvg = (clone $query)
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->avg('total_amount') ?? 0;
+
+        $previousAvg = (clone $query)
+            ->whereMonth('created_at', now()->subMonth()->month)
+            ->whereYear('created_at', now()->subMonth()->year)
+            ->avg('total_amount') ?? 0;
+
+        $percentage = $previousAvg > 0
+            ? round(($currentAvg - $previousAvg) / $previousAvg * 100)
+            : ($currentAvg > 0 ? 100 : 0);
+
+        return response()->json([
+            'percentage' => abs($percentage),
+            'trend' => $percentage >= 0 ? 'up' : 'down',
+            'current_month' => round($currentAvg),
+            'previous_month' => round($previousAvg),
+        ]);
     }
 }

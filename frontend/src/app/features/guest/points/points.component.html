@@ -1,10 +1,13 @@
 <div class="max-w-3xl mx-auto px-4 py-8">
   <!-- Cabecera -->
-  <div class="flex items-center gap-3 mb-6">
-    <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-      <app-icon-svg name="star" className="w-6 h-6 text-amber-600"></app-icon-svg>
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+        <app-icon-svg name="star" class="w-6 h-6 text-amber-600"></app-icon-svg>
+      </div>
+      <h1 class="text-2xl font-bold text-gray-800">Mis puntos</h1>
     </div>
-    <h1 class="text-2xl font-bold text-gray-800">Mis puntos</h1>
+    <app-back-button backUrl="/guest/dashboard" text="Volver al dashboard"></app-back-button>
   </div>
 
   @if (loading) {

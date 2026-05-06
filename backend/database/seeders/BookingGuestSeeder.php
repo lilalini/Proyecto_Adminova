@@ -15,7 +15,8 @@ class BookingGuestSeeder extends Seeder
      */
     public function run(): void
     {
-        $bookings = Booking::all();
+        //$bookings = Booking::all();
+        $bookings = Booking::with('guest')->get();
 
         foreach ($bookings as $booking) {
             // Guest principal (el que hizo la reserva)

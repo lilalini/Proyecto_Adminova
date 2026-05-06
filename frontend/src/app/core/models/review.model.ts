@@ -57,8 +57,12 @@ export interface ReviewResponse {
   data: Review;
 }
 
+export interface ApiResponse<T> {
+  data: T;
+}
+
 export interface CreateReviewData {
-  accommodation_id: number;
+  accommodation_id?: number;
   booking_id?: number;
   rating: number;
   cleanliness_rating?: number;
@@ -71,4 +75,20 @@ export interface CreateReviewData {
 
 export interface RespondToReviewData {
   response: string;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  current_page: number;
+  first_page_url: string;
+  from: number;
+  last_page: number;
+  last_page_url: string;
+  links: any[];
+  next_page_url: string | null;
+  path: string;
+  per_page: number;
+  prev_page_url: string | null;
+  to: number;
+  total: number;
 }

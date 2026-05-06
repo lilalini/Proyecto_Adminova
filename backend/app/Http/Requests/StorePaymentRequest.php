@@ -3,14 +3,12 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Gate;
-use App\Models\Payment;
 
 class StorePaymentRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return Gate::allows('create', Payment::class);
+        return true;
     }
 
     public function rules(): array

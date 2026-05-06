@@ -9,15 +9,28 @@ use App\Http\Resources\AvailabilityCalendarResource;
 use App\Models\AvailabilityCalendar;
 use App\Models\Accommodation;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
+use App\Services\CalendarService;
 
 class AvailabilityCalendarController extends Controller
 {
+
+    public function __construct(protected CalendarService $calendarService)
+    {
+    }
     public function index(Request $request)
     {
+        $user = $request->user();
         $query = AvailabilityCalendar::query();
+
+        // Control de acceso por rol
+        if ($user->role === 'owner') {
+            $query->whereHas('accommodation', fn($q) => $q->where('owner_id', $user->id));
+        } elseif ($user->role === 'guest') {
+            // Guests solo ven disponibilidad de alojamientos publicados
+            $query->whereHas('accommodation', fn($q) => $q->where('status', 'published'))
+                  ->where('status', 'available');
+        }
 
         if ($request->has('accommodation_id')) {
             $query->where('accommodation_id', $request->accommodation_id);
@@ -26,6 +39,7 @@ class AvailabilityCalendarController extends Controller
         if ($request->has('from')) {
             $query->where('date', '>=', $request->from);
         }
+
         if ($request->has('to')) {
             $query->where('date', '<=', $request->to);
         }
@@ -34,15 +48,12 @@ class AvailabilityCalendarController extends Controller
             $query->where('status', $request->status);
         }
 
-        $availabilities = $query->orderBy('date')->paginate(31);
-        return AvailabilityCalendarResource::collection($availabilities);
+        return AvailabilityCalendarResource::collection($query->orderBy('date')->paginate(31));
     }
 
     public function store(StoreAvailabilityRequest $request)
     {
-        if (!Gate::allows('create', AvailabilityCalendar::class)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
+        $this->authorize('create', AvailabilityCalendar::class);
 
         $exists = AvailabilityCalendar::where('accommodation_id', $request->accommodation_id)
             ->where('date', $request->date)
@@ -63,47 +74,16 @@ class AvailabilityCalendarController extends Controller
         return new AvailabilityCalendarResource($availabilityCalendar);
     }
 
-   /* public function update(UpdateAvailabilityRequest $request, AvailabilityCalendar $availabilityCalendar)
+    public function update(UpdateAvailabilityRequest $request, AvailabilityCalendar $availabilityCalendar)
     {
-        // Forzar carga de la relación para la policy
-        $availabilityCalendar->load('accommodation');
-        
-        if (!Gate::allows('update', $availabilityCalendar)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
+        $this->authorize('update', $availabilityCalendar);
         $availabilityCalendar->update($request->validated());
-        $availabilityCalendar->refresh();
-        return new AvailabilityCalendarResource($availabilityCalendar);
-    }*/
-public function update(UpdateAvailabilityRequest $request, $id)
-{
-    $availabilityCalendar = AvailabilityCalendar::find($id);
-    
-    if (!$availabilityCalendar) {
-        return response()->json(['message' => 'Registro no encontrado'], 404);
+        return new AvailabilityCalendarResource($availabilityCalendar->refresh());
     }
-    
-    $availabilityCalendar->load('accommodation');
-    
-    if (!Gate::allows('update', $availabilityCalendar)) {
-        return response()->json(['message' => 'No autorizado'], 403);
-    }
-
-    $availabilityCalendar->update($request->validated());
-    $availabilityCalendar->refresh();
-
-    return new AvailabilityCalendarResource($availabilityCalendar);
-}
 
     public function destroy(AvailabilityCalendar $availabilityCalendar)
     {
-        $availabilityCalendar->load('accommodation');
-        
-        if (!Gate::allows('delete', $availabilityCalendar)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
+        $this->authorize('delete', $availabilityCalendar);
         $availabilityCalendar->delete();
         return response()->json(null, 204);
     }
@@ -120,11 +100,8 @@ public function update(UpdateAvailabilityRequest $request, $id)
             'max_nights' => 'nullable|integer|min:1',
         ]);
 
-        $accommodation = Accommodation::find($request->accommodation_id);
-        
-        if (!Gate::allows('update', $accommodation)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
+        $accommodation = Accommodation::findOrFail($request->accommodation_id);
+        $this->authorize('update', $accommodation);
 
         $current = Carbon::parse($request->from);
         $end = Carbon::parse($request->to);
@@ -151,9 +128,30 @@ public function update(UpdateAvailabilityRequest $request, $id)
     public function publicIndex($accommodationId)
     {
         $availability = AvailabilityCalendar::where('accommodation_id', $accommodationId)
-                                            ->where('date', '>=', now())
-                                            ->limit(60)
-                                            ->get();
+            ->where('date', '>=', now())
+            ->where('status', 'available') // solo disponibilidad pública, sin datos sensibles
+            ->select(['date', 'status', 'price', 'min_nights', 'max_nights', 'closed_to_arrival', 'closed_to_departure'])
+            ->limit(60)
+            ->get();
+
         return response()->json(['data' => $availability]);
+    }
+
+
+    public function check(Request $request)
+    {
+        $request->validate([
+            'accommodation_id' => 'required|exists:accommodations,id',
+            'check_in' => 'required|date',
+            'check_out' => 'required|date|after:check_in',
+        ]);
+
+        $available = $this->calendarService->isAvailable(
+            $request->accommodation_id,
+            $request->check_in,
+            $request->check_out
+        );
+
+        return response()->json(['available' => $available]);
     }
 }

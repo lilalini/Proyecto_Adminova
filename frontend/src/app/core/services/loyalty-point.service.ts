@@ -37,7 +37,4 @@ export class LoyaltyPointService {
     return this.http.get<LoyaltyPointResponse>(`${this.apiUrl}?guest_id=${guestId}&page=${page}`);
   }
 
-  getGuestByUserId(userId: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/guests/by-user/${userId}`);
-  }
 }

@@ -22,6 +22,7 @@ class LoyaltySettingSeeder extends Seeder
                 'expiry_days' => 365,
                 'max_discount' => 10.00,
                 'is_active' => true,
+                'valid_from' => now()->subYear(),
             ],
             [
                 'name' => 'Silver',
@@ -31,6 +32,7 @@ class LoyaltySettingSeeder extends Seeder
                 'expiry_days' => 365,
                 'max_discount' => 15.00,
                 'is_active' => true,
+                'valid_from' => now()->subYear(),
             ],
             [
                 'name' => 'Gold',
@@ -40,6 +42,7 @@ class LoyaltySettingSeeder extends Seeder
                 'expiry_days' => 365,
                 'max_discount' => 20.00,
                 'is_active' => true,
+                'valid_from' => now()->subYear(),
             ],
             [
                 'name' => 'Platinum',
@@ -49,6 +52,7 @@ class LoyaltySettingSeeder extends Seeder
                 'expiry_days' => 365,
                 'max_discount' => 25.00,
                 'is_active' => true,
+                'valid_from' => now()->subYear(),
             ],
         ];
 

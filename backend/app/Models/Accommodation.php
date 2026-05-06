@@ -46,6 +46,7 @@ class Accommodation extends Model implements HasMedia
         'status', // draft, published, maintenance, inactive
         'views',
         'last_booking_at',
+        'cleaning_buffer_days',
     ];
 
     protected function casts(): array
@@ -71,6 +72,7 @@ class Accommodation extends Model implements HasMedia
             'status' => 'string',
             'views' => 'integer',
             'last_booking_at' => 'datetime',
+            'cleaning_buffer_days' => 'integer',
         ];
     }
 

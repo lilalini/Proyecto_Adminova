@@ -79,7 +79,10 @@ module.exports = {
 | **SoftDeletes** | Eliminación lógica en todas las tablas |
 | **Índices** | Optimización de consultas frecuentes |
 | **Foreign keys** | Integridad referencial con cascade/nullOnDelete |
+| **Extensión unaccent** | Búsquedas sin tildes (requiere instalación manual) |
 
+> Requiere ejecutar en PostgreSQL antes del primer despliegue:
+> `CREATE EXTENSION IF NOT EXISTS unaccent;`
 ---
 
 ## **Seguridad y Autenticación**
@@ -116,8 +119,14 @@ module.exports = {
 
 ##  **Conclusiones Técnicas**
 
-- **API REST** completa con 24 endpoints principales
+- **API REST** completa más de 80 endpoints
 - **Autenticación segura** mediante tokens Sanctum
 - **Separación de responsabilidades** clara entre backend y frontend
 - **Escalabilidad** gracias a la arquitectura modular
 - **Compatibilidad entre navegadores** asegurada con PostCSS/Autoprefixer
+
+## **emails de prueba**
+
+owner@example.com password
+staff@example.com password
+admin@example.com 123456

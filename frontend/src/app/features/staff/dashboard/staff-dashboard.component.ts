@@ -16,12 +16,14 @@ import { GreetingComponent } from '../../../shared/components/greeting/greeting.
 export class StaffDashboardComponent implements OnInit {
   user: any = null;
   stats = {
-    todayCheckIns: 0,
     todayCheckOuts: 0,
+    tomorrowCheckIns: 0,
     pendingTasks: 0
   };
   todayBookings: any[] = [];
   pendingTasks: any[] = [];
+  checkOutsToday: any[] = [];
+  checkInsTomorrow: any[] = [];
   loading = true;
   today = new Date().toISOString().split('T')[0];
 
@@ -40,14 +42,21 @@ export class StaffDashboardComponent implements OnInit {
 
   loadData() {
     const today = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
     
+    // Obtener reservas
     this.bookingService.getAll().subscribe({
       next: (res) => {
-        this.todayBookings = res.data.filter(b => 
-          b.check_in === today || b.check_out === today
-        );
-        this.stats.todayCheckIns = this.todayBookings.filter(b => b.check_in === today).length;
-        this.stats.todayCheckOuts = this.todayBookings.filter(b => b.check_out === today).length;
+        // Check-outs de hoy (necesitan limpieza)
+        this.checkOutsToday = res.data.filter((b: any) => b.check_out === today);
+        
+        // Check-ins de mañana (necesitan estar listos)
+        this.checkInsTomorrow = res.data.filter((b: any) => b.check_in === tomorrowStr);
+        
+        this.stats.todayCheckOuts = this.checkOutsToday.length;
+        this.stats.tomorrowCheckIns = this.checkInsTomorrow.length;
         this.loading = false;
       },
       error: () => {
@@ -55,15 +64,14 @@ export class StaffDashboardComponent implements OnInit {
       }
     });
     
-    // Tareas de limpieza (independiente)
+    // Tareas de limpieza pendientes
     this.cleaningTaskService.getTodayTasks().subscribe({
       next: (res) => {
-        this.stats.pendingTasks = res.data.filter(t => t.status === 'pending').length;
+        this.stats.pendingTasks = res.data.filter((t: any) => t.status === 'pending').length;
         this.pendingTasks = res.data;
       },
       error: (err) => {
         console.error('Error cargando tareas:', err);
-        this.stats.pendingTasks = 0;
       }
     });
   }

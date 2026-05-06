@@ -9,16 +9,19 @@ class CustomPathGenerator implements PathGenerator
 {
     public function getPath(Media $media): string
     {
-        return 'accommodations/' . $media->model_id . '/';
+        $folder = strtolower(class_basename($media->model_type));
+        return $folder . 's/' . $media->model_id . '/';
     }
 
     public function getPathForConversions(Media $media): string
     {
-        return 'accommodations/' . $media->model_id . '/conversions/';
+        $folder = strtolower(class_basename($media->model_type));
+        return $folder . 's/' . $media->model_id . '/conversions/';
     }
 
     public function getPathForResponsiveImages(Media $media): string
     {
-        return 'accommodations/' . $media->model_id . '/responsive/';
+        $folder = strtolower(class_basename($media->model_type));
+        return $folder . 's/' . $media->model_id . '/responsive/';
     }
 }

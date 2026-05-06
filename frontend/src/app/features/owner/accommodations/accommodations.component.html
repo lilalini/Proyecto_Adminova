@@ -1,0 +1,95 @@
+<div class="max-w-7xl mx-auto px-4 py-8">
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+        <app-icon-svg name="building-2" className="w-6 h-6 text-indigo-600"></app-icon-svg>
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold text-gray-800">Mis alojamientos</h1>
+        @if (!loading) {
+          <p class="text-sm text-gray-500">{{ total }} propiedad{{ total !== 1 ? 'es' : '' }}</p>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (loading) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (i of [1,2,3]; track i) {
+        <app-skeleton type="card"></app-skeleton>
+      }
+    </div>
+  }
+
+  <!-- Empty state -->
+  @if (!loading && accommodations.length === 0) {
+    <div class="bg-white rounded-xl border border-gray-200 p-12 text-center">
+      <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <app-icon-svg name="building-2" className="w-8 h-8 text-gray-400"></app-icon-svg>
+      </div>
+      <p class="text-gray-600 font-medium">No tienes alojamientos asignados</p>
+      <p class="text-gray-400 text-sm mt-1">Contacta con el administrador para más información</p>
+    </div>
+  }
+
+  <!-- Grid -->
+  @if (!loading && accommodations.length > 0) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (acc of accommodations; track acc.id) {
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
+          
+      <!-- Imagen -->
+      <div class="h-48 bg-gray-100 overflow-hidden">
+        @if (acc.main_image) {
+          <img [src]="acc.main_image" 
+              alt="Imagen del alojamiento"
+              title="Alojamiento"
+              aria-label="Imagen del alojamiento"
+              class="w-full h-full object-cover">
+        } @else {
+          <div class="w-full h-full flex items-center justify-center">
+            <app-icon-svg name="image" className="w-12 h-12 text-gray-300"></app-icon-svg>
+          </div>
+        }
+      </div>
+
+          <div class="p-4">
+            <!-- Título y estado -->
+            <div class="flex items-start justify-between gap-2 mb-2">
+              <h3 class="font-semibold text-gray-800 leading-tight">{{ acc.title }}</h3>
+              <span class="text-xs px-2 py-1 rounded-full shrink-0 {{ getStatusClass(acc.status) }}">
+                {{ getStatusLabel(acc.status) }}
+              </span>
+            </div>
+
+            <p class="text-sm text-gray-500">{{ acc.address }}, {{ acc.city }}</p>
+
+            <!-- Detalles -->
+            <div class="flex items-center gap-4 mt-3 text-sm text-gray-500">
+              <span class="flex items-center gap-1">
+                <app-icon-svg name="bed" className="w-4 h-4"></app-icon-svg>
+                {{ acc.bedrooms }}
+              </span>
+              <span class="flex items-center gap-1">
+                <app-icon-svg name="users" className="w-4 h-4"></app-icon-svg>
+                {{ acc.max_guests }}
+              </span>
+            </div>
+
+            <div class="mt-4 flex justify-between items-center pt-4 border-t border-gray-100">
+              <span class="text-lg font-bold text-indigo-600">
+                €{{ acc.base_price }}<span class="text-sm font-normal text-gray-400">/noche</span>
+              </span>
+              <a [routerLink]="['/accommodations', acc.id]"
+                 class="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1 font-medium">
+                Ver detalles
+                <app-icon-svg name="arrow-right" className="w-4 h-4"></app-icon-svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

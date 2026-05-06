@@ -22,7 +22,7 @@ class LoyaltyPointPolicy
     public function view(User $user, LoyaltyPoint $loyaltyPoint): bool
     {
         if ($user->role === 'admin') return true;
-        return $user->id === $loyaltyPoint->guest_id;
+        return $user->guest?->id === $loyaltyPoint->guest_id;
     }
 
     public function create(User $user): bool

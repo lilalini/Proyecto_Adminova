@@ -1,5 +1,10 @@
 <div class="max-w-7xl mx-auto px-4 py-8">
-  <h1 class="text-3xl font-bold text-gray-800 mb-6">Mis reservas</h1>
+
+  <div class="flex items-baseline justify-between mb-6">
+    <h1 class="text-3xl font-bold text-gray-800 leading-tight">Mis reservas</h1>
+    <app-back-button backUrl="/guest/dashboard" text="Volver al dashboard"></app-back-button>
+  </div>
+
 
   @if (loading) {
     <div class="text-center py-12">

@@ -3,8 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Gate;
-use App\Models\Review;
 
 class StoreReviewRequest extends FormRequest
 {
@@ -13,7 +11,7 @@ class StoreReviewRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows('create', Review::class);
+        return true;
     }
 
     /**

@@ -38,7 +38,7 @@ class ApartmentChannelFactory extends Factory
             'last_sync_at' => fake()->optional(0.4)->dateTimeThisMonth(),
             'last_sync_status' => fake()->optional(0.5)->randomElement(['success', 'error', 'pending']),
             'last_sync_message' => fake()->optional(0.2)->sentence(),
-            'channel_data' => json_encode(['preferences' => fake()->words(3)]),
+            'channel_data' => ['preferences' => fake()->words(3)],
         ];
     
     }

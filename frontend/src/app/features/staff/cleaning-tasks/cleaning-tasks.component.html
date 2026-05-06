@@ -1,0 +1,48 @@
+<div class="max-w-7xl mx-auto px-4 py-8">
+  <div class="bg-white rounded-xl p-4 mb-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-semibold text-gray-800 mb-1">Tareas de Limpieza</h1>
+        <p class="text-gray-500">Gestiona las tareas pendientes y completadas</p>
+      </div>
+      <a routerLink="/staff/dashboard" class="text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+        <app-icon-svg name="arrow-left" class="w-4 h-4"></app-icon-svg>
+        Volver al dashboard
+      </a>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="space-y-4">
+      @for (i of [1,2,3]; track i) {
+        <app-skeleton class="h-24 rounded-xl"></app-skeleton>
+      }
+    </div>
+  }
+
+  @if (!loading) {
+    <div class="space-y-4">
+      @for (task of tasks; track task.id) {
+        <div class="bg-white rounded-xl border border-gray-200 p-4 flex justify-between items-center">
+          <div>
+            <p class="font-medium text-gray-800">{{ task.accommodation?.title || 'Alojamiento' }}</p>
+            <p class="text-sm text-gray-500">Fecha programada: {{ task.scheduled_date | date:'dd/MM/yyyy' }}</p>
+            <p class="text-xs text-gray-400">Prioridad: {{ task.priority }} | Estado: {{ task.status }}</p>
+          </div>
+          <button 
+            (click)="markAsDone(task.id)"
+            class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 flex items-center gap-2">
+            <app-icon-svg name="check-circle" class="w-4 h-4"></app-icon-svg>
+            Marcar completada
+          </button>
+        </div>
+      }
+      @if (tasks.length === 0) {
+        <div class="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-500">
+          <app-icon-svg name="sparkles" class="w-12 h-12 text-gray-400 mx-auto mb-3"></app-icon-svg>
+          <p>No hay tareas de limpieza para hoy</p>
+        </div>
+      }
+    </div>
+  }
+</div>

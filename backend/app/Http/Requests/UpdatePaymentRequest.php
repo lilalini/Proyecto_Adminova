@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Gate;
 
 class UpdatePaymentRequest extends FormRequest
 {
@@ -12,8 +11,7 @@ class UpdatePaymentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $payment = $this->route('payment');
-        return Gate::allows('update', $payment);
+        return true;
     }
 
     /**

@@ -23,7 +23,6 @@ class SystemSetting extends Model
     protected function casts(): array
     {
         return [
-            'value' => 'json', // para poder guardar cualquier tipo
             'is_active' => 'boolean',
         ];
     }
@@ -32,16 +31,13 @@ class SystemSetting extends Model
     public static function get($key, $default = null)
     {
         $setting = self::where('key', $key)
-                       ->where('is_active', true)
-                       ->first();
-        
-        if (!$setting) {
-            return $default;
-        }
+                    ->where('is_active', true)
+                    ->first();
 
-        // Convertir según el tipo
+        if (!$setting) return $default;
+
         return match($setting->type) {
-            'boolean' => (bool) $setting->value,
+            'boolean' => filter_var($setting->value, FILTER_VALIDATE_BOOLEAN),
             'integer' => (int) $setting->value,
             'json' => json_decode($setting->value, true),
             default => $setting->value,

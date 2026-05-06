@@ -19,6 +19,11 @@ use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\MediaController;
 use App\Http\Controllers\Api\SyncLogController;
+use App\Http\Controllers\Api\CancellationPolicyController;
+use App\Http\Controllers\Api\DistributionChannelController;
+use App\Http\Controllers\Api\LoyaltySettingController;
+use App\Http\Controllers\Api\AccommodationMediaController;
+
 
 // Ruta de prueba (pública)
 Route::get('/test', function() {
@@ -28,14 +33,14 @@ Route::get('/test', function() {
     ]);
 });
 
-    // Rutas públicas   
-    Route::get('/accommodations/public', [App\Http\Controllers\Api\AccommodationController::class, 'publicList']);
-    Route::get('/accommodations/{id}/public', [App\Http\Controllers\Api\AccommodationController::class, 'publicShow']);
-    Route::get('/availability/public/{accommodationId}', [App\Http\Controllers\Api\AvailabilityCalendarController::class, 'publicIndex']);
-    Route::get('/reviews/public/{accommodationId}', [App\Http\Controllers\Api\ReviewController::class, 'publicIndex']);
-    Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::get('/guests/by-user/{userId}', [GuestController::class, 'findByUserId']);
+// Rutas públicas
+Route::get('/accommodations/public', [AccommodationController::class, 'publicList']);
+Route::get('/accommodations/{id}/public', [AccommodationController::class, 'publicShow']);
+Route::get('/availability/public/{accommodationId}', [AvailabilityCalendarController::class, 'publicIndex']);
+Route::get('/reviews/public/{accommodationId}', [ReviewController::class, 'publicIndex']);
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+    
 
 // Rutas protegidas (todas en un solo grupo)
     Route::middleware('auth:sanctum')->group(function () {
@@ -44,14 +49,24 @@ Route::get('/test', function() {
     Route::get('/user', [AuthController::class, 'user']);
 
 // Media de alojamientos 
-    Route::post('/accommodations/{accommodation}/media', [App\Http\Controllers\Api\AccommodationMediaController::class, 'store']);
-    Route::delete('/accommodations/{accommodation}/media/{mediaId}', [App\Http\Controllers\Api\AccommodationMediaController::class, 'destroy']);
+    Route::post('/accommodations/{accommodation}/media', [AccommodationMediaController::class, 'store']);
+    Route::delete('/accommodations/{accommodation}/media/{mediaId}', [AccommodationMediaController::class, 'destroy']);
     // Rutas de reservas
     Route::get('/bookings/my', [BookingController::class, 'myBookings']);
     Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancelByGuest']);
-    
     Route::get('/guests/profile-complete/{userId}', [GuestController::class, 'isProfileComplete']);
     Route::put('/guests/by-user/{userId}', [GuestController::class, 'updateByUserId']);
+    Route::get('/guests/by-user/{userId}', [GuestController::class, 'findByUserId']);
+    Route::post('/availability/check', [AvailabilityCalendarController::class, 'check']);
+    //PAGOS
+    Route::get('/payments/monthly-revenue', [PaymentController::class, 'monthlyRevenue']);
+    Route::get('/payments/total-revenue', [PaymentController::class, 'totalRevenue']);
+    Route::get('/payments/revenue-comparison', [PaymentController::class, 'revenueComparison']);
+    Route::get('/payments/monthly-comparison', [PaymentController::class, 'monthlyComparison']);
+    Route::get('/bookings/comparison', [BookingController::class, 'bookingComparison']);
+    Route::get('/bookings/average-comparison', [BookingController::class, 'averageComparison']);
+    Route::get('/loyalty-settings/current', [LoyaltySettingController::class, 'current']);
+    Route::get('/guests/by-email', [GuestController::class, 'findByEmail']);
     // CRUDs
     Route::apiResource('accommodations', AccommodationController::class);
     Route::apiResource('bookings', BookingController::class);
@@ -59,6 +74,11 @@ Route::get('/test', function() {
     Route::apiResource('owners', OwnerController::class);
     Route::apiResource('payments', PaymentController::class);
     Route::apiResource('reviews', ReviewController::class);
+    Route::apiResource('cancellation-policies', CancellationPolicyController::class);
+    Route::apiResource('distribution-channels', DistributionChannelController::class);
+    Route::apiResource('loyalty-settings', LoyaltySettingController::class)->except(['show']);
+    
+    
     // Ruta extra para responder reviews
     Route::post('/reviews/{review}/respond', [ReviewController::class, 'respond']);
     Route::apiResource('owner-payout-methods', OwnerPayoutMethodController::class);

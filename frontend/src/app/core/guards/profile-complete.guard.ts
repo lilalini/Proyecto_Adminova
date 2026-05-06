@@ -16,34 +16,34 @@ export class ProfileCompleteGuard implements CanActivate {
     private router: Router
   ) {}
 
-canActivate(route: ActivatedRouteSnapshot): Observable<boolean> {
-  return this.auth.currentUser$.pipe(
-    switchMap(user => {
-      if (!user) {
-        this.router.navigate(['/login']);
-        return of(false);
-      }
-      
-      return this.guestService.isProfileComplete(user.id).pipe(
-        map(response => {
-          if (response.complete) {
-            return true;
-          } else {
-            // Guardar la URL a la que intentaba acceder
-           const returnUrl = route.url.map((segment: { path: string }) => segment.path).join('/');
-            this.router.navigate(['/guest/profile'], {
-              queryParams: { incomplete: true, fields: response.missing_fields?.join(',') },
-              state: { returnUrl: `/${returnUrl}` }
-            });
-            return false;
+    canActivate(route: ActivatedRouteSnapshot): Observable<boolean> {
+      return this.auth.currentUser$.pipe(
+        switchMap(user => {
+          if (!user) {
+            this.router.navigate(['/login']);
+            return of(false);
           }
-        }),
-        catchError(() => {
-          this.router.navigate(['/guest/profile']);
-          return of(false);
+          
+          return this.guestService.isProfileComplete(user.id).pipe(
+            map(response => {
+              if (response.complete) {
+                return true;
+              } else {
+                // Guardar la URL COMPLETA (con query params)
+                const returnUrl = this.router.url;
+                localStorage.setItem('returnUrl', returnUrl);
+                this.router.navigate(['/guest/profile'], {
+                  queryParams: { incomplete: true, fields: response.missing_fields?.join(',') }
+                });
+                return false;
+              }
+            }),
+            catchError(() => {
+              this.router.navigate(['/guest/profile']);
+              return of(false);
+            })
+          );
         })
       );
-    })
-  );
-}
+    }
 }

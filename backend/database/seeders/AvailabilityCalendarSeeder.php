@@ -51,10 +51,10 @@ class AvailabilityCalendarSeeder extends Seeder
             }
             
             // Algunos periodos especiales (puentes, navidad)
-            $specialDates = [
-                '2024-12-20' => '2025-01-07', // Navidad
-                '2025-03-28' => '2025-04-06', // Semana Santa
-            ];
+           $specialDates = [
+            Carbon::now()->year . '-12-20' => Carbon::now()->year + 1 . '-01-07',
+            Carbon::now()->addYear()->format('Y') . '-03-28' => Carbon::now()->addYear()->format('Y') . '-04-06',
+        ];
             
             foreach ($specialDates as $start => $end) {
                 $specialStart = Carbon::parse($start);

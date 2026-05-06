@@ -5,6 +5,7 @@ import { IconSvgComponent } from '../../../shared/components/icon-svg/icon-svg.c
 import { AuthService } from '../../../core/services/auth.service';
 import { environment } from '../../../../environments/environment';
 import { first } from 'rxjs/operators';
+import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 
 interface Document {
   id: number;
@@ -21,7 +22,7 @@ interface Document {
   selector: 'app-documents',
   templateUrl: './documents.component.html',
   standalone: true,
-  imports: [DatePipe, IconSvgComponent]
+  imports: [DatePipe, IconSvgComponent, BackButtonComponent]
 })
 export class DocumentsComponent implements OnInit {
   documents: Document[] = [];

@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Gate;
 
 class UpdateLoyaltyPointRequest extends FormRequest
 {
@@ -12,8 +11,7 @@ class UpdateLoyaltyPointRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $point = $this->route('loyalty_point');
-        return Gate::allows('update', $point);
+       return true;
     }
 
     /**

@@ -1,12 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { BookingService } from '../../../core/services/booking.service';
 import { LoyaltyPointService } from '../../../core/services/loyalty-point.service';
 import { IconSvgComponent } from '../../../shared/components/icon-svg/icon-svg.component';
 import { GreetingComponent } from '../../../shared/components/greeting/greeting.component';
 import { first } from 'rxjs/operators';
+import { NotificationService } from '../../../core/services/notification.service';
 import { GuestService } from '../../../core/services/guest.service'; 
 
 @Component({
@@ -15,7 +16,7 @@ import { GuestService } from '../../../core/services/guest.service';
   imports: [CommonModule, RouterModule, IconSvgComponent, GreetingComponent],
   templateUrl: './guest-dashboard.component.html',
 })
-export class GuestDashboardComponent implements OnInit {
+export class GuestDashboardComponent implements OnInit, AfterViewInit {
   user: any = null;
   stats = {
     upcomingBookings: 0,
@@ -25,19 +26,33 @@ export class GuestDashboardComponent implements OnInit {
   };
   
   loading = true;
+  unreadCount = 0;
 
   constructor(
     private auth: AuthService,
     private bookingService: BookingService,
     private loyaltyPointService: LoyaltyPointService,
-    private guestService: GuestService 
-  ) {}
+    private guestService: GuestService,
+    private notificationService: NotificationService,  
+    private router: Router
+  ) {
+      this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd && event.url === '/guest/dashboard') {
+        this.loadUnreadCount();
+      }
+    });
+  }
 
   ngOnInit() {
     this.auth.currentUser$.subscribe(user => {
       this.user = user;
     });
     this.loadDashboardData();
+    this.loadUnreadCount();
+  }
+
+   ngAfterViewInit() {
+    this.loadUnreadCount(); 
   }
 
   loadDashboardData() {
@@ -73,6 +88,19 @@ export class GuestDashboardComponent implements OnInit {
           },
           error: (err) => console.error('Error buscando guest:', err)
         });
+      }
+    });
+  }
+
+
+    loadUnreadCount() {
+    this.notificationService.getAll().subscribe({
+      next: (res: any) => {
+        const notifications = res.data || [];
+        this.unreadCount = notifications.filter((n: any) => !n.is_read).length;
+      },
+      error: () => {
+        this.unreadCount = 0;
       }
     });
   }

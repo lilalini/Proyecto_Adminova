@@ -1,0 +1,140 @@
+<div class="space-y-6">
+  <div class="flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-gray-800">Propietarios</h1>
+    <a routerLink="/admin/owners/create"
+       class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+      <app-icon-svg name="plus" className="w-5 h-5"></app-icon-svg>
+      Nuevo propietario
+    </a>
+  </div>
+
+  @if (loading) {
+    <div class="text-center py-12">
+      <p class="text-gray-500">Cargando propietarios...</p>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (!loading && !errorMessage) {
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Teléfono</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ciudad</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contrato</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            @for (owner of owners; track owner.id) {
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                      <span class="text-purple-600 font-semibold text-sm">
+                        {{ owner.first_name.charAt(0) }}{{ owner.last_name.charAt(0) }}
+                      </span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-900">{{ owner.first_name }} {{ owner.last_name }}</p>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-600">{{ owner.email }}</td>
+                <td class="px-6 py-4 text-sm text-gray-600">{{ owner.phone || '—' }}</td>
+                <td class="px-6 py-4 text-sm text-gray-600">{{ owner.city || '—' }}</td>
+                <td class="px-6 py-4">
+                  @if (owner.contract_signed) {
+                    <span class="px-2 py-1 text-xs rounded-full bg-emerald-100 text-emerald-700">Firmado</span>
+                  } @else {
+                    <span class="px-2 py-1 text-xs rounded-full bg-amber-100 text-amber-700">Pendiente</span>
+                  }
+                </td>
+                <td class="px-6 py-4">
+                  @if (owner.is_active) {
+                    <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">Activo</span>
+                  } @else {
+                    <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-700">Inactivo</span>
+                  }
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex items-center justify-end space-x-3">
+                    <a [routerLink]="['/admin/owners', owner.id, 'show']"
+                       class="inline-flex items-center p-2 text-indigo-600 hover:text-indigo-900 rounded-full hover:bg-indigo-50 transition"
+                       title="Ver detalle">
+                      <app-icon-svg name="eye" className="w-5 h-5"></app-icon-svg>
+                    </a>
+                    <a [routerLink]="['/admin/owners', owner.id, 'edit']"
+                       class="inline-flex items-center p-2 text-amber-600 hover:text-amber-900 rounded-full hover:bg-amber-50 transition"
+                       title="Editar propietario">
+                      <app-icon-svg name="edit" className="w-5 h-5"></app-icon-svg>
+                    </a>
+                    <button (click)="confirmDelete(owner.id, owner.first_name + ' ' + owner.last_name)"
+                            class="inline-flex items-center p-2 text-red-600 hover:text-red-900 rounded-full hover:bg-red-50 transition"
+                            title="Eliminar propietario">
+                      <app-icon-svg name="trash-2" className="w-5 h-5"></app-icon-svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (pagination) {
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+          <div class="text-sm text-gray-700">
+            Mostrando {{ pagination.from }} a {{ pagination.to }} de {{ pagination.total }} propietarios
+          </div>
+          <div class="flex space-x-2">
+            <button (click)="loadPage(pagination.current_page - 1)"
+                    [disabled]="pagination.current_page === 1"
+                    class="px-3 py-1 border rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+              Anterior
+            </button>
+            <span class="px-3 py-1">Página {{ pagination.current_page }} de {{ pagination.last_page }}</span>
+            <button (click)="loadPage(pagination.current_page + 1)"
+                    [disabled]="pagination.current_page === pagination.last_page"
+                    class="px-3 py-1 border rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+              Siguiente
+            </button>
+          </div>
+        </div>
+      }
+
+      @if (owners.length === 0) {
+        <div class="text-center py-12">
+          <p class="text-gray-500">No hay propietarios registrados</p>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (showDeleteModal) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-2">Confirmar eliminación</h3>
+      <p class="text-gray-600 mb-6">{{ deleteModalMessage }}</p>
+      <div class="flex justify-end gap-3">
+        <button (click)="cancelDelete()"
+                class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+          Cancelar
+        </button>
+        <button (click)="deleteOwner()"
+                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+}

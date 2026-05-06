@@ -42,10 +42,11 @@ export class GuestService {
   }
 
   // Buscar huésped por email
-  getByEmail(email: string): Observable<GuestListResponse> {
-    return this.http.get<GuestListResponse>(`${this.apiUrl}?email=${email}`);
+  getByEmail(email: string): Observable<{ data: Guest | null }> {
+    return this.http.get<{ data: Guest | null }>(`${this.apiUrl}/by-email`, { 
+      params: { email } 
+    });
   }
-
   // Obtener huéspedes de una reserva específica (si existe relación)
   getByBooking(bookingId: number): Observable<GuestListResponse> {
     return this.http.get<GuestListResponse>(`${this.apiUrl}?booking_id=${bookingId}`);

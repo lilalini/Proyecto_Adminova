@@ -135,15 +135,121 @@ export const routes: Routes = [
   data: { roles: ['admin'] }
 },
 
+{
+  path: 'admin/bookings',
+  loadComponent: () =>
+    import('./features/bookings/pages/admin-list/admin-list.component')
+      .then(m => m.AdminListComponent),
+  canActivate: [AuthGuard, RoleGuard],
+  data: { roles: ['admin'] }
+},
+{
+  path: 'admin/bookings/create',
+  loadComponent: () =>
+    import('./features/bookings/pages/admin-create/admin-create.component')
+      .then(m => m.AdminCreateComponent),
+  canActivate: [AuthGuard, RoleGuard],
+  data: { roles: ['admin'] }
+},
+
+{
+  path: 'admin/guests/create',
+  loadComponent: () =>
+    import('./features/guest/pages/admin-create/admin-create.component')
+      .then(m => m.AdminCreateGuestComponent),
+  canActivate: [AuthGuard, RoleGuard],
+  data: { roles: ['admin'] }
+},
+
+{
+  path: 'admin/bookings/:id/edit',
+  loadComponent: () =>
+    import('./features/bookings/pages/admin-edit/admin-edit.component')
+      .then(m => m.AdminEditComponent),
+  canActivate: [AuthGuard, RoleGuard],
+  data: { roles: ['admin'] }
+},
+
+{
+  path: 'admin/bookings/:id/show',
+  loadComponent: () =>
+    import('./features/bookings/pages/admin-show/admin-show.component')
+      .then(m => m.AdminShowComponent),
+  canActivate: [AuthGuard, RoleGuard],
+  data: { roles: ['admin'] }
+},
+
+
+{
+  path: 'admin/guests',
+  loadComponent: () =>
+    import('./features/guest/pages/admin-list/admin-list.component')
+      .then(m => m.GuestListComponent),
+  canActivate: [AuthGuard, RoleGuard],
+  data: { roles: ['admin'] }
+},
+//=====================================Admin-owners========================
+{
+  path: 'admin/owners',
+  loadComponent: () =>
+    import('./features/owner/pages/admin-list/admin-list.component')
+      .then(m => m.AdminOwnerListComponent),
+  canActivate: [AuthGuard, RoleGuard],
+  data: { roles: ['admin'] }
+},
+/*
+{
+  path: 'admin/owners/create',
+  loadComponent: () =>
+    import('./features/owner/pages/admin-create/admin-create.component')
+      .then(m => m.AdminOwnerCreateComponent),
+  canActivate: [AuthGuard, RoleGuard],
+  data: { roles: ['admin'] }
+},
+{
+  path: 'admin/owners/:id/edit',
+  loadComponent: () =>
+    import('./features/owner/pages/admin-edit/admin-edit.component')
+      .then(m => m.AdminOwnerEditComponent),
+  canActivate: [AuthGuard, RoleGuard],
+  data: { roles: ['admin'] }
+},
+{
+  path: 'admin/owners/:id/show',
+  loadComponent: () =>
+    import('./features/owner/pages/admin-show/admin-show.component')
+      .then(m => m.AdminOwnerShowComponent),
+  canActivate: [AuthGuard, RoleGuard],
+  data: { roles: ['admin'] }
+},*/
 
   // ==================== OWNER ====================
-    {
+  {
     path: 'owner/dashboard',
-    loadComponent: () => import('./features/owner/dashboard/owner-dashboard.component').then(m => m.OwnerDashboardComponent),
+    loadComponent: () =>
+      import('./features/owner/dashboard/owner-dashboard.component')
+        .then(m => m.OwnerDashboardComponent),
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['owner'] }
-    },
+  },
 
+  {
+    path: 'owner/accommodations',
+    loadComponent: () =>
+      import('./features/owner/accommodations/accommodations.component')
+        .then(m => m.OwnerAccommodationsComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['owner'] }
+  },
+
+  {
+    path: 'owner/bookings',
+    loadComponent: () =>
+      import('./features/owner/bookings/bookings.component')
+        .then(m => m.OwnerBookingsComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['owner'] }
+},
 
   // ==================== STAFF ====================
   {
@@ -153,7 +259,23 @@ export const routes: Routes = [
     data: { roles: ['staff'] }
   },
 
+  {
+  path: 'staff/bookings',
+  loadComponent: () =>
+    import('./features/staff/bookings/bookings.component')
+      .then(m => m.StaffBookingsComponent),
+  canActivate: [AuthGuard, RoleGuard],
+  data: { roles: ['staff'] }
+},
 
+{
+  path: 'staff/cleaning-tasks',
+  loadComponent: () =>
+    import('./features/staff/cleaning-tasks/cleaning-tasks.component')
+      .then(m => m.CleaningTasksComponent),
+  canActivate: [AuthGuard, RoleGuard],
+  data: { roles: ['staff'] }
+},
 
   // ==================== RUTAS PARAMETRIZADAS ESPECÍFICAS ====================
   {

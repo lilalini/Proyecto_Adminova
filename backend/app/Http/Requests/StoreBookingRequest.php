@@ -39,9 +39,9 @@ class StoreBookingRequest extends FormRequest
             'guest_email' => 'nullable|email',
             'guest_phone' => 'nullable|string',
             'source' => 'nullable|string',
-            'status' => 'nullable|string',
+            'status' => 'nullable|in:pending,confirmed,checked_in,checked_out,cancelled,no_show',
+            'payment_status' => 'nullable|in:pending,partial,paid,refunded',
             'currency' => 'nullable|string|size:3',
-            'payment_status' => 'nullable|string',
         ];
     }
 }

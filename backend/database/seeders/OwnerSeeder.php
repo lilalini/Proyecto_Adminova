@@ -6,19 +6,28 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Owner;
 use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 
 class OwnerSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
-    public function run(): void
+        public function run(): void
     {
-       // 10 owners aleatorios
         Owner::factory(10)->create();
-        
-        // Owner específico para pruebas
+
+        // Crear user para el owner de prueba
+        $user = User::create([
+            'first_name' => 'Owner',
+            'last_name' => 'Principal',
+            'email' => 'owner@example.com',
+            'password' => 'password',
+            'role' => 'owner',
+            'is_active' => true,
+            'is_guest' => false,
+            'email_verified_at' => now(),
+        ]);
+
         Owner::create([
+            'user_id' => $user->id,
             'first_name' => 'Owner',
             'last_name' => 'Principal',
             'email' => 'owner@example.com',
@@ -29,12 +38,14 @@ class OwnerSeeder extends Seeder
             'address' => 'Calle Principal 123',
             'city' => 'Madrid',
             'postal_code' => '28001',
-            'country' => 'España',
+            'country' => 'ES',
             'iban' => 'ES9121000418450200051332',
+            'commission_rate' => 80.00,
             'contract_signed' => true,
             'contract_date' => now(),
             'is_active' => true,
             'email_verified_at' => now(),
         ]);
     }
+
 }

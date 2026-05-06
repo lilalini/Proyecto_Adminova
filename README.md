@@ -22,3 +22,8 @@ php artisan migrate
 
 ## Producción
 El backend puede desplegarse en cualquier hosting compatible con PHP 8.2 + PostgreSQL.
+
+añadir: 
+1. PostgreSQL con extensión unaccent: CREATE EXTENSION IF NOT EXISTS unaccent;
+2. En producción: quitar ->withOptions(['verify' => false]) de GeocodingService
+3. Librería mPDF instalada: composer require mpdf/mpdf

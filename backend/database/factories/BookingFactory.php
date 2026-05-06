@@ -65,7 +65,7 @@ class BookingFactory extends Factory
             'discount_amount' => fake()->randomFloat(2, 0, 100),
             'total_amount' => $totalAmount,
             'paid_amount' => $paymentStatus === 'paid' ? $totalAmount : ($paymentStatus === 'partial' ? $totalAmount / 2 : 0),
-            'balance_due' => $totalAmount,
+            'balance_due' => $paymentStatus === 'paid' ? 0 : ($paymentStatus === 'partial' ? $totalAmount / 2 : $totalAmount),
             'channel_commission_rate' => fake()->optional(0.5)->randomFloat(2, 10, 20),
             'channel_commission_amount' => fake()->optional(0.5)->randomFloat(2, 20, 200),
             'platform_fee' => fake()->optional(0.3)->randomFloat(2, 5, 30),

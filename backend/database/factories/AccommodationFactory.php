@@ -47,8 +47,6 @@ class AccommodationFactory extends Factory
             'security_deposit' => fake()->randomFloat(2, 0, 500),
             'minimum_stay' => fake()->numberBetween(1, 3),
             'maximum_stay' => fake()->optional(0.3)->numberBetween(14, 90),
-            'amenities' => json_encode(fake()->randomElements(['wifi', 'tv', 'kitchen', 'ac', 'heating', 'pool', 'parking'], rand(3, 7))),
-            'house_rules' => json_encode(['No parties', 'No smoking', 'Check-in after 15:00']),
             'check_in_time' => '15:00',
             'check_out_time' => '11:00',
             'status' => fake()->randomElement(['draft', 'published', 'maintenance', 'inactive']),

@@ -18,6 +18,8 @@ export class PaymentComponent implements OnInit {
   loading = true;
   processing = false;
   errorMessage = '';
+  showSuccessModal = false;
+  showErrorModal = false;
 
   // Simulación de métodos de pago
   paymentMethods = [
@@ -59,28 +61,36 @@ export class PaymentComponent implements OnInit {
 
   processPayment() {
     this.processing = true;
+    this.errorMessage = '';
     
     // Simular proceso de pago (2 segundos)
     setTimeout(() => {
-      // 90% de éxito para simular
       const success = Math.random() < 0.9;
       
       if (success) {
-        // Confirmar reserva en backend
         this.bookingService.confirmPayment(this.bookingId).subscribe({
           next: () => {
-            this.router.navigate(['/bookings', this.bookingId, 'confirmation']);
+            this.processing = false;
+            this.showSuccessModal = true;
           },
           error: (error) => {
             console.error('Error confirmando pago:', error);
-            this.errorMessage = 'Error al confirmar el pago';
             this.processing = false;
+            this.showErrorModal = true;
           }
         });
       } else {
-        this.errorMessage = 'El pago ha fallado. Inténtalo de nuevo.';
         this.processing = false;
+        this.showErrorModal = true;
       }
     }, 2000);
+  }
+
+  goToBookings() {
+    this.router.navigate(['/my-bookings']);
+  }
+
+  closeErrorModal() {
+    this.showErrorModal = false;
   }
 }

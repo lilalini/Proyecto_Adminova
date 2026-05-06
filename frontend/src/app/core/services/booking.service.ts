@@ -79,6 +79,14 @@ export class BookingService {
     return this.http.post(`${this.apiUrl}/${bookingId}/cancel`, { reason });
   }
 
+  getBookingComparison(): Observable<{ percentage: number; trend: string; current_month: number; previous_month: number }> {
+    return this.http.get<{ percentage: number; trend: string; current_month: number; previous_month: number }>(`${this.apiUrl}/comparison`);
+  }
+
+  getAverageComparison(): Observable<{ percentage: number; trend: string; current_month: number; previous_month: number }> {
+    return this.http.get<{ percentage: number; trend: string; current_month: number; previous_month: number }>(`${this.apiUrl}/average-comparison`);
+  }
+
 }
 
 

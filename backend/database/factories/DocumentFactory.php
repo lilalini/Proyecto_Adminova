@@ -52,7 +52,7 @@ class DocumentFactory extends Factory
             'verified_by_user_id' => $isVerified ? User::inRandomOrder()->first()?->id : null,
             'verified_at' => $isVerified ? fake()->dateTimeThisYear() : null,
             'notes' => fake()->optional(0.3)->sentence(),
-            'metadata' => fake()->optional(0.2)->json(),
+            'metadata' => fake()->optional(0.2)->passThrough(['source' => fake()->word()]),
         ];
     
     }

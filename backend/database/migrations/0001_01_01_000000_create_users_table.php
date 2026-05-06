@@ -17,7 +17,8 @@ return new class extends Migration
             $table->string('password');
             $table->string('first_name');
             $table->string('last_name');
-            $table->string('role')->default('host');
+            $table->string('role')->default('guest');
+            $table->boolean('is_guest')->default(false)->after('role');
             $table->boolean('is_active')->default(true);
             $table->string('phone')->nullable();
             $table->timestamp('email_verified_at')->nullable();

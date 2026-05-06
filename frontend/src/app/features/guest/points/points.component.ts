@@ -6,6 +6,7 @@ import { LoyaltyPointService } from '../../../core/services/loyalty-point.servic
 import { GuestService } from '../../../core/services/guest.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { first } from 'rxjs/operators';
+import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 
 interface Guest {
   id: number;
@@ -17,7 +18,7 @@ interface Guest {
 @Component({
   selector: 'app-points',
   standalone: true,
-  imports: [CommonModule, RouterModule, IconSvgComponent],
+  imports: [CommonModule, RouterModule, IconSvgComponent, BackButtonComponent],
   templateUrl: './points.component.html',
 })
 export class PointsComponent implements OnInit {

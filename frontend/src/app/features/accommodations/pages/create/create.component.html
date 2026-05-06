@@ -154,7 +154,23 @@
         </div>
       </div>
     </div>
-
+      <!-- dentro del <form>, después de los campos de ubicación -->
+      @if (userRole === 'admin') {
+        <div class="border-b border-gray-200 pb-4">
+          <h2 class="text-lg font-semibold mb-4">Asignación</h2>
+          <div>
+            <label class="block text-gray-700 text-sm font-bold mb-2">Propietario</label>
+            <select formControlName="owner_id" 
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    title="Seleccionar propietario">
+              <option value="">Seleccionar propietario</option>
+              @for (owner of owners; track owner.id) {
+                <option [value]="owner.id">{{ owner.first_name }} {{ owner.last_name }} ({{ owner.email }})</option>
+              }
+            </select>
+          </div>
+        </div>
+      }
     <!-- ===== PRECIOS ===== -->
     <div class="border-b border-gray-200 pb-4">
       <h2 class="text-lg font-semibold mb-4">Precios</h2>
@@ -322,6 +338,7 @@
       </button>
     </div>
   </form>
+  
 
   @if (accommodationCreated) {
     <div class="mt-8 border-t border-gray-200 pt-8" id="upload-section">

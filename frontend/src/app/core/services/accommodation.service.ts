@@ -3,7 +3,7 @@
   import { Observable } from 'rxjs';
   import { environment } from '../../../environments/environment';
   import { Accommodation, AccommodationListResponse, AccommodationResponse,  ApiResponse } from '../models/accommodation.model';
- 
+  import { CreateAccommodationData } from '../models/accommodation.model';
   @Injectable({
     providedIn: 'root'
   })
@@ -23,12 +23,12 @@
     }
 
     // Crear nuevo alojamiento
-    create(data: Partial<Accommodation>): Observable<AccommodationResponse> {
-      return this.http.post<AccommodationResponse>(this.apiUrl, data);
-    }
+    create(data: CreateAccommodationData): Observable<AccommodationResponse> {
+    return this.http.post<AccommodationResponse>(this.apiUrl, data);
+  }
 
     // Actualizar alojamiento
-    update(id: number, data: Partial<Accommodation>): Observable<AccommodationResponse> {
+    update(id: number, data: CreateAccommodationData): Observable<AccommodationResponse> {
       return this.http.put<AccommodationResponse>(`${this.apiUrl}/${id}`, data);
     }
 

@@ -45,7 +45,7 @@ class NotificationSeeder extends Seeder
             'type' => 'welcome',
             'title' => '¡Bienvenido al sistema!',
             'body' => 'Gracias por registrarte. Comienza a gestionar tus propiedades.',
-            'channels' => json_encode(['mail']),
+            'channels' => ['mail'],
             'is_read' => false,
             'sent_at' => now(),
         ]);

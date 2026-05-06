@@ -105,6 +105,6 @@ export class AuthService {
   }
 
     updateUser(data: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/user`, data);
+    return this.http.put(`${environment.apiUrl}/user`, data);
   }
 }

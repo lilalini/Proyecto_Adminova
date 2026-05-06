@@ -2,78 +2,98 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { IconSvgComponent } from '../../../shared/components/icon-svg/icon-svg.component';
+import { NotificationService } from '../../../core/services/notification.service';
+import { getRelativeDate } from '../../../shared/utils/booking-status.util';
+import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 
 @Component({
   selector: 'app-notifications',
   standalone: true,
-  imports: [CommonModule, RouterModule, IconSvgComponent],
+  imports: [CommonModule, RouterModule, IconSvgComponent, BackButtonComponent],
   templateUrl: './notifications.component.html',
 })
 export class NotificationsComponent implements OnInit {
   notifications: any[] = [];
   loading = true;
-  unreadCount = 0; // ← AÑADIR
+  unreadCount = 0;
+  currentPage = 1;
+  totalPages = 1;
+  perPage = 5;
+
+  constructor(private notificationService: NotificationService) {}
 
   ngOnInit() {
     this.loadNotifications();
   }
 
   loadNotifications() {
-    setTimeout(() => {
-      this.notifications = [
-        {
-          id: 1,
-          title: 'Reserva confirmada',
-          message: 'Tu reserva en el apartamento de Madrid ha sido confirmada',
-          date: '2026-03-20T10:30:00',
-          read: false,
-          icon: 'calendar-check'
-        },
-        {
-          id: 2,
-          title: 'Pago recibido',
-          message: 'Hemos recibido el pago de tu reserva #BKG-12345',
-          date: '2026-03-19T15:20:00',
-          read: true,
-          icon: 'wallet'
-        },
-        {
-          id: 3,
-          title: 'Recordatorio de check-in',
-          message: 'Tu check-in en Barcelona es dentro de 2 días',
-          date: '2026-03-18T09:00:00',
-          read: false,
-          icon: 'bell'
-        }
-      ];
-      this.unreadCount = this.notifications.filter(n => !n.read).length; // ← CALCULAR
-      this.loading = false;
-    }, 500);
+    this.notificationService.getAll(this.currentPage).subscribe({
+      next: (res: any) => {
+
+        console.log('Respuesta completa:', res);
+        console.log('Meta:', res.meta);
+        console.log('Total pages:', res.meta?.last_page);
+
+        this.notifications = res.data || [];
+        this.totalPages = res.meta?.last_page || 1;
+        this.unreadCount = this.notifications.filter((n: any) => !n.is_read).length;
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error cargando notificaciones:', err);
+        this.loading = false;
+      }
+    });
   }
 
-  markAsRead(notificationId: number) {
-    const notification = this.notifications.find(n => n.id === notificationId);
-    if (notification && !notification.read) {
-      notification.read = true;
-      this.unreadCount = this.notifications.filter(n => !n.read).length; // ← RECALCULAR
-    }
+  goToPage(page: number) {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.loading = true;
+    this.loadNotifications();
   }
+
+
+  getIconForNotification(notification: any): string {
+    const type = notification.type || '';
+    if (type.includes('booking') || type.includes('reserva')) return 'calendar-check';
+    if (type.includes('payment') || type.includes('pago')) return 'wallet';
+    if (type.includes('reminder') || type.includes('recordatorio')) return 'bell';
+    return 'bell';
+  }
+
+  markAllAsRead() {
+    this.notificationService.markAllAsRead().subscribe({
+      next: () => {
+
+        this.notifications = this.notifications.map(n => ({
+          ...n,
+          is_read: 1
+        }));
+
+        this.unreadCount = 0;
+      },
+      error: (err) => console.error('Error:', err)
+    });
+  }
+
+markAsRead(notificationId: number) {
+  console.log('Click detectado, ID:', notificationId);
+  this.notificationService.markAsRead(notificationId).subscribe({
+    next: () => {
+      console.log('Marcada como leída en backend');
+      const notification = this.notifications.find(n => n.id === notificationId);
+      if (notification) {
+        notification.is_read = true;
+        this.unreadCount = this.notifications.filter(n => !n.is_read).length;
+        console.log('unreadCount actualizado:', this.unreadCount);
+      }
+    },
+    error: (err) => console.error('Error:', err)
+  });
+}
 
   formatDate(date: string): string {
-    const d = new Date(date);
-    const now = new Date();
-    const diff = now.getTime() - d.getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    
-    if (hours < 24) {
-      if (hours < 1) return 'Hace unos minutos';
-      return `Hace ${hours} ${hours === 1 ? 'hora' : 'horas'}`;
-    }
-    
-    return d.toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    return getRelativeDate(date);
   }
 }

@@ -22,21 +22,20 @@ class CommissionFactory extends Factory
      */
     public function definition(): array
     {
-        $booking = Booking::inRandomOrder()->first() ?? Booking::factory();
-        $accommodation = $booking->accommodation_id ? Accommodation::find($booking->accommodation_id) : Accommodation::factory();
-        $owner = $accommodation instanceof Accommodation ? $accommodation->owner_id : Owner::factory();
-        
+        $booking = Booking::inRandomOrder()->first() ?? Booking::factory()->create();
+        $accommodation = Accommodation::find($booking->accommodation_id) ?? Accommodation::factory()->create();
+        $ownerId = $accommodation->owner_id ?? Owner::factory()->create()->id;
+
         $commissionType = fake()->randomElement(['channel', 'platform', 'owner']);
         $rate = fake()->randomFloat(2, 5, 25);
         $amount = ($booking->total_amount ?? fake()->randomFloat(2, 100, 1000)) * ($rate / 100);
-        
         $status = fake()->randomElement(['pending', 'calculated', 'invoiced', 'paid']);
-        
+
         return [
             'booking_id' => $booking->id,
-            'channel_id' => $commissionType === 'channel' ? DistributionChannel::factory() : null,
-            'accommodation_id' => $accommodation instanceof Accommodation ? $accommodation->id : $accommodation->create()->id,
-            'owner_id' => $owner instanceof Owner ? $owner->id : $owner->create()->id,
+            'channel_id' => $commissionType === 'channel' ? DistributionChannel::inRandomOrder()->value('id') : null,
+            'accommodation_id' => $accommodation->id,
+            'owner_id' => $ownerId,
             'commission_type' => $commissionType,
             'rate' => $rate,
             'amount' => $amount,
@@ -48,6 +47,5 @@ class CommissionFactory extends Factory
             'paid_at' => $status === 'paid' ? fake()->dateTimeThisMonth() : null,
             'notes' => fake()->optional(0.2)->sentence(),
         ];
-    
     }
 }

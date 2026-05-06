@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Accommodation } from '../models/accommodation.model';
 import { AvailabilityCalendar } from '../models/availability-calendar.model';
-import { Review } from '../models/review.model';
+import { PaginatedResponse, Review } from '../models/review.model';
 import { Media } from '../models/media.model';
 import { Owner } from '../models/owner.model';
 
@@ -45,7 +45,7 @@ export class PublicService {
     return this.http.get<ApiResponse<Accommodation>>(`${this.apiUrl}/accommodations/${id}/public`);
   }
 
-    searchAccommodations(params: any): Observable<ApiResponse<Accommodation[]>> {
+  searchAccommodations(params: any): Observable<ApiResponse<Accommodation[]>> {
     return this.http.get<ApiResponse<Accommodation[]>>(`${this.apiUrl}/accommodations/public`, { params });
   }
 
@@ -65,8 +65,8 @@ export class PublicService {
 
   // ========== RESEÑAS ==========
   
-  getReviews(accommodationId: number, page: number = 1): Observable<ApiResponse<Review[]>> {
-    return this.http.get<ApiResponse<Review[]>>(`${this.apiUrl}/reviews/public/${accommodationId}?page=${page}`);
+  getReviews(accommodationId: number): Observable<ApiResponse<PaginatedResponse<Review>>> {
+    return this.http.get<ApiResponse<PaginatedResponse<Review>>>(`${this.apiUrl}/reviews/public/${accommodationId}`);
   }
 
   createReview(accommodationId: number, review: { rating: number; comment: string }): Observable<ApiResponse<Review>> {

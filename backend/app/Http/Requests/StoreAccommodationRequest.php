@@ -44,6 +44,7 @@ class StoreAccommodationRequest extends FormRequest
             'cancellation_policy_id' => 'required|exists:cancellation_policies,id',
             'amenities' => 'nullable|array',
             'house_rules' => 'nullable|array',
+            'owner_id' => 'sometimes|exists:owners,id',
         ];
     }
 }

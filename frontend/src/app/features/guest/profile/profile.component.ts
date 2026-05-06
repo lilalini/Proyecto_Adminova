@@ -89,13 +89,14 @@ export class ProfileComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
   ) { const navigation = this.router.getCurrentNavigation();
-  this.returnUrl = navigation?.extras.state?.['returnUrl'] || '/guest/dashboard';}
+    this.returnUrl = localStorage.getItem('returnUrl') || '/guest/dashboard';
+}
 
   ngOnInit() {
     // Capturar mensaje de perfil incompleto
     this.route.queryParams.subscribe(params => {
       if (params['incomplete'] === 'true') {
-        this.errorMessage = 'Debes completar todos los campos obligatorios (*) antes de realizar una reserva.';
+        this.errorMessage = 'Mi vida es tan misteriosa como este perfil incompleto :(';
       }
     });
 
@@ -180,6 +181,10 @@ export class ProfileComponent implements OnInit {
         this.saving = false;
       }
     });
+  }
+
+    clearReturnUrl() {
+    localStorage.removeItem('returnUrl');
   }
 
   isProfileComplete(): boolean {

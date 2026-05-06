@@ -55,4 +55,20 @@ export class PaymentService {
   markAsRefunded(id: number, reason?: string): Observable<PaymentResponse> {
     return this.http.patch<PaymentResponse>(`${this.apiUrl}/${id}/refund`, { reason });
   }
+
+  getMonthlyRevenue(): Observable<number[]> {
+    return this.http.get<number[]>(`${this.apiUrl}/monthly-revenue`);
+  }
+
+  getTotalRevenue(): Observable<{ total: number }> {
+    return this.http.get<{ total: number }>(`${this.apiUrl}/total-revenue`);
+  }
+
+  getRevenueComparison(): Observable<{ percentage: number; trend: string; current_year: number; previous_year: number }> {
+    return this.http.get<{ percentage: number; trend: string; current_year: number; previous_year: number }>(`${this.apiUrl}/revenue-comparison`);
+  }
+
+  getMonthlyComparison(): Observable<{ percentage: number; trend: string; current_month: number; previous_month: number }> {
+    return this.http.get<{ percentage: number; trend: string; current_month: number; previous_month: number }>(`${this.apiUrl}/monthly-comparison`);
+  }
 }

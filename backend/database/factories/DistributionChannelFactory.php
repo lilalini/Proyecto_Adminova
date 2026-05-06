@@ -24,7 +24,7 @@ class DistributionChannelFactory extends Factory
             'name' => fake()->randomElement(['Booking.com', 'Airbnb', 'Expedia', 'VRBO', 'Direct Website']),
             'channel_type' => fake()->randomElement(['OTA', 'direct', 'corporate', 'referral']),
             'commission_rate' => fake()->randomFloat(2, 0, 25),
-            'api_config' => fake()->optional(0.5)->json(),
+            'api_config' => fake()->optional(0.5)->passThrough(['api_key' => 'test_' . fake()->uuid()]),
             'is_active' => fake()->boolean(90),
             'sync_enabled' => fake()->boolean(80),
             'last_sync_at' => fake()->optional(0.3)->dateTimeThisMonth(),

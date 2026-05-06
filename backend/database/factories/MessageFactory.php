@@ -30,7 +30,7 @@ class MessageFactory extends Factory
         $receiverType = fake()->randomElement($receiverTypes);
         
         $sender = $senderType::inRandomOrder()->first() ?? $senderType::factory();
-        $receiver = $receiverType::inRandomOrder()->first() ?? $senderType::factory();
+        $receiver = $receiverType::inRandomOrder()->first() ?? $receiverType::factory();
         
         $isRead = fake()->boolean(40);
         
@@ -47,7 +47,7 @@ class MessageFactory extends Factory
             'is_read' => $isRead,
             'read_at' => $isRead ? fake()->dateTimeThisMonth() : null,
             'message_type' => fake()->randomElement(['general', 'question', 'complaint', 'reservation']),
-            'attachments' => fake()->optional(0.1)->json(),
+            'attachments' => fake()->optional(0.1)->passThrough([['name' => 'file.pdf', 'url' => '/docs/file.pdf']]),
             'priority' => fake()->randomElement(['low', 'normal', 'high']),
             'sent_at' => fake()->dateTimeThisMonth(),
         ];

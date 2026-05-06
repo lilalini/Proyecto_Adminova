@@ -30,7 +30,7 @@ class UserFactory extends Factory
             'last_name' => fake()->lastName(),
             'email' => fake()->unique()->safeEmail(),
             'password' => static::$password ??= Hash::make('password'),
-            'role' => fake()->randomElement(['host', 'guest', 'admin']), // host, guest, admin
+            'role' => fake()->randomElement(['owner', 'guest', 'admin']), // owner, guest, admin
             'is_active' => true,
             'phone' => fake()->optional()->phoneNumber(),
             'email_verified_at' => now(),

@@ -3,13 +3,18 @@
 namespace App\Console\Commands;
 
 use App\Models\Accommodation;
+use App\Services\GeocodingService;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Http;
 
 class GeocodeAddresses extends Command
 {
     protected $signature = 'geocode:addresses';
     protected $description = 'Geocode all accommodations without coordinates';
+
+    public function __construct(protected GeocodingService $geocodingService)
+    {
+        parent::__construct();
+    }
 
     public function handle()
     {
@@ -26,32 +31,22 @@ class GeocodeAddresses extends Command
 
         foreach ($accommodations as $acc) {
             $address = "{$acc->address}, {$acc->city}, {$acc->country}";
-            
             $this->info("Geocoding: {$address}");
-            
-            $response = Http::withHeaders([
-                'User-Agent' => 'Adminova/1.0'
-            ])->get('https://nominatim.openstreetmap.org/search', [
-                'q' => $address,
-                'format' => 'json',
-                'limit' => 1
-            ]);
 
-            if ($response->successful() && count($response->json()) > 0) {
-                $data = $response->json()[0];
-                
-                $acc->latitude = $data['lat'];
-                $acc->longitude = $data['lon'];
+            $coordinates = $this->geocodingService->geocodeAddress($address);
+
+            if ($coordinates) {
+                $acc->latitude = $coordinates['lat'];
+                $acc->longitude = $coordinates['lon'];
                 $acc->save();
-                
-                $this->info("{$acc->title}: {$data['lat']}, {$data['lon']}");
+                $this->info("{$acc->title}: {$coordinates['lat']}, {$coordinates['lon']}");
             } else {
                 $this->error("No se encontró: {$address}");
             }
-            
+
             sleep(1);
         }
-        
+
         $this->info('Geocodificación completada');
     }
 }

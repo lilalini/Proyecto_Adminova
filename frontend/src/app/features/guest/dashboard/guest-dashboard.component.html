@@ -69,17 +69,34 @@
         </a>
 
         <!-- Notificaciones -->
-        <a routerLink="/guest/notifications" class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <app-icon-svg name="bell" className="w-6 h-6 text-purple-600"></app-icon-svg>
-            </div>
-            <div>
-              <p class="text-2xl font-bold text-gray-800">{{ stats.unreadNotifications }}</p>
-              <p class="text-sm text-gray-500">Notificaciones</p>
-            </div>
-          </div>
-        </a>
+<!-- Notificaciones -->
+<a routerLink="/guest/notifications" 
+   class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition"
+   [class.opacity-60]="unreadCount === 0">
+  <div class="flex items-center gap-4">
+    <div class="w-12 h-12 rounded-lg flex items-center justify-center"
+         [class.bg-purple-100]="unreadCount > 0"
+         [class.bg-gray-100]="unreadCount === 0">
+      <app-icon-svg name="bell" 
+                    class="w-6 h-6"
+                    [class.text-purple-600]="unreadCount > 0"
+                    [class.text-gray-400]="unreadCount === 0">
+      </app-icon-svg>
+    </div>
+    <div>
+      <p class="text-2xl font-bold"
+         [class.text-gray-800]="unreadCount > 0"
+         [class.text-gray-400]="unreadCount === 0">
+        {{ unreadCount }}
+      </p>
+      <p class="text-sm"
+         [class.text-gray-600]="unreadCount > 0"
+         [class.text-gray-400]="unreadCount === 0">
+        Notificaciones
+      </p>
+    </div>
+  </div>
+</a>
       </div>
     }
 

@@ -27,7 +27,7 @@ export class DocumentService {
   }
 
   downloadDocument(documentId: number): void {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     window.open(`${this.apiUrl}/${documentId}/download?token=${token}`, '_blank');
   }
 }

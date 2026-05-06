@@ -6,6 +6,7 @@ import { BookingStatusBadgeComponent } from '../booking-status-badge/booking-sta
 import { IconSvgComponent } from '../../../../shared/components/icon-svg/icon-svg.component';
 import { BookingService } from '../../../../core/services/booking.service'; 
 import { FormsModule } from '@angular/forms'; 
+import { getBookingStatus } from '../../../../shared/utils/booking-status.util';
 
 @Component({
   selector: 'app-booking-card',
@@ -30,7 +31,12 @@ export class BookingCardComponent {
   cancelReason = '';
   selectedBookingId: number | null = null;
 
-  constructor(private bookingService: BookingService) {} // ← INYECTAR
+  constructor(private bookingService: BookingService) {} 
+
+    private parseDate(dateStr: string): Date {
+    const [year, month, day] = dateStr.split('T')[0].split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
 
    downloadConfirmation(): void {
     this.bookingService.downloadConfirmation(this.booking.id).subscribe({
@@ -86,31 +92,34 @@ export class BookingCardComponent {
     this.cancelReason = '';
   }
 
-  confirmCancel() {
-    if (!this.selectedBookingId) return;
-    
-    this.bookingService.cancelBooking(this.selectedBookingId, this.cancelReason).subscribe({
-      next: () => {
-        this.closeCancelModal();
-        this.bookingCancelled.emit(this.selectedBookingId!); // ← EMITIR AL PADRE
-      },
-      error: (error: any) => {
-        alert('Error al cancelar: ' + error.error?.message || 'Error desconocido');
-      }
-    });
+confirmCancel() {
+  if (!this.selectedBookingId) return;
+  
+  this.bookingService.cancelBooking(this.selectedBookingId, this.cancelReason).subscribe({
+    next: () => {
+      this.closeCancelModal();
+      this.bookingCancelled.emit(this.selectedBookingId!);
+    },
+    error: (error: any) => {
+      alert('Error al cancelar: ' + (error.error?.message || 'Error desconocido'));
+    }
+  });
+}
+
+  canCancel(): boolean {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const checkIn = new Date(this.booking.check_in);
+    checkIn.setHours(0, 0, 0, 0);
+
+    const statusOk = ['pending', 'confirmed'].includes(this.booking.status);
+    const dateOk = checkIn.getTime() >= today.getTime();
+
+    return statusOk && dateOk;
   }
 
-     canCancel(): boolean {
-      const today = new Date().toISOString().split('T')[0];
-      const checkIn = this.booking.check_in.split('T')[0];
-      const statusOk = this.booking.status === 'pending' || this.booking.status === 'confirmed';
-      const dateOk = checkIn >= today;
-      
-      console.log('Reserva ID:', this.booking.id);
-      console.log('Status:', this.booking.status, '| Status OK:', statusOk);
-      console.log('Check-in:', checkIn, '| Hoy:', today, '| Date OK:', dateOk);
-      console.log('Resultado:', statusOk && dateOk);
-      
-      return statusOk && dateOk;
-    }
+    getBookingStatus(booking: any): string {
+    return getBookingStatus(booking);
+  }
 }

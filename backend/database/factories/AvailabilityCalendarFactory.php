@@ -25,7 +25,7 @@ class AvailabilityCalendarFactory extends Factory
         
         return [
             'accommodation_id' => Accommodation::factory(),
-            'user_id' => fake()->optional(0.3)->passThrough(User::inRandomOrder()->first()?->id ?? User::factory()),
+            'user_id' => fake()->boolean(30) ? User::inRandomOrder()->value('id') : null,
             'date' => fake()->dateTimeBetween('now', '+1 year'),
             'status' => $status,
             'price' => $status === 'blocked' ? null : fake()->optional(0.3)->randomFloat(2, 50, 500),

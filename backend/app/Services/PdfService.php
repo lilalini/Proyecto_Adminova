@@ -9,11 +9,12 @@ use Illuminate\Support\Facades\Storage;
 
 class PdfService
 {
-    protected Mpdf $mpdf;
-
-    public function __construct()
+    /**
+     * Crea una nueva instancia de Mpdf con la configuración base
+     */
+    protected function createMpdf(): Mpdf
     {
-        $this->mpdf = new Mpdf([
+        return new Mpdf([
             'mode' => 'utf-8',
             'format' => 'A4',
             'margin_top' => 24,
@@ -26,17 +27,17 @@ class PdfService
 
     /**
      * Renderiza una vista Blade y devuelve el PDF como string
-     * Método genérico para cualquier vista
      */
     public function render(string $view, array $data = []): string
     {
+        $mpdf = $this->createMpdf();
         $html = view($view, $data)->render();
-        $this->mpdf->WriteHTML($html);
-        return $this->mpdf->Output('', 'S');
+        $mpdf->WriteHTML($html);
+        return $mpdf->Output('', 'S');
     }
 
     /**
-     * genera factura de reserva (usando vista pdfs.invoice)
+     * Genera factura de reserva
      */
     public function generateInvoice(Booking $booking): string
     {
@@ -44,7 +45,7 @@ class PdfService
     }
 
     /**
-     * genera contrato de alojamiento (usando vista pdfs.contract)
+     * Genera contrato de alojamiento
      */
     public function generateContract(array $data): string
     {
@@ -52,12 +53,12 @@ class PdfService
     }
 
     /**
-     * guarda pdf en storage y crea registro en documents
+     * Guarda PDF en storage y crea registro en documents
      */
     public function saveAndRegister(
-        string $pdfContent, 
-        string $documentType, 
-        $documentable, 
+        string $pdfContent,
+        string $documentType,
+        $documentable,
         string $title
     ): Document {
         $path = 'documents/' . date('Y/m') . '/' . uniqid() . '.pdf';
@@ -77,7 +78,7 @@ class PdfService
     }
 
     /**
-     * descarga el pdf directamente (para confirmaciones, etc.)
+     * Descarga el PDF directamente
      */
     public function download(string $view, array $data, string $filename)
     {

@@ -8,7 +8,6 @@ use App\Http\Requests\UpdateGuestRequest;
 use App\Http\Resources\GuestResource;
 use App\Models\Guest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use App\Http\Requests\UpdateGuestByUserIdRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Models\LoyaltyPoint;
@@ -17,113 +16,127 @@ class GuestController extends Controller
 {
     public function index(Request $request)
     {
-        if (!Gate::allows('viewAny', Guest::class)) {
-            return response()->json(['message' => 'No autorizado'], 403);
+        $this->authorize('viewAny', Guest::class);
+
+        $user = $request->user();
+        $query = Guest::query();
+
+        // Owner solo ve guests de sus alojamientos
+        if ($user->role === 'owner') {
+            $query->whereHas('bookings.accommodation', fn($q) => $q->where('owner_id', $user->id));
         }
 
-        $guests = Guest::paginate(15);
-        return GuestResource::collection($guests);
+        return GuestResource::collection($query->paginate(15));
     }
 
     public function store(StoreGuestRequest $request)
     {
-        if (!Gate::allows('create', Guest::class)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
+        $this->authorize('create', Guest::class);
         $guest = Guest::create($request->validated());
         return new GuestResource($guest);
     }
 
     public function show(Guest $guest)
     {
-        if (!Gate::allows('view', $guest)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
+        $this->authorize('view', $guest);
         return new GuestResource($guest);
     }
 
     public function update(UpdateGuestRequest $request, Guest $guest)
     {
-        if (!Gate::allows('update', $guest)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
+        $this->authorize('update', $guest);
         $guest->update($request->validated());
         return new GuestResource($guest);
     }
 
     public function destroy(Guest $guest)
     {
-        if (!Gate::allows('delete', $guest)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
+        $this->authorize('delete', $guest);
         $guest->delete();
         return response()->json(null, 204);
     }
 
-    public function findByUserId($userId)
+    public function findByUserId(Request $request, $userId)
     {
+        // Solo el propio usuario o admin pueden consultar
+        $authUser = $request->user();
+        if ($authUser->id != $userId && $authUser->role !== 'admin') {
+            return response()->json(['message' => 'No autorizado'], 403);
+        }
+
         $guest = Guest::where('user_id', $userId)->first();
         if (!$guest) {
             return response()->json(['message' => 'Guest no encontrado'], 404);
         }
+
         return new GuestResource($guest);
+    }
+
+    public function findByEmail(Request $request)
+    {
+        $email = $request->query('email');
+        
+        if (!$email) {
+            return response()->json(['data' => null]);
+        }
+        
+        $guest = Guest::where('email', $email)->first();
+        
+        if (!$guest) {
+            return response()->json(['data' => null]);
+        }
+        
+        // Verificar que el usuario autenticado puede ver este guest
+        $user = $request->user();
+        
+        if ($user->role !== 'admin' && $user->email !== $email) {
+            return response()->json(['data' => null], 403);
+        }
+        
+        return response()->json(['data' => new GuestResource($guest)]);
     }
 
     public function isProfileComplete($userId)
     {
         $guest = Guest::where('user_id', $userId)->first();
-        
+
         if (!$guest) {
             return response()->json([
                 'complete' => false,
-                'message' => 'Perfil no encontrado'
+                'message' => 'Perfil no encontrado',
             ], 404);
         }
-        
+
         $requiredFields = [
             'first_name', 'last_name', 'email', 'phone',
             'document_type', 'document_number', 'nationality',
-            'address', 'city', 'country'
+            'address', 'city', 'country',
         ];
-        
-        $missingFields = [];
-        foreach ($requiredFields as $field) {
-            if (empty($guest->$field)) {
-                $missingFields[] = $field;
-            }
-        }
-        
+
+        $missingFields = array_filter($requiredFields, fn($field) => empty($guest->$field));
+
         return response()->json([
             'complete' => empty($missingFields),
-            'missing_fields' => $missingFields
+            'missing_fields' => array_values($missingFields),
         ]);
     }
 
-  
-
     public function updateByUserId(UpdateGuestByUserIdRequest $request, $userId)
     {
+        $authUser = Auth::user();
+
+        if ($authUser->id != $userId && $authUser->role !== 'admin') {
+            return response()->json(['message' => 'No autorizado'], 403);
+        }
+
         $guest = Guest::where('user_id', $userId)->first();
-        
         if (!$guest) {
             return response()->json(['message' => 'Guest no encontrado'], 404);
         }
-        
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        if ($user->id != $userId) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-        
+
         $oldNewsletter = $guest->accepts_newsletter;
-        
         $guest->update($request->validated());
-        
-        // Si acaba de aceptar el boletín, dar puntos de bienvenida
+
         if (!$oldNewsletter && $request->accepts_newsletter) {
             LoyaltyPoint::create([
                 'guest_id' => $guest->id,
@@ -133,8 +146,7 @@ class GuestController extends Controller
                 'expiry_date' => now()->addYear(),
             ]);
         }
-        
+
         return new GuestResource($guest);
     }
-
 }

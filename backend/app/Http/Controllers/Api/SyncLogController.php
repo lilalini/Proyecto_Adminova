@@ -6,18 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\SyncLogResource;
 use App\Models\SyncLog;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 
 class SyncLogController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
-        if (!Gate::allows('viewAny', SyncLog::class)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
+        $this->authorize('viewAny', SyncLog::class);
 
         $query = SyncLog::with(['accommodation', 'channel', 'createdBy']);
 
@@ -45,26 +39,19 @@ class SyncLogController extends Controller
             $query->where('created_at', '<=', $request->to);
         }
 
-        $logs = $query->orderBy('created_at', 'desc')->paginate(15);
-        return SyncLogResource::collection($logs);
+        return SyncLogResource::collection($query->orderBy('created_at', 'desc')->paginate(15));
     }
 
     public function show(SyncLog $syncLog)
     {
-        if (!Gate::allows('view', $syncLog)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
+        $this->authorize('view', $syncLog);
         $syncLog->load(['accommodation', 'channel', 'createdBy']);
         return new SyncLogResource($syncLog);
     }
 
     public function destroy(SyncLog $syncLog)
     {
-        if (!Gate::allows('delete', $syncLog)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
+        $this->authorize('delete', $syncLog);
         $syncLog->delete();
         return response()->json(null, 204);
     }

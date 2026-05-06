@@ -44,8 +44,11 @@ class NotificationPolicy
 
     public function markAsRead(User $user, Notification $notification): bool
     {
+        $userType = 'App\\Models\\User';
+        $notificationType = str_replace('\\\\', '\\', $notification->notifiable_type);
+        
         return $user->id === $notification->notifiable_id && 
-               get_class($user) === $notification->notifiable_type;
+            $userType === $notificationType;
     }
     /**
      * Determine whether the user can restore the model.

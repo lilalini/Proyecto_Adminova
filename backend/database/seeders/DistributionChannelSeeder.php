@@ -19,7 +19,7 @@ class DistributionChannelSeeder extends Seeder
                 'name' => 'Booking.com',
                 'channel_type' => 'OTA',
                 'commission_rate' => 15.00,
-                'api_config' => json_encode(['api_key' => 'test_key']),
+                'api_config' => ['api_key' => 'test_key'],
                 'is_active' => true,
                 'sync_enabled' => true,
             ],

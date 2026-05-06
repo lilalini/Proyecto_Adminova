@@ -150,7 +150,7 @@
                 }}</span>
               </div>
               <span class="text-gray-400">·</span>
-              <a href="#reviews" class="text-indigo-600 hover:underline">
+              <a (click)="scrollToReviews()" class="text-indigo-600 hover:underline cursor-pointer">
                 {{ reviews.length }} reseñas
               </a>
             </div>
@@ -307,41 +307,45 @@
   }
 </div>
 
-        <!-- RESEÑAS -->
-        <div
-          id="reviews"
-          class="bg-white rounded-xl border border-gray-200 p-6"
-        >
-          <h2 class="text-xl font-semibold mb-4">Reseñas</h2>
-          @if (reviews.length > 0) {
-            <div class="space-y-4">
-              @for (review of reviews; track review.id) {
-                <div class="border-b border-gray-100 pb-4 last:border-0">
-                  <div class="flex items-center gap-2 mb-2">
-                    <div class="flex items-center">
-                      @for (star of [1, 2, 3, 4, 5]; track star) {
-                        <app-icon-svg
-                          [name]="star <= review.rating ? 'star' : 'star'"
-                          [className]="
-                            star <= review.rating
-                              ? 'w-4 h-4 text-yellow-400 fill-current'
-                              : 'w-4 h-4 text-gray-300'
-                          "
-                        >
-                        </app-icon-svg>
-                      }
+        <!-- RESEÑAS CON TOGGLE -->
+        <div id="reviews" class="bg-white rounded-xl border border-gray-200 p-6">
+          <div 
+            class="flex justify-between items-center cursor-pointer" 
+            (click)="toggleReviews()"
+          >
+            <h2 class="text-xl font-semibold">Reseñas ({{ reviews.length }})</h2>
+            <app-icon-svg 
+              [name]="showReviews ? 'chevron-up' : 'chevron-down'" 
+              class="w-5 h-5 text-gray-500"
+            ></app-icon-svg>
+          </div>
+          
+          @if (showReviews) {
+            <div class="mt-4 space-y-4">
+              @if (reviews.length > 0) {
+                @for (review of reviews; track review.id) {
+                  <div class="border-b border-gray-100 pb-4 last:border-0">
+                    <div class="flex items-center gap-2 mb-2">
+                      <div class="flex items-center gap-1">
+                        @for (star of [1, 2, 3, 4, 5]; track star) {
+                          <app-icon-svg 
+                            name="star" 
+                            [class]="star <= review.rating ? 'w-4 h-4 text-yellow-400 fill-current' : 'w-4 h-4 text-gray-300'"
+                          ></app-icon-svg>
+                        }
+                      </div>
+                      <span class="font-medium">{{ getGuestName(review) }}</span>
+                      <span class="text-gray-400 text-sm">{{ review.created_at | date }}</span>
                     </div>
-                    <span class="font-medium">{{ review.guest_name }}</span>
-                    <span class="text-gray-400 text-sm">{{
-                      review.created_at | date
-                    }}</span>
+                    <p class="text-gray-600">{{ review.comment }}</p>
                   </div>
-                  <p class="text-gray-600">{{ review.comment }}</p>
-                </div>
+                }
+              } @else {
+                <p class="text-gray-500">No hay reseñas todavía</p>
               }
             </div>
           } @else {
-            <p class="text-gray-500">No hay reseñas todavía</p>
+            <p class="text-gray-500 mt-4">Haz clic para ver las reseñas</p>
           }
         </div>
       </div>
@@ -371,6 +375,7 @@
                 <input
                   type="date"
                   [(ngModel)]="checkIn"
+                  [min]="todayDate"
                   (change)="onDateChange()"
                   class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300"
                   placeholder="Llegada"
@@ -388,6 +393,7 @@
                 <input
                   type="date"
                   [(ngModel)]="checkOut"
+                  [min]="checkIn"
                   (change)="onDateChange()"
                   class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300"
                   placeholder="Salida"
@@ -395,6 +401,13 @@
               </div>
             </div>
           </div>
+
+                    @if (availabilityError) {
+            <div class="text-red-600 text-sm mt-2 flex items-center gap-1">
+              <app-icon-svg name="alert-circle" class="w-4 h-4"></app-icon-svg>
+              {{ availabilityError }}
+            </div>
+          }
 
           <!-- Huéspedes con icono -->
           <div class="mb-4">
@@ -533,15 +546,12 @@
           <!-- Botón de reserva con icono -->
           <button
             (click)="goToCheckout()"
-            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-lg transition transform hover:scale-105 flex items-center justify-center gap-2"
+            [disabled]="!canBook || !checkIn || !checkOut || availabilityError"
+            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-lg transition transform hover:scale-105 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <app-icon-svg
-              name="calendar-check"
-              className="w-5 h-5"
-            ></app-icon-svg>
+            <app-icon-svg name="calendar-check" class="w-5 h-5"></app-icon-svg>
             Reservar ahora
           </button>
-
           <!-- Código de referencia con icono -->
           <p
             class="text-xs text-gray-400 text-center mt-4 flex items-center justify-center gap-1"

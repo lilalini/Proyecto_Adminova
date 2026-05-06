@@ -8,11 +8,13 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { Accommodation } from '../../../../core/models/accommodation.model';
 import { IconSvgComponent } from '../../../../shared/components/icon-svg/icon-svg.component';
 import { BookingResponseWithToken } from '../../../../core/models/booking.model';
+import { GuestService } from '../../../../core/services/guest.service';
+import { TermsModalComponent } from '../../../bookings/components/terms-modal/terms-modal.component';
 
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, IconSvgComponent],
+  imports: [CommonModule, FormsModule, RouterModule, IconSvgComponent, TermsModalComponent],
   templateUrl: './checkout.component.html',
 })
 export class CheckoutComponent implements OnInit {
@@ -24,6 +26,7 @@ export class CheckoutComponent implements OnInit {
   guests: number = 1;
   nights: number = 0;
   totalPrice: number = 0;
+  todayDate: string = new Date().toISOString().split('T')[0];
   
   guestData = {
     first_name: '',
@@ -39,12 +42,15 @@ export class CheckoutComponent implements OnInit {
   showAuthModal = false; 
   showTermsModal = false;
 
+  cancellationPolicy: any = null;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private publicService: PublicService,
     private bookingService: BookingService,
-    public auth: AuthService
+    public auth: AuthService,
+    private guestService: GuestService
   ) {}
 
   ngOnInit() {
@@ -60,14 +66,40 @@ export class CheckoutComponent implements OnInit {
       return;
     }
 
+    this.validateDates();
     this.loadAccommodation();
     this.loadGuestData();
+  }
+
+  validateDates(): boolean {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const checkInDate = new Date(this.checkIn);
+    const checkOutDate = new Date(this.checkOut);
+
+    if (checkInDate < today) {
+      this.errorMessage = 'La fecha de entrada no puede ser anterior a hoy';
+      return false;
+    }
+
+    if (checkOutDate <= checkInDate) {
+      this.errorMessage = 'La fecha de salida debe ser posterior a la fecha de entrada';
+      return false;
+    }
+
+    if (this.nights < 1) {
+      this.errorMessage = 'La estancia debe ser de al menos 1 noche';
+      return false;
+    }
+
+    return true;
   }
 
   loadAccommodation() {
     this.publicService.getAccommodation(this.accommodationId).subscribe({
       next: (response) => {
         this.accommodation = response.data;
+        this.cancellationPolicy = response.data.cancellation_policy; 
         this.loading = false;
       },
       error: () => {
@@ -79,11 +111,23 @@ export class CheckoutComponent implements OnInit {
 
   loadGuestData() {
     this.auth.currentUser$.subscribe(user => {
-      if (user) {
-        this.guestData.first_name = (user as any).first_name || '';
-        this.guestData.last_name = (user as any).last_name || '';
-        this.guestData.email = user.email || '';
-        this.guestData.phone = (user as any).phone || '';
+      if (user && user.email) {
+        this.guestService.getByEmail(user.email).subscribe({
+          next: (response) => {
+            const guest = response.data;
+            if (guest) {
+              this.guestData.first_name = guest.first_name || '';
+              this.guestData.last_name = guest.last_name || '';
+              this.guestData.email = guest.email || user.email;
+              this.guestData.phone = guest.phone || '';
+            } else {
+              this.guestData.email = user.email;
+            }
+          },
+          error: () => {
+            this.guestData.email = user.email;
+          }
+        });
       }
     });
   }
@@ -94,8 +138,17 @@ export class CheckoutComponent implements OnInit {
       return;
     }
 
+    if (!this.validateDates()) {
+      return;
+    }
+
     if (!this.guestData.first_name || !this.guestData.last_name || !this.guestData.email) {
-      alert('Por favor, completa todos los campos obligatorios');
+      this.errorMessage = 'Por favor, completa todos los campos obligatorios';
+      return;
+    }
+
+    if (!this.accommodation) {
+      this.errorMessage = 'Error: Datos del alojamiento no disponibles';
       return;
     }
 
@@ -114,21 +167,24 @@ export class CheckoutComponent implements OnInit {
       status: 'pending' as 'pending',
       special_requests: this.guestData.special_requests,
       nights: this.nights,
-      price_per_night: this.accommodation?.base_price || 0,
-      base_price: (this.accommodation?.base_price || 0) * this.nights,
+      price_per_night: this.accommodation.base_price,
+      base_price: this.accommodation.base_price * this.nights,
       balance_due: this.totalPrice
     };
 
     this.submitting = true;
+    this.errorMessage = '';
 
     this.bookingService.create<BookingResponseWithToken>(bookingData).subscribe({
       next: (response: BookingResponseWithToken) => {
-        localStorage.setItem('auth_token', response.token);
+        if (response.token) {
+          localStorage.setItem('auth_token', response.token);
+        }
         this.router.navigate(['/payment', response.data.id]);
       },
       error: (error) => {
         console.error('Error al crear reserva:', error);
-        this.errorMessage = 'Error al procesar la reserva';
+        this.errorMessage = error.error?.message || 'Error al procesar la reserva';
         this.submitting = false;
       }
     });
@@ -154,5 +210,56 @@ export class CheckoutComponent implements OnInit {
 
   closeTermsModal() {
     this.showTermsModal = false;
+  }
+
+    updateDates() {
+    const checkInDate = new Date(this.checkIn);
+    const checkOutDate = new Date(this.checkOut);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (checkInDate < today) {
+      this.errorMessage = 'La fecha de entrada no puede ser anterior a hoy';
+      return;
+    }
+
+    if (checkOutDate <= checkInDate) {
+      this.errorMessage = 'La fecha de salida debe ser posterior a la fecha de entrada';
+      return;
+    }
+
+    this.errorMessage = '';
+  }
+
+  updateBookingSummary() {
+    const checkInDate = new Date(this.checkIn);
+    const checkOutDate = new Date(this.checkOut);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (checkInDate < today) {
+      this.errorMessage = 'La fecha de entrada no puede ser anterior a hoy';
+      return;
+    }
+
+    if (checkOutDate <= checkInDate) {
+      this.errorMessage = 'La fecha de salida debe ser posterior a la fecha de entrada';
+      return;
+    }
+
+    // Recalcular noches
+    const diffTime = Math.abs(checkOutDate.getTime() - checkInDate.getTime());
+    this.nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    // Recalcular precio total
+    if (this.accommodation) {
+      this.totalPrice = (this.accommodation.base_price * this.nights) + (this.accommodation.cleaning_fee || 0);
+    }
+    
+    this.errorMessage = '';
+  }
+
+  goBackToAccommodation() {
+    this.router.navigate(['/accommodations', this.accommodationId]);
   }
 }

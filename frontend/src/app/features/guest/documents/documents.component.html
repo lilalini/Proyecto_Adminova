@@ -1,7 +1,10 @@
 <div class="max-w-7xl mx-auto px-4 py-8">
-  <div class="bg-white rounded-xl p-4 mb-6">
-    <h1 class="text-2xl font-semibold text-gray-800 mb-1">Mis documentos</h1>
-    <p class="text-gray-500">Facturas, contratos y documentos legales</p>
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-semibold text-gray-800 mb-1">Mis documentos</h1>
+      <p class="text-gray-500">Facturas, contratos y documentos legales</p>
+    </div>
+    <app-back-button backUrl="/guest/dashboard" text="Volver al dashboard"></app-back-button>
   </div>
 
   @if (loading) {

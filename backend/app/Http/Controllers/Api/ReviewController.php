@@ -6,9 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreReviewRequest;
 use App\Http\Requests\UpdateReviewRequest;
 use App\Http\Resources\ReviewResource;
+use App\Models\Booking;
 use App\Models\Review;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 
 class ReviewController extends Controller
 {
@@ -16,33 +16,28 @@ class ReviewController extends Controller
     {
         $query = Review::with(['accommodation', 'guest', 'user']);
 
-        // Filtro por accommodation
         if ($request->has('accommodation_id')) {
             $query->where('accommodation_id', $request->accommodation_id);
         }
 
-        // Filtro por rating
         if ($request->has('min_rating')) {
             $query->where('rating', '>=', $request->min_rating);
         }
 
-        // Solo publicadas para guest
         if ($request->user()?->role === 'guest') {
             $query->where('status', 'published');
         }
 
-        $reviews = $query->paginate(15);
-        return ReviewResource::collection($reviews);
+        return ReviewResource::collection($query->paginate(15));
     }
 
     public function store(StoreReviewRequest $request)
     {
         $data = $request->validated();
-        
-        // Obtener accommodation_id desde booking
-        $booking = \App\Models\Booking::find($data['booking_id']);
+
+        $booking = Booking::find($data['booking_id']);
         $data['accommodation_id'] = $booking->accommodation_id;
-        $data['guest_id'] = $request->user()->id;
+        $data['guest_id'] = $request->user()->guest?->id;
         $data['status'] = 'pending';
         $data['source'] = $data['source'] ?? 'direct';
         $data['is_verified'] = true;
@@ -61,50 +56,40 @@ class ReviewController extends Controller
 
     public function update(UpdateReviewRequest $request, Review $review)
     {
+        $this->authorize('update', $review);
         $review->update($request->validated());
         $review->load(['accommodation', 'booking', 'guest']);
-
         return new ReviewResource($review);
     }
 
     public function destroy(Review $review)
     {
-        if (!Gate::allows('delete', $review)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
+        $this->authorize('delete', $review);
         $review->delete();
         return response()->json(null, 204);
     }
 
-    // Método adicional para responder a una review
     public function respond(Request $request, Review $review)
     {
-        if (!Gate::allows('respond', $review)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
+        $this->authorize('respond', $review);
 
         $request->validate([
             'host_response' => 'required|string',
         ]);
 
-        $review->update([
-            'host_response' => $request->host_response,
-            'host_responded_at' => now(),
-            'user_id' => $request->user()->id,
-        ]);
+        $review->respond($request->host_response, $request->user()->id);
 
-        return new ReviewResource($review);
+        return new ReviewResource($review->fresh());
     }
 
     public function publicIndex($accommodationId)
     {
         $reviews = Review::with('guest')
-                        ->where('accommodation_id', $accommodationId)
-                        ->where('status', 'published')
-                        ->latest()
-                        ->paginate(10);
-        
+            ->where('accommodation_id', $accommodationId)
+            ->where('status', 'published')
+            ->latest()
+            ->paginate(10);
+
         return response()->json(['data' => $reviews]);
     }
 }

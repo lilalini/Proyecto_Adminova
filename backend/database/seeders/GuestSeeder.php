@@ -30,7 +30,7 @@ class GuestSeeder extends Seeder
             'address' => 'Calle Secundaria 456',
             'city' => 'Barcelona',
             'postal_code' => '08001',
-            'country' => 'España',
+            'country' => 'ES',
             'source' => 'direct',
         ]);
     }

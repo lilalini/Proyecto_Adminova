@@ -32,7 +32,7 @@ class OwnerFactory extends Factory
             'address' => fake()->streetAddress(),
             'city' => fake()->city(),
             'postal_code' => fake()->postcode(),
-            'country' => fake()->country(),
+            'country' => fake()->countryCode(),
             'iban' => fake()->optional(0.7)->iban('ES'),
             'contract_signed' => fake()->boolean(80),
             'contract_date' => fake()->optional(0.8)->dateTimeBetween('-2 years', 'now'),

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
         // Las reviews son histórico, no se borran aunque el accommodation se desactive
             $table->foreignId('accommodation_id')->constrained()->restrictOnDelete();
-            $table->foreignId('booking_id')->constrained()->nullOnDelete();
+            $table->foreignId('booking_id')->constrained()->restrictOnDelete();
         // Guest no se borra, sus reviews quedan
             $table->foreignId('guest_id')->constrained()->restrictOnDelete();
         // Staff puede irse, la respuesta queda

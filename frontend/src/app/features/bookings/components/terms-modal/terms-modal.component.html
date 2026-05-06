@@ -1,0 +1,36 @@
+<div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" (click)="close()">
+  <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col" (click)="$event.stopPropagation()">
+    <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+      <h2 class="text-xl font-semibold text-gray-800">Términos y condiciones</h2>
+        <button type="button" (click)="close()" class="text-gray-400 hover:text-gray-600" title="Cerrar">
+        <app-icon-svg name="x" class="w-6 h-6"></app-icon-svg>
+        <span class="sr-only">Cerrar</span>
+        </button>
+    </div>
+    
+    <div class="p-6 overflow-y-auto flex-1 space-y-4 text-gray-600">
+      @if (cancellationPolicy) {
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <h3 class="font-semibold text-gray-800">Política de cancelación: {{ cancellationPolicy.name }}</h3>
+          <p class="text-sm">Cancelación gratuita hasta {{ cancellationPolicy.free_cancellation_days }} días antes. Penalización del {{ cancellationPolicy.penalty_percentage }}% después.</p>
+        </div>
+      }
+
+      @if (securityDeposit > 0) {
+        <div class="bg-yellow-50 p-4 rounded-lg">
+          <p class="text-sm">Depósito de seguridad: {{ securityDeposit | number:'1.2-2' }} €</p>
+        </div>
+      }
+
+      <h3 class="font-semibold text-gray-800">1. Reservas</h3>
+      <p>Las reservas están sujetas a disponibilidad.</p>
+      
+      <h3 class="font-semibold text-gray-800">2. Responsabilidades</h3>
+      <p>El huésped se compromete a cuidar las instalaciones.</p>
+    </div>
+    
+    <div class="p-6 border-t border-gray-200 flex justify-end">
+      <button type="button" (click)="close()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg">Aceptar</button>
+    </div>
+  </div>
+</div>

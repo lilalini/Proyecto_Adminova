@@ -1,66 +1,102 @@
-<div class="max-w-3xl mx-auto px-4 py-8">
+<div class="max-w-4xl mx-auto px-4 py-8">
+  
   <!-- Cabecera -->
-  <div class="flex items-center gap-3 mb-6">
-    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-      <app-icon-svg name="bell" className="w-6 h-6 text-purple-600"></app-icon-svg>
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-3">
+      <a routerLink="/guest/dashboard" 
+         class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center hover:bg-gray-200 transition">
+        <app-icon-svg name="arrow-left" class="w-5 h-5 text-gray-600"></app-icon-svg>
+      </a>
+      <div>
+        <h1 class="text-2xl font-bold text-gray-800">Notificaciones</h1>
+        <p class="text-sm text-gray-500">Mantente al día de tus novedades</p>
+      </div>
     </div>
-    <h1 class="text-2xl font-bold text-gray-800">Notificaciones</h1>
-    @if (!loading && notifications.length > 0) {
-        <span class="ml-2 bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full">
-        {{ unreadCount }} nuevas
-        </span>
-        }
+
+    @if (!loading && unreadCount > 0) {
+      <button (click)="markAllAsRead()" 
+              type="button"
+              title="Marcar todas como leídas"
+              class="text-sm text-purple-600 hover:text-purple-700 font-medium flex items-center gap-1">
+        <app-icon-svg name="check-circle" class="w-4 h-4"></app-icon-svg>
+        Marcar todas como leídas
+      </button>
+    }
   </div>
 
+  <!-- LOADING -->
   @if (loading) {
-    <div class="text-center py-12">
-      <p class="text-gray-500">Cargando notificaciones...</p>
+    <div class="space-y-3">
+      @for (i of [1,2,3]; track i) {
+        <div class="bg-white rounded-xl border border-gray-200 p-4 animate-pulse">
+          <div class="flex gap-4">
+            <div class="w-10 h-10 bg-gray-200 rounded-lg"></div>
+            <div class="flex-1">
+              <div class="h-4 bg-gray-200 rounded w-32 mb-2"></div>
+              <div class="h-3 bg-gray-200 rounded w-full"></div>
+            </div>
+          </div>
+        </div>
+      }
     </div>
   }
 
+  <!-- SIN NOTIFICACIONES -->
   @if (!loading && notifications.length === 0) {
-    <div class="bg-white rounded-xl shadow-lg p-12 text-center">
-      <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <app-icon-svg name="bell" className="w-10 h-10 text-gray-400"></app-icon-svg>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-16 text-center">
+      <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <app-icon-svg name="bell" class="w-12 h-12 text-gray-300"></app-icon-svg>
       </div>
-      <h2 class="text-xl font-semibold text-gray-700 mb-2">No hay notificaciones</h2>
-      <p class="text-gray-500">Te avisaremos cuando tengas novedades</p>
+      <h3 class="text-xl font-semibold text-gray-700 mb-2">No hay notificaciones</h3>
+      <p class="text-gray-400">Te avisaremos cuando tengas novedades</p>
     </div>
   }
 
+  <!-- LISTA -->
   @if (!loading && notifications.length > 0) {
     <div class="space-y-3">
       @for (notification of notifications; track notification.id) {
         <div 
-          class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition cursor-pointer"
-          [class.border-l-4]="!notification.read"
-          [class.border-l-purple-500]="!notification.read"
-          (click)="markAsRead(notification.id)"
-        >
-          <div class="flex gap-4">
-            <div class="flex-shrink-0">
-              <div class="w-10 h-10 rounded-lg flex items-center justify-center"
-                   [class.bg-purple-100]="!notification.read"
-                   [class.bg-gray-100]="notification.read">
-                <app-icon-svg [name]="notification.icon" 
-                              className="w-5 h-5"
-                              [class.text-purple-600]="!notification.read"
-                              [class.text-gray-400]="notification.read">
-                </app-icon-svg>
-              </div>
-            </div>
-            <div class="flex-1">
-              <div class="flex justify-between items-start">
-                <div>
-                  <h3 class="font-semibold text-gray-800"
-                      [class.font-medium]="notification.read">
-                    {{ notification.title }}
-                  </h3>
-                  <p class="text-sm text-gray-500 mt-1">{{ notification.message }}</p>
+          class="group bg-white rounded-xl border transition-all duration-200 hover:shadow-md cursor-pointer"
+          [class.border-l-4]="!notification.is_read"
+          [class.border-l-purple-500]="!notification.is_read"
+          [class.border-gray-200]="notification.is_read"
+          [class.opacity-75]="notification.is_read"
+          (click)="markAsRead(notification.id)">
+          
+          <div class="p-5">
+            <div class="flex gap-4">
+              <!-- ICONO -->
+              <div class="flex-shrink-0">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center"
+                     [class.bg-purple-50]="!notification.is_read"
+                     [class.bg-gray-50]="notification.is_read">
+                  <app-icon-svg 
+                    [name]="getIconForNotification(notification)" 
+                    class="w-6 h-6"
+                    [class.text-purple-600]="!notification.is_read"
+                    [class.text-gray-400]="notification.is_read">
+                  </app-icon-svg>
                 </div>
-                <span class="text-xs text-gray-400 whitespace-nowrap ml-4">
-                  {{ formatDate(notification.date) }}
-                </span>
+              </div>
+              
+              <!-- CONTENIDO -->
+              <div class="flex-1 min-w-0">
+                <div class="flex justify-between items-start gap-4">
+                  <div class="flex-1">
+                    <h3 class="text-gray-900"
+                        [class.font-semibold]="!notification.is_read"
+                        [class.font-medium]="notification.is_read">
+                      {{ notification.title }}
+                    </h3>
+                    <p class="text-sm text-gray-500 mt-1 line-clamp-2">
+                      {{ notification.body || notification.message }}
+                    </p>
+                  </div>
+                  <span class="text-xs text-gray-400 whitespace-nowrap flex-shrink-0">
+                    {{ formatDate(notification.created_at || notification.date) }}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -68,4 +104,47 @@
       }
     </div>
   }
+
+  <!-- PAGINACIÓN + VOLVER -->
+  @if (totalPages > 1) {
+    <div class="flex items-center justify-between mt-8 pt-4 border-t border-gray-100">
+      <a routerLink="/guest/dashboard" 
+         class="inline-flex items-center gap-2 text-gray-500 hover:text-indigo-600 transition-colors duration-200">
+        <app-icon-svg name="arrow-left" class="w-4 h-4"></app-icon-svg>
+        <span class="text-sm">Volver al dashboard</span>
+      </a>
+      
+      <div class="flex items-center gap-2">
+        <button (click)="goToPage(currentPage - 1)" 
+                [disabled]="currentPage === 1"
+                type="button"
+                title="Página anterior"
+                class="px-3 py-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50">
+          <app-icon-svg name="chevron-left" class="w-4 h-4"></app-icon-svg>
+        </button>
+        
+        <span class="text-sm text-gray-600">
+          Página {{ currentPage }} de {{ totalPages }}
+        </span>
+        
+        <button (click)="goToPage(currentPage + 1)" 
+                [disabled]="currentPage === totalPages"
+                type="button"
+                title="Página siguiente"
+                class="px-3 py-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50">
+          <app-icon-svg name="chevron-right" class="w-4 h-4"></app-icon-svg>
+        </button>
+      </div>
+    </div>
+  } @else {
+    <!-- Solo volver si no hay paginación -->
+    <div class="mt-8 pt-4 border-t border-gray-100">
+      <a routerLink="/guest/dashboard" 
+         class="inline-flex items-center gap-2 text-gray-500 hover:text-indigo-600 transition-colors duration-200">
+        <app-icon-svg name="arrow-left" class="w-4 h-4"></app-icon-svg>
+        <span class="text-sm">Volver al dashboard</span>
+      </a>
+    </div>
+  }
+
 </div>

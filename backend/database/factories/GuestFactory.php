@@ -34,9 +34,9 @@ class GuestFactory extends Factory
             'address' => fake()->optional(0.6)->streetAddress(),
             'city' => fake()->optional(0.6)->city(),
             'postal_code' => fake()->optional(0.6)->postcode(),
-            'country' => fake()->optional(0.6)->country(),
+            'country' => fake()->optional(0.6)->countryCode(), // ISO, no nombre completo
+            'source_data' => fake()->optional(0.3)->passthrough(['source' => fake()->word()]), 
             'source' => fake()->randomElement(['direct', 'booking.com', 'airbnb', 'expedia', 'phone']),
-            'source_data' => fake()->optional(0.3)->passthrough(json_encode(['source' => fake()->word()])),
             'external_id' => fake()->optional(0.3)->uuid(),
         ];
     }

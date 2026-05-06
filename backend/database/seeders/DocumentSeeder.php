@@ -58,7 +58,7 @@ class DocumentSeeder extends Seeder
         
         // Documentos para guests (30%)
         $guests = Guest::all();
-        foreach ($guests->random($guests->count() * 0.3) as $guest) {
+        foreach ($guests->random((int) ($guests->count() * 0.3)) as $guest) {
             Document::create([
                 'documentable_type' => Guest::class,
                 'documentable_id' => $guest->id,

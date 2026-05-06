@@ -7,12 +7,14 @@ import { Booking } from '../../../../core/models/booking.model';
 import { IconSvgComponent } from '../../../../shared/components/icon-svg/icon-svg.component';
 import { BookingCardComponent } from '../../../bookings/components/booking-card/booking-card.component';
 import { ActivatedRoute } from '@angular/router';
+import { getBookingStatus } from '../../../../shared/utils/booking-status.util';
+import { BackButtonComponent } from '../../../../shared/components/back-button/back-button.component';
 
 
 @Component({
   selector: 'app-my-bookings',
   standalone: true,
-  imports: [CommonModule, RouterModule, IconSvgComponent, BookingCardComponent],
+  imports: [CommonModule, RouterModule, IconSvgComponent, BookingCardComponent, BackButtonComponent],
   templateUrl: './my-bookings.component.html',
 })
 export class MyBookingsComponent implements OnInit {
@@ -43,10 +45,12 @@ export class MyBookingsComponent implements OnInit {
         
         if (this.onlyUpcoming) {
           // filtrar solo próximas (pendientes/confirmadas y fecha futura)
-          this.bookings = response.data.filter(booking => 
-            (booking.status === 'pending' || booking.status === 'confirmed') &&
-            booking.check_in >= today
-          );
+        this.bookings = response.data.filter(booking => {
+          const status = getBookingStatus(booking);
+
+          return (status === 'pending' || status === 'confirmed') &&
+                booking.check_in >= today;
+        });
         } else {
           this.bookings = response.data;
         }

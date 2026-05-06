@@ -10,27 +10,25 @@ use App\Models\CancellationPolicy;
 
 class AccommodationSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-         $owners = Owner::all();
+        $owners = Owner::all();
         $policies = CancellationPolicy::all();
 
         foreach ($owners as $owner) {
-            // 2-5 propiedades por owner
             $numProperties = rand(2, 5);
             
             for ($i = 0; $i < $numProperties; $i++) {
                 Accommodation::factory()->create([
                     'owner_id' => $owner->id,
                     'cancellation_policy_id' => $policies->random()->id,
+                    'latitude' => fake()->latitude(36, 43),
+                    'longitude' => fake()->longitude(-9, 4),
                 ]);
             }
         }
         
-        // Propiedad específica para pruebas
+        // Propiedad específica para pruebas (Madrid)
         Accommodation::create([
             'owner_id' => Owner::where('email', 'owner@example.com')->first()->id ?? Owner::first()->id,
             'cancellation_policy_id' => CancellationPolicy::where('name', 'Flexible')->first()->id,
@@ -46,10 +44,12 @@ class AccommodationSeeder extends Seeder
             'city' => 'Madrid',
             'postal_code' => '28013',
             'country' => 'ES',
+            'latitude' => 40.416775,
+            'longitude' => -3.703790,
             'base_price' => 250.00,
             'cleaning_fee' => 50.00,
             'status' => 'published',
+            'cleaning_buffer_days' => 1,
         ]);
-    
     }
 }

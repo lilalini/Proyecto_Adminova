@@ -3,8 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Gate;
-use App\Models\OwnerPayoutMethod;
 
 class StoreOwnerPayoutMethodRequest extends FormRequest
 {
@@ -13,7 +11,7 @@ class StoreOwnerPayoutMethodRequest extends FormRequest
      */
     public function authorize(): bool
     {
-         return Gate::allows('create', OwnerPayoutMethod::class);
+         return true;
     }
 
     /**

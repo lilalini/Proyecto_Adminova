@@ -3,8 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Gate;
-use App\Models\GuestPaymentMethod;
+
 
 class StoreGuestPaymentMethodRequest extends FormRequest
 {
@@ -13,7 +12,7 @@ class StoreGuestPaymentMethodRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows('create', GuestPaymentMethod::class);
+        return true;
     }
 
     /**
@@ -25,7 +24,7 @@ class StoreGuestPaymentMethodRequest extends FormRequest
     {
         return [
             'guest_id' => 'required|exists:guests,id',
-            'method_type' => 'required|in:credit_card,paypal,apple_pay,google_pay',
+            'method_type' => 'required|in:credit_card,debit_card,paypal,apple_pay,google_pay',
             'token' => 'nullable|string',
             'card_last_four' => 'required_if:method_type,credit_card|nullable|string|size:4',
             'card_brand' => 'required_if:method_type,credit_card|nullable|string|in:visa,mastercard,amex',

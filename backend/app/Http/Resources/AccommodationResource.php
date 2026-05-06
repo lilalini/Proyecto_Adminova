@@ -7,11 +7,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class AccommodationResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
         return [
@@ -31,6 +26,8 @@ class AccommodationResource extends JsonResource
             'latitude' => $this->latitude,
             'longitude' => $this->longitude,
             'base_price' => (float) $this->base_price,
+            'weekly_discount' => (float) $this->weekly_discount,
+            'monthly_discount' => (float) $this->monthly_discount,
             'cleaning_fee' => (float) $this->cleaning_fee,
             'security_deposit' => (float) $this->security_deposit,
             'minimum_stay' => $this->minimum_stay,
@@ -38,33 +35,40 @@ class AccommodationResource extends JsonResource
             'check_in_time' => $this->check_in_time,
             'check_out_time' => $this->check_out_time,
             'status' => $this->status,
-            'amenities' => is_string($this->amenities) 
-                ? json_decode($this->amenities, true) 
-                : ($this->amenities ?? []),
-            'house_rules' => $this->house_rules,
-            
-            // Relaciones
-            'owner' => [
+            'views' => $this->views,
+            'amenities' => $this->amenities ?? [],
+            'house_rules' => $this->house_rules ?? [],
+
+            // Relaciones — solo si están cargadas
+            'owner' => $this->whenLoaded('owner', fn() => [
                 'id' => $this->owner->id,
                 'first_name' => $this->owner->first_name,
                 'last_name' => $this->owner->last_name,
                 'email' => $this->owner->email,
-            ],
-            'cancellation_policy' => [
+            ]),
+            'cancellation_policy' => $this->whenLoaded('cancellationPolicy', fn() => [
                 'id' => $this->cancellationPolicy->id,
                 'name' => $this->cancellationPolicy->name,
                 'free_cancellation_days' => $this->cancellationPolicy->free_cancellation_days,
                 'penalty_percentage' => (float) $this->cancellationPolicy->penalty_percentage,
-            ],
-            
-            // Media (fotos)
-           'main_image' => $this->media->where('is_main', true)->first()?->file_path,
-            'images' => $this->getMedia('gallery')->map(fn($media) => [
-                'id' => $media->id,
-                'url' => $media->getUrl(),
-                'is_main' => null,
             ]),
-            
+
+            // Media
+            'main_image' => $this->whenLoaded('media', fn() =>
+                $this->getMedia('gallery')
+                    ->first(fn($m) => $m->getCustomProperty('is_main'))
+                    ?->getUrl()
+                ?? $this->getMedia('gallery')->first()?->getUrl() // fallback: primera imagen
+            ),
+            'images' => $this->whenLoaded('media', fn() =>
+                $this->getMedia('gallery')->map(fn($media) => [
+                    'id' => $media->id,
+                    'url' => $media->getUrl(),
+                    'thumb' => $media->getUrl('thumb'),
+                    'is_main' => (bool) $media->getCustomProperty('is_main', false),
+                ])
+            ),
+
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

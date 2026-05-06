@@ -67,3 +67,39 @@
     }
   </div>
 </div>
+
+<!-- Modal de éxito -->
+@if (showSuccessModal) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
+      <div class="text-center">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <app-icon-svg name="check-circle" class="w-8 h-8 text-green-600"></app-icon-svg>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">¡Pago confirmado!</h3>
+        <p class="text-gray-600 mb-6">Tu reserva ha sido confirmada correctamente.</p>
+        <button (click)="goToBookings()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-xl transition">
+          Ver mis reservas
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal de error -->
+@if (showErrorModal) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
+      <div class="text-center">
+        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <app-icon-svg name="x-circle" class="w-8 h-8 text-red-600"></app-icon-svg>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">Error en el pago</h3>
+        <p class="text-gray-600 mb-6">No se pudo procesar el pago. Inténtalo de nuevo.</p>
+        <button (click)="closeErrorModal()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-xl transition">
+          Intentar de nuevo
+        </button>
+      </div>
+    </div>
+  </div>
+}

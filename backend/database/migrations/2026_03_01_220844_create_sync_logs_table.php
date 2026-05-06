@@ -38,7 +38,7 @@ return new class extends Migration
             $table->integer('retry_count')->default(0);
             $table->timestamp('next_retry_at')->nullable();
             
-            $table->foreignId('created_by_user_id')->nullable()->constrained('users');
+            $table->foreignId('created_by_user_id')->nullable()->constrained('users')->nullOnDelete();
             
             $table->timestamps();
             $table->softDeletes();

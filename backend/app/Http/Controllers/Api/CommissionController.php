@@ -7,20 +7,20 @@ use App\Http\Requests\UpdateCommissionRequest;
 use App\Http\Resources\CommissionResource;
 use App\Models\Commission;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 
 class CommissionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
-        if (!Gate::allows('viewAny', Commission::class)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
+        $this->authorize('viewAny', Commission::class);
 
+        $user = $request->user();
         $query = Commission::with(['booking', 'channel', 'accommodation', 'owner']);
+
+        // Owner solo ve sus comisiones
+        if ($user->role === 'owner') {
+            $query->whereHas('owner', fn($q) => $q->where('email', $user->email));
+        }
 
         if ($request->has('owner_id')) {
             $query->where('owner_id', $request->owner_id);
@@ -38,16 +38,12 @@ class CommissionController extends Controller
             $query->where('created_at', '<=', $request->to);
         }
 
-        $commissions = $query->paginate(15);
-        return CommissionResource::collection($commissions);
+        return CommissionResource::collection($query->paginate(15));
     }
 
     public function show(Commission $commission)
     {
-        if (!Gate::allows('view', $commission)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
+        $this->authorize('view', $commission);
         $commission->load(['booking', 'channel', 'accommodation', 'owner']);
         return new CommissionResource($commission);
     }
@@ -56,31 +52,20 @@ class CommissionController extends Controller
     {
         $commission->update($request->validated());
         $commission->load(['booking', 'channel', 'accommodation', 'owner']);
-
         return new CommissionResource($commission);
     }
 
     public function destroy(Commission $commission)
     {
-        if (!Gate::allows('delete', $commission)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
+        $this->authorize('delete', $commission);
         $commission->delete();
         return response()->json(null, 204);
     }
 
     public function markAsPaid(Request $request, Commission $commission)
     {
-        if (!Gate::allows('update', $commission)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
-        $commission->update([
-            'status' => 'paid',
-            'paid_at' => now(),
-        ]);
-
-        return new CommissionResource($commission);
+        $this->authorize('update', $commission);
+        $commission->markAsPaid(); // usando método del modelo
+        return new CommissionResource($commission->fresh());
     }
 }

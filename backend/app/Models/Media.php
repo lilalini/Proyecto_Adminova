@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\MediaCollections\Models\Media as SpatieMedia;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
-use Illuminate\Support\Facades\Storage;
 
 class Media extends SpatieMedia implements HasMedia
 {
@@ -22,26 +21,9 @@ class Media extends SpatieMedia implements HasMedia
         'collection_name',   // gallery, profile, documents, tasks, etc.
         'name',
         'file_name',
-        'file_path',
-        'file_size',
         'mime_type',
         'disk',              // public, s3, local
-        'order',
-        'is_main',
-        'alt_text',
-        'title',
-        'description',
-        'metadata',          // JSON con dimensiones, coordenadas GPS, etc.
     ];
-
-    // Casts para tipos de datos
-    protected $casts = [
-        'file_size' => 'integer',
-        'order' => 'integer',
-        'is_main' => 'boolean',
-        'metadata' => 'array',
-    ];
-  
 
     // ==================== scopes ====================
     /**
@@ -50,14 +32,6 @@ class Media extends SpatieMedia implements HasMedia
     public function scopeForCollection($query, $collectionName)
     {
         return $query->where('collection_name', $collectionName);
-    }
-
-    /**
-     * Filtra la imagen principal (is_main = true)
-     */
-    public function scopeMainImage($query)
-    {
-        return $query->where('is_main', true);
     }
 
     /**
@@ -136,22 +110,9 @@ class Media extends SpatieMedia implements HasMedia
             ->where('model_id', $this->model_id)
             ->where('collection_name', $this->collection_name)
             ->where('id', '!=', $this->id)
-            ->update(['is_main' => false]);
+            ->each(fn($m) => $m->setCustomProperty('is_main', false)->save());
 
-        $this->update(['is_main' => true]);
+        $this->setCustomProperty('is_main', true)->save();
     }
 
-    // ==================== eventos ====================
-    /**
-     * Boot del modelo
-     * Elimina el archivo físico cuando se elimina el registro de la BD
-     */
-    protected static function booted()
-    {
-        static::deleted(function ($media) {
-            if ($media->file_path && Storage::disk($media->disk)->exists($media->file_path)) {
-                Storage::disk($media->disk)->delete($media->file_path);
-            }
-        });
-    }
 }

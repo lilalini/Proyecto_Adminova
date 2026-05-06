@@ -8,17 +8,27 @@ use App\Http\Requests\UpdateDocumentRequest;
 use App\Http\Resources\DocumentResource;
 use App\Models\Document;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
 class DocumentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Document::class);
+
+        $user = $request->user();
         $query = Document::with('verifiedBy');
+
+        // Filtrar por rol
+        if ($user->role === 'guest') {
+            $query->where('documentable_type', 'App\Models\Guest')
+                  ->where('documentable_id', $user->guest?->id);
+        } elseif ($user->role === 'owner') {
+            $query->where(function($q) use ($user) {
+                $q->where('documentable_type', 'App\Models\Owner')
+                  ->whereHas('documentable', fn($q) => $q->where('email', $user->email));
+            });
+        }
 
         if ($request->has('documentable_type') && $request->has('documentable_id')) {
             $query->where('documentable_type', $request->documentable_type)
@@ -29,15 +39,12 @@ class DocumentController extends Controller
             $query->where('document_type', $request->document_type);
         }
 
-        $documents = $query->paginate(15);
-        return DocumentResource::collection($documents);
+        return DocumentResource::collection($query->paginate(15));
     }
 
     public function store(StoreDocumentRequest $request)
     {
-        if (!Gate::allows('create', Document::class)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
+        $this->authorize('create', Document::class);
 
         $file = $request->file('file');
         $path = $file->store('documents/' . date('Y/m'), 'public');
@@ -56,64 +63,42 @@ class DocumentController extends Controller
             'notes' => $request->notes,
         ]);
 
-        $document->refresh();
-        return new DocumentResource($document);
+        return new DocumentResource($document->refresh());
     }
 
     public function show(Document $document)
     {
-        if (!Gate::allows('view', $document)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
+        $this->authorize('view', $document);
         $document->load('verifiedBy');
         return new DocumentResource($document);
     }
 
     public function update(UpdateDocumentRequest $request, Document $document)
     {
-        if (!Gate::allows('update', $document)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
+        $this->authorize('update', $document);
         $document->update($request->validated());
         $document->load('verifiedBy');
-
         return new DocumentResource($document);
     }
 
     public function destroy(Document $document)
     {
-        if (!Gate::allows('delete', $document)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
+        $this->authorize('delete', $document);
         Storage::disk('public')->delete($document->file_path);
         $document->delete();
-
         return response()->json(null, 204);
     }
 
     public function verify(Request $request, Document $document)
     {
-        if (!Gate::allows('verify', $document)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
-        $document->update([
-            'is_verified' => true,
-            'verified_at' => now(),
-            'verified_by_user_id' => $request->user()->id,
-        ]);
-
-        return new DocumentResource($document);
+        $this->authorize('verify', $document);
+        $document->markAsVerified($request->user()->id);
+        return new DocumentResource($document->fresh());
     }
 
     public function download(Document $document)
     {
-        if (!Gate::allows('view', $document)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
+        $this->authorize('view', $document);
         /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
         $disk = Storage::disk('public');
         return $disk->download($document->file_path, $document->file_name);

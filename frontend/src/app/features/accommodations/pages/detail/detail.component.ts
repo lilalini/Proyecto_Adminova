@@ -9,13 +9,15 @@ import { PublicService } from '../../../../core/services/public.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { BookingService } from '../../../../core/services/booking.service';
 import { Accommodation } from '../../../../core/models/accommodation.model';
-import { Review } from '../../../../core/models/review.model';
 import { AvailabilityCalendar } from '../../../../core/models/availability-calendar.model';
 import { User } from '../../../../core/models/user.model';
 import { Media } from '../../../../core/models/media.model';
 import { BookingResponse } from '../../../../core/models/booking.model';
-import { WeatherService } from '../../../../core/services/weather.service';
+import { WeatherService, CurrentWeather, DailyForecast } from '../../../../core/services/weather.service';
 import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
+import { ReviewService } from '../../../../core/services/review.service';
+import { PaginatedResponse, Review } from '../../../../core/models/review.model';
+import { ApiResponse } from '../../../../core/services/public.service';
 
 @Component({
   selector: 'app-accommodation-detail',
@@ -44,6 +46,10 @@ export class AccommodationDetailComponent implements OnInit {
   checkIn: string = '';
   checkOut: string = '';
   guests: number = 1;
+  todayDate: string = new Date().toISOString().split('T')[0];
+  availabilityError: string = '';
+  canBook: boolean = false;
+  isCheckingAvailability: boolean = false;
 
   // Para cálculo dinámico
   nights: number = 0;
@@ -57,19 +63,33 @@ export class AccommodationDetailComponent implements OnInit {
   modalCurrentImage = '';
 
   // Clima
-  weather: any = null;
-  forecast: any[] = [];
+  weather: CurrentWeather | null = null;
+  forecast: DailyForecast[] = [];
   weatherLoading = true;
   weatherError = false;
   showForecast = false;
-  
+
+  // Reviews
+  canReview = false;
+  showReviewForm = false;
+  submittingReview = false;
+  reviewData = {
+    rating: 5,
+    comment: '',
+    booking_id: 0
+  };
+  reviewSuccess = false;
+  reviewError = '';
+  showReviews = false;
+
   constructor(
     private route: ActivatedRoute,
     private publicService: PublicService,
     private auth: AuthService,
     private bookingService: BookingService,
     private router: Router,
-    private weatherService: WeatherService
+    private weatherService: WeatherService,
+    private reviewService: ReviewService
   ) {}
 
   ngOnInit() {
@@ -82,6 +102,7 @@ export class AccommodationDetailComponent implements OnInit {
       this.loadAccommodation(parseInt(id));
       this.loadAvailability(parseInt(id));
       this.loadReviews(parseInt(id));
+      this.checkCanReview(parseInt(id));
       
       const today = new Date();
       const nextWeek = new Date();
@@ -90,6 +111,7 @@ export class AccommodationDetailComponent implements OnInit {
       this.checkIn = today.toISOString().split('T')[0];
       this.checkOut = nextWeek.toISOString().split('T')[0];
       this.calculateNights();
+      this.verifyAvailability();
     }
   }
 
@@ -99,8 +121,8 @@ export class AccommodationDetailComponent implements OnInit {
         this.accommodation = response.data;
         this.loading = false;
         this.calculateNights();
+        this.verifyAvailability();
         
-        // Cargar clima después de tener coordenadas
         if (this.accommodation?.latitude && this.accommodation?.longitude) {
           this.loadWeather(this.accommodation.latitude, this.accommodation.longitude);
         }
@@ -129,8 +151,8 @@ export class AccommodationDetailComponent implements OnInit {
 
   loadReviews(id: number) {
     this.publicService.getReviews(id).subscribe({
-      next: (response) => {
-        this.reviews = response.data;
+      next: (response: ApiResponse<PaginatedResponse<Review>>) => {
+        this.reviews = response.data.data;
       },
       error: (error) => {
         console.error('Error cargando reseñas:', error);
@@ -138,30 +160,34 @@ export class AccommodationDetailComponent implements OnInit {
     });
   }
 
-loadWeather(lat: string, lon: string) {
-  this.weatherLoading = true;
-  this.weatherService.getCurrentWeather(lat, lon).subscribe({
-    next: (data) => {
-      this.weather = data;
-      this.weatherLoading = false;
-    },
-    error: (err) => {
-      console.error('Error cargando clima:', err);
-      this.weatherError = true;
-      this.weatherLoading = false;
-    }
-  });
-  
-  // Cargar pronóstico para los próximos días
-  this.weatherService.getForecast(lat, lon).subscribe({
-    next: (data) => {
-      this.forecast = data;
-    },
-    error: (err) => {
-      console.error('Error cargando pronóstico:', err);
-    }
-  });
-}
+  toggleReviews(): void {
+    this.showReviews = !this.showReviews;
+  }
+
+  loadWeather(lat: string, lon: string) {
+    this.weatherLoading = true;
+    this.weatherService.getCurrentWeather(lat, lon).subscribe({
+      next: (data) => {
+        this.weather = data;
+        this.weatherLoading = false;
+      },
+      error: (err) => {
+        console.error('Error cargando clima:', err);
+        this.weatherError = true;
+        this.weatherLoading = false;
+      }
+    });
+    
+    this.weatherService.getForecast(lat, lon).subscribe({
+      next: (data) => {
+        this.forecast = data;
+      },
+      error: (err) => {
+        console.error('Error cargando pronóstico:', err);
+      }
+    });
+  }
+
   getWeatherIcon(code: number): string {
     if (code === 0) return 'sun';
     if (code <= 3) return 'cloud-sun';
@@ -203,9 +229,7 @@ loadWeather(lat: string, lon: string) {
         extraGuestsTotal = extraGuests * this.extraGuestFee * this.nights;
       }
       
-      this.totalPrice = basePriceTotal + 
-                        extraGuestsTotal + 
-                        (this.accommodation.cleaning_fee || 0);
+      this.totalPrice = basePriceTotal + extraGuestsTotal + (this.accommodation.cleaning_fee || 0);
     }
   }
 
@@ -214,7 +238,53 @@ loadWeather(lat: string, lon: string) {
   }
 
   onDateChange() {
-    this.calculateNights();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const checkInDate = new Date(this.checkIn);
+    const checkOutDate = new Date(this.checkOut);
+
+    if (checkInDate < today) {
+      this.availabilityError = 'La fecha de entrada no puede ser anterior a hoy';
+      this.canBook = false;
+      return;
+    }
+
+    if (checkOutDate <= checkInDate) {
+      this.availabilityError = 'La fecha de salida debe ser posterior a la fecha de entrada';
+      this.canBook = false;
+      return;
+    }
+
+    this.availabilityError = '';
+    this.verifyAvailability();
+  }
+
+  verifyAvailability() {
+    if (!this.accommodation || !this.checkIn || !this.checkOut) {
+      this.canBook = false;
+      return;
+    }
+
+    this.isCheckingAvailability = true;
+    this.canBook = false;
+
+    this.publicService.checkAvailability(this.accommodation.id, this.checkIn, this.checkOut).subscribe({
+      next: (response) => {
+        this.isCheckingAvailability = false;
+        this.canBook = response.available;
+        this.availabilityError = response.available ? '' : 'El alojamiento no está disponible en las fechas seleccionadas';
+        
+        if (response.available) {
+          this.calculateNights();
+        }
+      },
+      error: (err) => {
+        console.error('Error verificando disponibilidad:', err);
+        this.isCheckingAvailability = false;
+        this.canBook = false;
+        this.availabilityError = 'Error verificando disponibilidad. Intenta de nuevo.';
+      }
+    });
   }
 
   onImageUploaded(image: Media) {
@@ -223,11 +293,12 @@ loadWeather(lat: string, lon: string) {
     }
   }
 
-  checkAvailability() {
-    console.log('Verificando disponibilidad:', this.checkIn, this.checkOut);
-  }
-
   goToCheckout() {
+    if (!this.canBook) {
+      alert(this.availabilityError || 'Las fechas seleccionadas no están disponibles');
+      return;
+    }
+
     if (!this.checkIn || !this.checkOut) {
       alert('Selecciona fechas de check-in y check-out');
       return;
@@ -256,9 +327,7 @@ loadWeather(lat: string, lon: string) {
       }
     }
     
-    return Array.isArray(this.accommodation.amenities) 
-      ? this.accommodation.amenities 
-      : [];
+    return Array.isArray(this.accommodation.amenities) ? this.accommodation.amenities : [];
   }
 
   openModal(index: number) {
@@ -326,5 +395,66 @@ loadWeather(lat: string, lon: string) {
         alert('Error al crear la reserva. Inténtalo de nuevo.');
       }
     });
+  }
+
+  checkCanReview(accommodationId: number) {
+    if (!this.user || this.user.role !== 'guest') return;
+
+    this.bookingService.getMyBookings().subscribe({
+      next: (response) => {
+        const completedBooking = response.data.find(b =>
+          b.accommodation?.id === accommodationId &&
+          b.status === 'checked_out'
+        );
+        if (completedBooking) {
+          this.canReview = true;
+          this.reviewData.booking_id = completedBooking.id;
+        }
+      },
+      error: () => {}
+    });
+  }
+
+  submitReview() {
+    if (!this.reviewData.comment.trim()) return;
+    this.submittingReview = true;
+    this.reviewError = '';
+
+    this.reviewService.create({
+      booking_id: this.reviewData.booking_id,
+      rating: this.reviewData.rating,
+      comment: this.reviewData.comment
+    }).subscribe({
+      next: () => {
+        this.reviewSuccess = true;
+        this.showReviewForm = false;
+        this.submittingReview = false;
+        const id = this.route.snapshot.paramMap.get('id');
+        if (id) this.loadReviews(parseInt(id));
+      },
+      error: (err) => {
+        this.reviewError = err.error?.message || 'Error al enviar la reseña';
+        this.submittingReview = false;
+      }
+    });
+  }
+
+  setRating(rating: number) {
+    this.reviewData.rating = rating;
+  }
+
+  getGuestName(review: Review): string {
+    if (review.guest) {
+      return review.guest.first_name + ' ' + review.guest.last_name;
+    }
+    return 'Huésped verificado';
+  }
+
+  scrollToReviews(): void {
+    const element = document.getElementById('reviews');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+    this.showReviews = true;
   }
 }

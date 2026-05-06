@@ -40,8 +40,8 @@ class SyncLogSeeder extends Seeder
                     'items_total' => rand(30, 90),
                     'items_success' => $status === 'success' ? 90 : rand(60, 85),
                     'items_failed' => $status === 'success' ? 0 : rand(5, 30),
-                    'request_data' => json_encode(['action' => 'sync_all']),
-                    'response_data' => json_encode(['message' => 'Sync completed']),
+                    'request_data' => ['action' => 'sync_all'],
+                    'response_data' => ['message' => 'Sync completed'],
                     'error_message' => $status === 'error' ? 'Connection timeout' : null,
                     'created_by_user_id' => $admin?->id,
                     'created_at' => $date,
@@ -62,7 +62,7 @@ class SyncLogSeeder extends Seeder
                 'duration_seconds' => 300,
                 'items_total' => rand(50, 200),
                 'items_success' => rand(50, 200),
-                'request_data' => json_encode(['import_new_listings' => true]),
+                'request_data' => ['import_new_listings' => true],
                 'created_by_user_id' => $admin?->id,
             ]);
         }

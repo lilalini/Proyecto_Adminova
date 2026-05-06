@@ -53,4 +53,9 @@ class User extends Authenticatable
             'is_active' => 'boolean',
         ];
     }
+
+    public function guest()
+    {
+        return $this->hasOne(Guest::class, 'user_id');
+    }
 }

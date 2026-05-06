@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('guests', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
              // Datos personales (única vez)
             $table->string('first_name');
             $table->string('last_name');
-            $table->string('email')->nullable(); // puede reservar sin email (ej: Airbnb)
+            $table->string('email')->nullable()->unique(); // puede reservar sin email (ej: Airbnb)
             $table->string('phone')->nullable();
             
             // Datos legales (pueden cambiar con el tiempo)
@@ -28,8 +29,9 @@ return new class extends Migration
             $table->string('address')->nullable();
             $table->string('city')->nullable();
             $table->string('postal_code')->nullable();
-            $table->string('country')->nullable();
-            
+            $table->string('country')->nullable(); 
+            $table->boolean('accepts_newsletter')->default(false); 
+                        
             // Metadata
             $table->string('source')->default('direct');
             $table->json('source_data')->nullable();
@@ -39,6 +41,7 @@ return new class extends Migration
            
             
             // Evitar duplicados por email o documento
+            $table->unique('user_id');
             $table->index('email');
             $table->index('document_number');
             $table->index('source');

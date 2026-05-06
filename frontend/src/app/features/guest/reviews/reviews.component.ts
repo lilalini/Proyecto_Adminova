@@ -3,87 +3,92 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { IconSvgComponent } from '../../../shared/components/icon-svg/icon-svg.component';
+import { BookingService } from '../../../core/services/booking.service';
+import { ReviewService } from '../../../core/services/review.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { GuestService } from '../../../core/services/guest.service';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 
 @Component({
   selector: 'app-reviews',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, IconSvgComponent],
+  imports: [CommonModule, FormsModule, RouterModule, IconSvgComponent, BackButtonComponent],
   templateUrl: './reviews.component.html',
 })
 export class ReviewsComponent implements OnInit {
   pendingReviews: any[] = [];
   completedReviews: any[] = [];
   loading = true;
-  
-  // Modal de reseña
+  submitting = false;
+  error = '';
+
+  // Modal
   showReviewModal = false;
   selectedBooking: any = null;
   reviewRating = 5;
   reviewComment = '';
 
+  private guestId: number | null = null;
+
+  constructor(
+    private bookingService: BookingService,
+    private reviewService: ReviewService,
+    private auth: AuthService,
+    private guestService: GuestService
+  ) {}
+
   ngOnInit() {
-    this.loadReviews();
+    this.auth.currentUser$.subscribe(user => {
+      if (user) {
+        // Obtener el guest asociado al user
+        this.guestService.getByUserId(user.id).subscribe({
+          next: (res: any) => {
+            this.guestId = res.data?.id ?? res.id ?? null;
+            this.loadReviews();
+          },
+          error: () => this.loadReviews()
+        });
+      }
+    });
   }
 
   loadReviews() {
-    // Aquí vendrá la llamada al backend
-    setTimeout(() => {
-      this.pendingReviews = [
-        {
-          id: 1,
-          accommodation: {
-            id: 1,
-            title: 'Loft Moderno con Terraza',
-            image: '/assets/images/placeholder.jpg'
-          },
-          check_out: '2026-03-15',
-          stay_days: 3
-        },
-        {
-          id: 2,
-          accommodation: {
-            id: 2,
-            title: 'Ático de Lujo con Vistas',
-            image: '/assets/images/placeholder.jpg'
-          },
-          check_out: '2026-03-10',
-          stay_days: 2
-        }
-      ];
+    forkJoin({
+      bookings: this.bookingService.getMyBookings().pipe(catchError(() => of({ data: [] }))),
+      reviews: this.guestId
+        ? this.reviewService.getAll(1).pipe(catchError(() => of({ data: [] })))
+        : of({ data: [] })
+    }).subscribe({
+      next: ({ bookings, reviews }) => {
+        // Reservas completadas sin reseña
+        const reviewedBookingIds = new Set(
+          (reviews as any).data.map((r: any) => r.booking_id)
+        );
 
-      this.completedReviews = [
-        {
-          id: 1,
-          accommodation: {
-            id: 3,
-            title: 'Apartamento Centro',
-            image: '/assets/images/placeholder.jpg'
-          },
-          rating: 5,
-          comment: 'Excelente estancia, todo perfecto. Muy recomendable.',
-          created_at: '2026-02-15'
-        },
-        {
-          id: 2,
-          accommodation: {
-            id: 4,
-            title: 'Villa con Piscina',
-            image: '/assets/images/placeholder.jpg'
-          },
-          rating: 4,
-          comment: 'Muy buena experiencia, solo faltaba un poco más de menaje.',
-          created_at: '2026-01-20'
-        }
-      ];
-      
-      this.loading = false;
-    }, 500);
+        this.pendingReviews = (bookings as any).data.filter((b: any) =>
+          b.status === 'checked_out' && !reviewedBookingIds.has(b.id)
+        );
+
+        // Reseñas ya escritas
+        this.completedReviews = (reviews as any).data.filter((r: any) =>
+          r.guest_id === this.guestId
+        );
+
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      }
+    });
   }
 
   openReviewModal(booking: any) {
     this.selectedBooking = booking;
     this.reviewRating = 5;
     this.reviewComment = '';
+    this.error = '';
     this.showReviewModal = true;
   }
 
@@ -94,24 +99,29 @@ export class ReviewsComponent implements OnInit {
 
   submitReview() {
     if (!this.reviewComment.trim()) {
-      alert('Por favor, escribe un comentario');
+      this.error = 'Por favor, escribe un comentario';
       return;
     }
 
-    // Aquí irá la llamada al backend
-    const newReview = {
-      id: Date.now(),
-      accommodation: this.selectedBooking.accommodation,
+    this.submitting = true;
+    this.error = '';
+
+    this.reviewService.create({
+      booking_id: this.selectedBooking.id,
       rating: this.reviewRating,
-      comment: this.reviewComment,
-      created_at: new Date().toISOString()
-    };
-    
-    this.completedReviews.unshift(newReview);
-    this.pendingReviews = this.pendingReviews.filter(b => b.id !== this.selectedBooking.id);
-    
-    this.closeReviewModal();
-    alert('¡Gracias por tu reseña!');
+      comment: this.reviewComment
+    }).subscribe({
+      next: () => {
+        this.submitting = false;
+        this.closeReviewModal();
+        this.loading = true;
+        this.loadReviews();
+      },
+      error: (err) => {
+        this.submitting = false;
+        this.error = err.error?.message || 'Error al enviar la reseña';
+      }
+    });
   }
 
   formatDate(date: string): string {

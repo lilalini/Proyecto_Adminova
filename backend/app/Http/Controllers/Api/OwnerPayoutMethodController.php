@@ -8,32 +8,27 @@ use App\Http\Requests\UpdateOwnerPayoutMethodRequest;
 use App\Http\Resources\OwnerPayoutMethodResource;
 use App\Models\OwnerPayoutMethod;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 
 class OwnerPayoutMethodController extends Controller
 {
     public function index(Request $request)
     {
-        if (!Gate::allows('viewAny', OwnerPayoutMethod::class)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
+        $this->authorize('viewAny', OwnerPayoutMethod::class);
 
         $user = $request->user();
         $query = OwnerPayoutMethod::with('owner');
 
         if ($user->role === 'owner') {
-            $query->where('owner_id', $user->id);
+            $query->whereHas('owner', fn($q) => $q->where('email', $user->email));
         }
 
-        $methods = $query->paginate(15);
-        return OwnerPayoutMethodResource::collection($methods);
+        return OwnerPayoutMethodResource::collection($query->paginate(15));
     }
 
     public function store(StoreOwnerPayoutMethodRequest $request)
     {
         $data = $request->validated();
 
-        // Si es default, quitar default de otros métodos del mismo owner
         if ($data['is_default'] ?? false) {
             OwnerPayoutMethod::where('owner_id', $data['owner_id'])
                 ->update(['is_default' => false]);
@@ -47,19 +42,17 @@ class OwnerPayoutMethodController extends Controller
 
     public function show(OwnerPayoutMethod $ownerPayoutMethod)
     {
-        if (!Gate::allows('view', $ownerPayoutMethod)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
+        $this->authorize('view', $ownerPayoutMethod);
         $ownerPayoutMethod->load('owner');
         return new OwnerPayoutMethodResource($ownerPayoutMethod);
     }
 
     public function update(UpdateOwnerPayoutMethodRequest $request, OwnerPayoutMethod $ownerPayoutMethod)
     {
+        $this->authorize('update', $ownerPayoutMethod);
+
         $data = $request->validated();
 
-        // Si se marca como default, quitar default de otros métodos del mismo owner
         if (($data['is_default'] ?? false) && !$ownerPayoutMethod->is_default) {
             OwnerPayoutMethod::where('owner_id', $ownerPayoutMethod->owner_id)
                 ->where('id', '!=', $ownerPayoutMethod->id)
@@ -74,10 +67,7 @@ class OwnerPayoutMethodController extends Controller
 
     public function destroy(OwnerPayoutMethod $ownerPayoutMethod)
     {
-        if (!Gate::allows('delete', $ownerPayoutMethod)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
+        $this->authorize('delete', $ownerPayoutMethod);
         $ownerPayoutMethod->delete();
         return response()->json(null, 204);
     }

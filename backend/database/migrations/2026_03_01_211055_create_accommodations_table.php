@@ -40,6 +40,7 @@ return new class extends Migration
             $table->decimal('monthly_discount', 5, 2)->default(0);
             $table->decimal('cleaning_fee', 10, 2)->default(0);
             $table->decimal('security_deposit', 10, 2)->default(0);
+            $table->integer('cleaning_buffer_days')->default(1);
             
             $table->integer('minimum_stay')->default(1);
             $table->integer('maximum_stay')->nullable();

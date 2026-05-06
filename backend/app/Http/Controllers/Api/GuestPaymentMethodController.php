@@ -8,32 +8,27 @@ use App\Http\Requests\UpdateGuestPaymentMethodRequest;
 use App\Http\Resources\GuestPaymentMethodResource;
 use App\Models\GuestPaymentMethod;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 
 class GuestPaymentMethodController extends Controller
 {
     public function index(Request $request)
     {
-        if (!Gate::allows('viewAny', GuestPaymentMethod::class)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
+        $this->authorize('viewAny', GuestPaymentMethod::class);
 
         $user = $request->user();
         $query = GuestPaymentMethod::with('guest');
 
         if ($user->role === 'guest') {
-            $query->where('guest_id', $user->id);
+            $query->where('guest_id', $user->guest?->id);
         }
 
-        $methods = $query->paginate(15);
-        return GuestPaymentMethodResource::collection($methods);
+        return GuestPaymentMethodResource::collection($query->paginate(15));
     }
 
     public function store(StoreGuestPaymentMethodRequest $request)
     {
         $data = $request->validated();
 
-        // Si es default, quitar default de otros métodos del mismo guest
         if ($data['is_default'] ?? false) {
             GuestPaymentMethod::where('guest_id', $data['guest_id'])
                 ->update(['is_default' => false]);
@@ -47,19 +42,17 @@ class GuestPaymentMethodController extends Controller
 
     public function show(GuestPaymentMethod $guestPaymentMethod)
     {
-        if (!Gate::allows('view', $guestPaymentMethod)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
+        $this->authorize('view', $guestPaymentMethod);
         $guestPaymentMethod->load('guest');
         return new GuestPaymentMethodResource($guestPaymentMethod);
     }
 
     public function update(UpdateGuestPaymentMethodRequest $request, GuestPaymentMethod $guestPaymentMethod)
     {
+        $this->authorize('update', $guestPaymentMethod);
+
         $data = $request->validated();
 
-        // Si se marca como default, quitar default de otros métodos del mismo guest
         if (($data['is_default'] ?? false) && !$guestPaymentMethod->is_default) {
             GuestPaymentMethod::where('guest_id', $guestPaymentMethod->guest_id)
                 ->where('id', '!=', $guestPaymentMethod->id)
@@ -74,10 +67,7 @@ class GuestPaymentMethodController extends Controller
 
     public function destroy(GuestPaymentMethod $guestPaymentMethod)
     {
-        if (!Gate::allows('delete', $guestPaymentMethod)) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
+        $this->authorize('delete', $guestPaymentMethod);
         $guestPaymentMethod->delete();
         return response()->json(null, 204);
     }

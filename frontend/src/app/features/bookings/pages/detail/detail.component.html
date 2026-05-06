@@ -30,8 +30,9 @@
           <h2 class="text-xl font-semibold text-white">
             Reserva #{{ booking.booking_reference || booking.id }}
           </h2>
-          <span class="px-3 py-1 rounded-full text-sm font-semibold {{ getStatusClass(booking.status) }}">
-            {{ getStatusText(booking.status) }}
+          <span class="px-3 py-1 rounded-full text-sm font-semibold"
+                [ngClass]="getStatusClass(getBookingStatus(booking))">
+            {{ getStatusText(getBookingStatus(booking)) }}
           </span>
         </div>
       </div>

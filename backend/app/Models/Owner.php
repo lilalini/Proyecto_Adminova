@@ -22,6 +22,7 @@ class Owner extends Model
         'postal_code',
         'country',
         'iban',
+        'commission_rate',
         'contract_signed',
         'contract_date',
         'is_active',
@@ -44,6 +45,7 @@ class Owner extends Model
             'is_active' => 'boolean',
             'contract_date' => 'date',
             'last_login_at' => 'datetime',
+            'commission_rate' => 'decimal:2',
         ];
     }
 
@@ -58,5 +60,10 @@ class Owner extends Model
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

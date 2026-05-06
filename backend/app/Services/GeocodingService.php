@@ -18,7 +18,8 @@ class GeocodingService
                 'User-Agent' => 'Adminova/1.0',
                 'Accept' => 'application/json',
             ])
-            ->withOptions(['verify' => false]) // importante para evitar problemas de SSL
+            // TODO: quitar en producción
+            ->withOptions(['verify' => false])
             ->timeout(10)
             ->get('https://nominatim.openstreetmap.org/search', [
                 'q' => $address,
