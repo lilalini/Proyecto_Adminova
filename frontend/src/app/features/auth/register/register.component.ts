@@ -60,6 +60,22 @@ export class RegisterComponent implements OnInit {
       return;
     }
 
+    // Validar email con regex
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(this.userData.email)) {
+      this.errorMessage = 'El email no tiene un formato válido';
+      return;
+    }
+
+    // Validar teléfono con regex (opcional pero si se rellena debe ser válido)
+    if (this.userData.phone) {
+      const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{6,14}$/;
+      if (!phoneRegex.test(this.userData.phone)) {
+        this.errorMessage = 'El teléfono no tiene un formato válido';
+        return;
+      }
+    }
+
     this.loading = true;
 
     this.auth.register(this.userData).subscribe({

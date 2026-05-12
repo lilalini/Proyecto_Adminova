@@ -457,4 +457,11 @@ export class AccommodationDetailComponent implements OnInit {
     }
     this.showReviews = true;
   }
+
+    onImagesChanged(images: any[]) {
+    // Actualizar las imágenes en el componente principal
+    if (this.accommodation) {
+      this.accommodation.images = images;
+    }
+  }
 }

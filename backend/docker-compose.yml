@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+
+  # ── PostgreSQL ──────────────────────────────────────────────────────────
+  db:
+    image: postgres:15-alpine
+    container_name: adminova_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: adminova_db
+      POSTGRES_USER: adminova
+      POSTGRES_PASSWORD: adminova123
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - adminova_network
+
+  # ── Backend Laravel ─────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: adminova_backend
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      APP_NAME: Adminova
+      APP_ENV: production
+      APP_DEBUG: false
+      APP_URL: http://localhost:8000
+      APP_KEY: base64:U1EHzqUfvR5pnyQOXfJTg4yjYUMpkdR3+GorpOWbeVs=
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: adminova_db
+      DB_USERNAME: adminova
+      DB_PASSWORD: adminova123
+      SESSION_DRIVER: database
+      CACHE_STORE: database
+      QUEUE_CONNECTION: database
+      FILESYSTEM_DISK: public
+    volumes:
+      - ./backend/storage:/var/www/html/storage
+    ports:
+      - "8000:80"
+    networks:
+      - adminova_network
+
+  # ── Frontend Angular ─────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: adminova_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "4200:80"
+    networks:
+      - adminova_network
+
+volumes:
+  pgdata:
+
+networks:
+  adminova_network:
+    driver: bridge

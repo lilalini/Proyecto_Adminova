@@ -20,6 +20,8 @@ use App\Models\LoyaltyPoint;
 use App\Services\CalendarService;
 use App\Models\Notification;
 use App\Models\Owner;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\BookingConfirmation;
 
 class BookingController extends Controller
 {
@@ -102,6 +104,7 @@ class BookingController extends Controller
         $booking = Booking::create($validated);
         $booking->load(['accommodation', 'guest']);
         $this->calendarService->markAsBooked($booking);
+        Mail::to($user->email)->send(new BookingConfirmation($booking));
 
         Notification::create([
             'notifiable_type' => 'App\\Models\\User',

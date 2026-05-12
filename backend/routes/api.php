@@ -108,6 +108,7 @@ Route::post('/login', [AuthController::class, 'login']);
     Route::post('/documents/{document}/verify', [DocumentController::class, 'verify']);
     Route::get('/documents/{document}/download', [DocumentController::class, 'download']);
     Route::apiResource('documents', DocumentController::class);
+    Route::get('/media', [MediaController::class, 'index']);
     Route::post('/media/reorder', [MediaController::class, 'reorder']);
     Route::post('/media/{media}/set-main', [MediaController::class, 'setMain']);
     Route::apiResource('media', MediaController::class);

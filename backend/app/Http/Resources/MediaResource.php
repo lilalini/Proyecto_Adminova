@@ -28,7 +28,7 @@ class MediaResource extends JsonResource
             'file_size' => $media->file_size,
             'mime_type' => $media->mime_type,
             'disk' => $media->disk,
-            'order' => $media->order,
+            'order' => $media->order_column,
             'is_main' => $media->is_main,
             'alt_text' => $media->alt_text,
             'title' => $media->title,
