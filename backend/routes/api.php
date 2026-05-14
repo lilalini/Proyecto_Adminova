@@ -40,13 +40,17 @@ Route::get('/availability/public/{accommodationId}', [AvailabilityCalendarContro
 Route::get('/reviews/public/{accommodationId}', [ReviewController::class, 'publicIndex']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/availability/check', [AvailabilityCalendarController::class, 'check']);  
 
-//ruta para railway
+//Ruta para railway despliegue, eliminar si no la usare
 Route::get('/setup', function() {
-    \Artisan::call('migrate:fresh --seed --force');
-    return 'Database seeded!';
+    try {
+        \Artisan::call('migrate:fresh --seed --force');
+        return 'Success: ' . \Artisan::output();
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
 });
-
 
 // Rutas protegidas (todas en un solo grupo)
     Route::middleware('auth:sanctum')->group(function () {
@@ -63,7 +67,6 @@ Route::get('/setup', function() {
     Route::get('/guests/profile-complete/{userId}', [GuestController::class, 'isProfileComplete']);
     Route::put('/guests/by-user/{userId}', [GuestController::class, 'updateByUserId']);
     Route::get('/guests/by-user/{userId}', [GuestController::class, 'findByUserId']);
-    Route::post('/availability/check', [AvailabilityCalendarController::class, 'check']);
     //PAGOS
     Route::get('/payments/monthly-revenue', [PaymentController::class, 'monthlyRevenue']);
     Route::get('/payments/total-revenue', [PaymentController::class, 'totalRevenue']);

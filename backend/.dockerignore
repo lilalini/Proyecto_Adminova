@@ -1,0 +1,15 @@
+node_modules
+frontend
+.git
+.env
+*.log
+storage/app/public
+storage/framework/cache
+storage/framework/sessions
+storage/framework/views
+bootstrap/cache
+vendor
+.gitignore
+README.md
+LICENSE
+.DS_Store
