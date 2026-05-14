@@ -40,7 +40,13 @@ Route::get('/availability/public/{accommodationId}', [AvailabilityCalendarContro
 Route::get('/reviews/public/{accommodationId}', [ReviewController::class, 'publicIndex']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-    
+
+//ruta para railway
+Route::get('/setup', function() {
+    \Artisan::call('migrate:fresh --seed --force');
+    return 'Database seeded!';
+});
+
 
 // Rutas protegidas (todas en un solo grupo)
     Route::middleware('auth:sanctum')->group(function () {
