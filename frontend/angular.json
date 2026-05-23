@@ -45,6 +45,12 @@
           },
           "configurations": {
             "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
               "budgets": [
                 {
                   "type": "initial",
@@ -105,7 +111,6 @@
                 "input": "src/assets/images",
                 "output": "/assets/images"
               }
-
             ],
             "styles": [
               "node_modules/flatpickr/dist/flatpickr.css",
