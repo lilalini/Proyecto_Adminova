@@ -1,0 +1,24 @@
+@if (showBanner) {
+  <div class="fixed bottom-0 left-0 right-0 z-50 bg-gray-900 text-white p-4 shadow-2xl">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex-1">
+        <p class="text-sm">
+          Usamos cookies para mejorar tu experiencia. Al continuar navegando aceptas nuestra 
+          <a routerLink="/cookies" class="text-indigo-400 hover:text-indigo-300 underline">política de cookies</a>
+          y 
+          <a routerLink="/privacy" class="text-indigo-400 hover:text-indigo-300 underline">política de privacidad</a>.
+        </p>
+      </div>
+      <div class="flex gap-3 shrink-0">
+        <button (click)="reject()" 
+                class="px-4 py-2 text-sm border border-gray-500 rounded-lg hover:bg-gray-700 transition">
+          Rechazar
+        </button>
+        <button (click)="accept()" 
+                class="px-4 py-2 text-sm bg-indigo-600 hover:bg-indigo-700 rounded-lg transition">
+          Aceptar
+        </button>
+      </div>
+    </div>
+  </div>
+}

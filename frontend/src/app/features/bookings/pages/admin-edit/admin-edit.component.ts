@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { BookingService } from '../../../../core/services/booking.service';
 import { Booking } from '../../../../core/models/booking.model';
 import { IconSvgComponent } from '../../../../shared/components/icon-svg/icon-svg.component';
+import {  NgZone } from '@angular/core';
 
 @Component({
   selector: 'app-admin-edit',
@@ -22,7 +23,8 @@ export class AdminEditComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private bookingService: BookingService
+    private bookingService: BookingService,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit() {
@@ -35,13 +37,21 @@ export class AdminEditComponent implements OnInit {
     }
   }
 
+  // Después de cargar la reserva, formatea las fechas
   loadBooking(id: number) {
     this.bookingService.getOne(id).subscribe({
       next: (response) => {
         this.booking = response.data;
+        // Formatear fechas para input type="date"
+        if (this.booking.check_in) {
+          this.booking.check_in = this.booking.check_in.split('T')[0];
+        }
+        if (this.booking.check_out) {
+          this.booking.check_out = this.booking.check_out.split('T')[0];
+        }
         this.loading = false;
       },
-      error: (error) => {
+      error: () => {
         this.errorMessage = 'Error al cargar la reserva';
         this.loading = false;
       }
@@ -71,6 +81,22 @@ export class AdminEditComponent implements OnInit {
         this.saving = false;
       }
     });
+  }
+
+  recalcularPrecio() {
+    if (!this.booking?.check_in || !this.booking?.check_out || !this.booking?.accommodation) return;
+      
+    const start = new Date(this.booking.check_in);
+    const end = new Date(this.booking.check_out);
+    const nights = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (nights > 0) {
+      const accommodation = this.booking!.accommodation!;
+      this.ngZone.run(() => {
+        this.booking!.total_amount = Math.round((accommodation.base_price * nights + 
+                                    (accommodation.cleaning_fee || 0)) * 100) / 100;
+      });
+    }
   }
 
   getStatusClass(status: string): string {

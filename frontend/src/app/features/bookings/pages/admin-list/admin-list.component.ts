@@ -104,4 +104,11 @@ export class AdminListComponent implements OnInit {
     getStatus(booking: Booking): string {
     return getBookingStatus(booking);
   }
+
+  calcularNoches(checkIn: string, checkOut: string): number {
+    const start = new Date(checkIn);
+    const end = new Date(checkOut);
+    return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  }
+  
 }

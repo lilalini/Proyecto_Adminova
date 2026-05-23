@@ -31,6 +31,25 @@ export const routes: Routes = [
     import('./features/terms/terms.component').then(m => m.TermsComponent)
 },
 
+
+{
+  path: 'contact',
+  loadComponent: () =>
+    import('./features/contact/pages/contact/contact.component').then(m => m.ContactComponent)
+},
+
+{
+  path: 'privacy',
+  loadComponent: () =>
+    import('./features/privacy/pages/privacy/privacy.component').then(m => m.PrivacyComponent)
+},
+
+/*{
+  path: 'cookies',
+  loadComponent: () =>
+    import('./features/cookies/pages/cookies/cookies.component').then(m => m.CookiesComponent)
+},*/
+
   // ==================== RUTAS PROTEGIDAS (requieren autenticación) ====================
   {
     path: 'checkout',

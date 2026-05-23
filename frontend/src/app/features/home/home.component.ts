@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { PublicService } from '../../core/services/public.service';
 import { IconSvgComponent } from '../../shared/components/icon-svg/icon-svg.component';
+import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, IconSvgComponent],
+  imports: [CommonModule, RouterModule, FormsModule, IconSvgComponent, SkeletonComponent],
   templateUrl: './home.component.html',
 })
 export class HomeComponent implements OnInit {

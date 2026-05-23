@@ -57,6 +57,13 @@
         </div>
       </div>
 
+      <!-- Botón recalcular -->
+      <button type="button" (click)="recalcularPrecio()"
+              class="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+        <app-icon-svg name="refresh-cw" className="w-4 h-4"></app-icon-svg>
+        Recalcular precio según fechas
+      </button>
+
       <div class="grid grid-cols-2 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Adultos</label>

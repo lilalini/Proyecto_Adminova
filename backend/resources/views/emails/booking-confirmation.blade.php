@@ -13,9 +13,9 @@ Tu reserva ha sido creada correctamente. Aquí tienes el resumen:
 **Total:** {{ number_format($booking->total_amount, 2) }} €
 </x-mail::panel>
 
-Por favor, realiza el pago para confirmar tu reserva.
+Tu reserva ha sido confirmada y el pago procesado correctamente. ¡Te esperamos!
 
-<x-mail::button :url="config('app.url')">
+<x-mail::button :url="env('FRONTEND_URL') . '/bookings/' . $booking->id">
 Ver mi reserva
 </x-mail::button>
 

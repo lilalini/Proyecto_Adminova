@@ -22,6 +22,7 @@
     "@bluehalo/ngx-leaflet": "^21.0.0",
     "@semantic-icons/lucide-icons": "^0.60.0",
     "chart.js": "^4.5.1",
+    "flatpickr": "^4.6.13",
     "leaflet": "^1.9.4",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",

@@ -46,7 +46,7 @@
                 </td>
                 <td class="px-6 py-4">
                   <div class="text-sm text-gray-900">{{ booking.check_in | date:'dd/MM/yyyy' }} - {{ booking.check_out | date:'dd/MM/yyyy' }}</div>
-                  <div class="text-xs text-gray-500">{{ booking.nights }} noches</div>
+                  <div class="text-xs text-gray-500">{{ calcularNoches(booking.check_in, booking.check_out) }} noches</div>
                 </td>
                 <td class="px-6 py-4">
                   <div class="text-sm font-medium text-gray-900">€{{ booking.total_amount | number:'1.2-2' }}</div>

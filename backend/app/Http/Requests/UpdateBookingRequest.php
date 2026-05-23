@@ -35,6 +35,7 @@ class UpdateBookingRequest extends FormRequest
             'guest_phone' => 'nullable|string',
             'guest_notes' => 'nullable|string',
             'staff_notes' => 'nullable|string',
+            'total_amount' => 'sometimes|numeric|min:0',
         ];
     }
 }
