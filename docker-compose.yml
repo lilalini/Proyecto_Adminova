@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+
+  db:
+    image: postgres:15-alpine
+    container_name: adminova_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: adminova_db
+      POSTGRES_USER: adminova
+      POSTGRES_PASSWORD: adminova123
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - adminova_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: adminova_backend
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      APP_NAME: Adminova
+      APP_ENV: production
+      APP_DEBUG: false
+      APP_URL: https://adminova.es
+      APP_KEY: base64:TrehRxH+KoiRn/OwMdpRBBxZ64vqa1G+sdnP1I2Huok=
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: adminova_db
+      DB_USERNAME: adminova
+      DB_PASSWORD: adminova123
+      SESSION_DRIVER: database
+      CACHE_STORE: database
+      QUEUE_CONNECTION: database
+      FILESYSTEM_DISK: public
+      MAIL_MAILER: smtp
+      MAIL_HOST: sandbox.smtp.mailtrap.io
+      MAIL_PORT: 2525
+      MAIL_USERNAME: 23eb595e24b7cd
+      MAIL_PASSWORD: 42cc9f9baab347
+      MAIL_FROM_ADDRESS: "hello@adminova.com"
+      MAIL_FROM_NAME: "Adminova"
+      FRONTEND_URL: https://adminova.es
+      SESSION_SECURE_COOKIE: "true"
+      SESSION_DOMAIN: adminova.es
+      SANCTUM_STATEFUL_DOMAINS: adminova.es
+    volumes:
+      - ./backend/storage:/var/www/html/storage
+      - ./backend/docker/ssl:/etc/nginx/ssl
+    ports:
+      - "8000:443"
+    networks:
+      - adminova_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: adminova_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    volumes:
+      - /etc/ssl/certs/adminova.crt:/etc/ssl/certs/adminova.crt
+      - /etc/ssl/private/adminova.key:/etc/ssl/private/adminova.key
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - adminova_network
+
+volumes:
+  pgdata:
+
+networks:
+  adminova_network:
+    driver: bridge

@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.adminova.es:8443/api'
+  apiUrl: 'https://adminova.es:8000/api'
 };
