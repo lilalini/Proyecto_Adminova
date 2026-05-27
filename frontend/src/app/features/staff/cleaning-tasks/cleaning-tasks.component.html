@@ -1,6 +1,6 @@
 <div class="max-w-7xl mx-auto px-4 py-8">
   <div class="bg-white rounded-xl p-4 mb-6">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
         <h1 class="text-2xl font-semibold text-gray-800 mb-1">Tareas de Limpieza</h1>
         <p class="text-gray-500">Gestiona las tareas pendientes y completadas</p>
@@ -12,6 +12,7 @@
     </div>
   </div>
 
+  <!-- SKELETON LOADING -->
   @if (loading) {
     <div class="space-y-4">
       @for (i of [1,2,3]; track i) {
@@ -20,18 +21,30 @@
     </div>
   }
 
+  <!-- CONTENIDO -->
   @if (!loading) {
     <div class="space-y-4">
       @for (task of tasks; track task.id) {
-        <div class="bg-white rounded-xl border border-gray-200 p-4 flex justify-between items-center">
+        <div class="bg-white rounded-xl border border-gray-200 p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <p class="font-medium text-gray-800">{{ task.accommodation?.title || 'Alojamiento' }}</p>
-            <p class="text-sm text-gray-500">Fecha programada: {{ task.scheduled_date | date:'dd/MM/yyyy' }}</p>
-            <p class="text-xs text-gray-400">Prioridad: {{ task.priority }} | Estado: {{ task.status }}</p>
+            <div class="flex items-center gap-2 mt-1">
+              <app-icon-svg name="calendar" class="w-4 h-4 text-gray-400"></app-icon-svg>
+              <p class="text-sm text-gray-500">Fecha: {{ task.scheduled_date | date:'dd/MM/yyyy' }}</p>
+            </div>
+            <div class="flex items-center gap-2 mt-1">
+              <span class="px-2 py-0.5 text-xs rounded-full" [ngClass]="getPriorityClass(task.priority)">
+                Prioridad: {{ task.priority }}
+              </span>
+              <span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-600">
+                Estado: {{ task.status }}
+              </span>
+              <span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-600">Estado: {{ task.status }}</span>
+            </div>
           </div>
           <button 
             (click)="markAsDone(task.id)"
-            class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 flex items-center gap-2">
+            class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 flex items-center gap-2 whitespace-nowrap">
             <app-icon-svg name="check-circle" class="w-4 h-4"></app-icon-svg>
             Marcar completada
           </button>

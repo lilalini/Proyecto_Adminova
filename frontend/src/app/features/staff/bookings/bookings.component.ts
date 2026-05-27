@@ -2,12 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { BookingService } from '../../../core/services/booking.service';
+import { IconSvgComponent } from '../../../shared/components/icon-svg/icon-svg.component';
+import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
 import { getBookingStatus, getStatusClass, getStatusText } from '../../../shared/utils/booking-status.util';
 
 @Component({
   selector: 'app-staff-bookings',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, IconSvgComponent, SkeletonComponent],
   templateUrl: './bookings.component.html'  // ← HTML aparte
 })
 export class StaffBookingsComponent implements OnInit {

@@ -296,6 +296,13 @@ export const routes: Routes = [
   data: { roles: ['staff'] }
 },
 
+{
+  path: 'staff/accommodations',
+  loadComponent: () => import('./features/accommodations/list/list.component').then(m => m.ListComponent),
+  canActivate: [AuthGuard, RoleGuard],
+  data: { roles: ['staff'] }
+},
+
   // ==================== RUTAS PARAMETRIZADAS ESPECÍFICAS ====================
   {
     path: 'admin/accommodations/:id/edit',

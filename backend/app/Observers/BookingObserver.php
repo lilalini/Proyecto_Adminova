@@ -4,6 +4,8 @@ namespace App\Observers;
 
 use App\Models\Booking;
 use App\Models\Notification;
+use App\Models\CleaningTask;
+use App\Services\PdfService;
 
 class BookingObserver
 {
@@ -23,6 +25,11 @@ class BookingObserver
     {
         if ($booking->wasChanged('status')) {
             $this->handleStatusChange($booking);
+
+             if ($booking->status === 'checked_out') {
+                $this->createCleaningTask($booking);
+                $this->generateInvoice($booking);
+            }
         }
     }
 
@@ -53,6 +60,23 @@ class BookingObserver
                 'is_read' => false
             ]);
         }
+    }
+
+
+    private function createCleaningTask(Booking $booking): void
+    {
+        CleaningTask::create([
+            'accommodation_id' => $booking->accommodation_id,
+            'booking_id' => $booking->id,
+            'scheduled_date' => now(),
+            'status' => 'pending',
+            'priority' => 'high',
+            'title' => 'Limpieza después de check-out',
+            'description' => 'Limpieza completa del alojamiento tras la salida del huésped',
+            'task_type' => 'cleaning',
+        ]);
+        
+        \Log::info('Tarea de limpieza creada para la reserva: ' . $booking->id);
     }
 
      private function generateInvoice(Booking $booking): void
