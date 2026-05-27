@@ -97,6 +97,15 @@ export class AccommodationDetailComponent implements OnInit {
       this.user = user;
     });
 
+    // Leer fechas del buscador (si vienen)
+    this.route.queryParams.subscribe(params => {
+      if (params['checkIn']) {
+        this.checkIn = params['checkIn'];
+        this.checkOut = params['checkOut'] || this.checkOut;
+        this.guests = Number(params['guests']) || this.guests;
+      }
+    });
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.loadAccommodation(parseInt(id));
@@ -104,12 +113,16 @@ export class AccommodationDetailComponent implements OnInit {
       this.loadReviews(parseInt(id));
       this.checkCanReview(parseInt(id));
       
-      const today = new Date();
-      const nextWeek = new Date();
-      nextWeek.setDate(today.getDate() + 7);
+      // SOLO si NO hay fechas del buscador, usar fechas por defecto
+      if (!this.checkIn || !this.checkOut) {
+        const today = new Date();
+        const nextWeek = new Date();
+        nextWeek.setDate(today.getDate() + 7);
+        
+        this.checkIn = today.toISOString().split('T')[0];
+        this.checkOut = nextWeek.toISOString().split('T')[0];
+      }
       
-      this.checkIn = today.toISOString().split('T')[0];
-      this.checkOut = nextWeek.toISOString().split('T')[0];
       this.calculateNights();
       this.verifyAvailability();
     }

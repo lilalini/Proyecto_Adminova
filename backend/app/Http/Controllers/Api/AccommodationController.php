@@ -186,13 +186,27 @@ class AccommodationController extends Controller
         }
 
         if ($request->has('check_in') && $request->has('check_out')) {
-            // TODO: implementar filtro de disponibilidad
-            return response()->json(['message' => 'Filtro de disponibilidad no implementado'], 501);
+            $checkIn = $request->check_in;
+            $checkOut = $request->check_out;
+
+            // 1. Excluir alojamientos con reservas que solapen
+            $query->whereDoesntHave('bookings', function($q) use ($checkIn, $checkOut) {
+                $q->whereNotIn('status', ['cancelled'])
+                ->where(function($sub) use ($checkIn, $checkOut) {
+                    $sub->where('check_in', '<', $checkOut)
+                        ->where('check_out', '>', $checkIn);
+                });
+            });
+
+            // 2. Excluir alojamientos con fechas bloqueadas en el calendario manual
+            $query->whereDoesntHave('availabilityCalendars', function($q) use ($checkIn, $checkOut) {
+                $q->whereIn('status', ['booked', 'blocked', 'maintenance'])
+                ->whereBetween('date', [$checkIn, $checkOut]);
+            });
         }
 
         return AccommodationResource::collection($query->paginate(6));
     }
-
     public function publicShow($id)
     {
         $accommodation = Accommodation::with([

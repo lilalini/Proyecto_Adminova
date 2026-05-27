@@ -22,11 +22,6 @@ export class BookingService {
     return this.http.get<BookingResponse>(`${this.apiUrl}/${id}`);
   }
 
-  // Crear nueva reserva
-/*  create(data: Partial<Booking>): Observable<BookingResponse> {
-    return this.http.post<BookingResponse>(this.apiUrl, data);
-  }*/
-
   create<T = BookingResponse>(data: Partial<Booking>): Observable<T> {
     return this.http.post<T>(this.apiUrl, data);
   }
@@ -85,6 +80,12 @@ export class BookingService {
 
   getAverageComparison(): Observable<{ percentage: number; trend: string; current_month: number; previous_month: number }> {
     return this.http.get<{ percentage: number; trend: string; current_month: number; previous_month: number }>(`${this.apiUrl}/average-comparison`);
+  }
+
+  downloadInvoice(bookingId: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${bookingId}/download-invoice`, {
+      responseType: 'blob'
+    });
   }
 
 }

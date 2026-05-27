@@ -55,16 +55,22 @@ export class BookingCardComponent {
     });
   }
 
-  generateInvoice(): void {
-    this.bookingService.generateInvoice(this.booking.id).subscribe({
-      next: () => {
-        alert('Factura generada correctamente. Puedes verla en "Mis documentos"');
+  downloadInvoice(): void {
+    this.bookingService.downloadInvoice(this.booking.id).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `factura-${this.booking.booking_reference}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
       },
       error: (error) => {
+        console.error('Error descargando factura:', error);
         if (error.status === 422) {
-          alert('La factura solo se puede generar después del check-out');
+          alert('La factura solo está disponible después del check-out');
         } else {
-          alert('Error al generar la factura');
+          alert('No se pudo descargar la factura');
         }
       }
     });

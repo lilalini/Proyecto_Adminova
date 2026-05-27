@@ -164,21 +164,27 @@ class BookingController extends Controller
         return response()->json(null, 204);
     }
 
-    public function myBookings(Request $request)
-    {
-        $user = $request->user();
-        $guest = Guest::where('email', $user->email)->first();
+public function myBookings(Request $request)
+{
+    $user = $request->user();
+    $guest = Guest::where('email', $user->email)->first();
 
-        $bookings = Booking::with(['accommodation'])
-            ->where(function($q) use ($user, $guest) {
-                $q->where('guest_email', $user->email)
-                  ->orWhere('guest_id', $guest?->id);
-            })
-            ->latest()
-            ->paginate(10);
+    $bookings = Booking::with(['accommodation', 'guest'])  // ← Añade 'guest'
+        ->where(function($q) use ($user, $guest) {
+            $q->where('guest_email', $user->email)
+              ->orWhere('guest_id', $guest?->id);
+        })
+        ->latest()
+        ->paginate(10);
 
-        return BookingResource::collection($bookings);
-    }
+    // Verificamos que la relación está cargada
+    /*\Log::info('Bookings with accommodation:', [
+        'count' => $bookings->count(),
+        'first_accommodation' => $bookings->first()?->accommodation?->title
+    ]);*/
+
+    return BookingResource::collection($bookings);
+}
 
     public function confirmPayment(Request $request, Booking $booking)
     {

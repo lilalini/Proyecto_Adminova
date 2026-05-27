@@ -20,7 +20,7 @@ class BookingResource extends JsonResource
         return [
             'id' => $this->id,
             'booking_reference' => $this->booking_reference,
-            'accommodation' => new AccommodationResource($this->whenLoaded('accommodation')),
+            'accommodation' => new AccommodationResource($this->accommodation),
             'guest' => new GuestResource($this->whenLoaded('guest')),
             'channel' => new DistributionChannelResource($this->whenLoaded('channel')),
             'check_in' => $this->check_in,

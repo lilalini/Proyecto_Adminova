@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\LoyaltySettingController;
 use App\Http\Controllers\Api\AccommodationMediaController;
 
 
+
 // Ruta de prueba (pública)
 Route::get('/test', function() {
     return response()->json([
@@ -76,6 +77,10 @@ Route::get('/setup', function() {
     Route::get('/bookings/average-comparison', [BookingController::class, 'averageComparison']);
     Route::get('/loyalty-settings/current', [LoyaltySettingController::class, 'current']);
     Route::get('/guests/by-email', [GuestController::class, 'findByEmail']);
+
+    // Rutas de reseñas (específicas antes que genéricas)
+    Route::get('/reviews/my', [ReviewController::class, 'myReviews']);
+    Route::post('/reviews/{review}/respond', [ReviewController::class, 'respond']);
     // CRUDs
     Route::apiResource('accommodations', AccommodationController::class);
     Route::apiResource('bookings', BookingController::class);
@@ -88,8 +93,7 @@ Route::get('/setup', function() {
     Route::apiResource('loyalty-settings', LoyaltySettingController::class)->except(['show']);
     
     
-    // Ruta extra para responder reviews
-    Route::post('/reviews/{review}/respond', [ReviewController::class, 'respond']);
+   
     Route::apiResource('owner-payout-methods', OwnerPayoutMethodController::class);
     Route::apiResource('guest-payment-methods', GuestPaymentMethodController::class);
      // Notifications

@@ -135,7 +135,8 @@
       } @else {
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           @for (acc of accommodations; track acc.id) {
-            <a [routerLink]="['/accommodations', acc.id]" class="group">
+            <a [routerLink]="['/accommodations', acc.id]" 
+                [queryParams]="{ checkIn: searchCheckIn, checkOut: searchCheckOut, guests: searchGuests }"  class="group">
               <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition">
                 <div class="h-48 overflow-hidden">
                   @if (acc.images && acc.images.length > 0) {

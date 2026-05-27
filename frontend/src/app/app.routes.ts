@@ -44,11 +44,11 @@ export const routes: Routes = [
     import('./features/privacy/pages/privacy/privacy.component').then(m => m.PrivacyComponent)
 },
 
-/*{
+{
   path: 'cookies',
   loadComponent: () =>
     import('./features/cookies/pages/cookies/cookies.component').then(m => m.CookiesComponent)
-},*/
+},
 
   // ==================== RUTAS PROTEGIDAS (requieren autenticación) ====================
   {

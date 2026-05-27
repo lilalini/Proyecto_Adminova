@@ -9,6 +9,8 @@ import { GreetingComponent } from '../../../shared/components/greeting/greeting.
 import { first } from 'rxjs/operators';
 import { NotificationService } from '../../../core/services/notification.service';
 import { GuestService } from '../../../core/services/guest.service'; 
+import { forkJoin } from 'rxjs';
+import { ReviewService } from '../../../core/services/review.service';
 
 @Component({
   selector: 'app-guest-dashboard',
@@ -34,7 +36,8 @@ export class GuestDashboardComponent implements OnInit, AfterViewInit {
     private loyaltyPointService: LoyaltyPointService,
     private guestService: GuestService,
     private notificationService: NotificationService,  
-    private router: Router
+    private router: Router,
+    private reviewService: ReviewService
   ) {
       this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd && event.url === '/guest/dashboard') {
@@ -53,44 +56,52 @@ export class GuestDashboardComponent implements OnInit, AfterViewInit {
 
    ngAfterViewInit() {
     this.loadUnreadCount(); 
+    this.loadDashboardData();
   }
 
-  loadDashboardData() {
-    const today = new Date().toISOString().split('T')[0];
-    
-    // Cargar reservas
-    this.bookingService.getMyBookings().subscribe({
-      next: (res) => {
-        this.stats.upcomingBookings = res.data.filter(b => 
-          b.check_in >= today && b.status !== 'cancelled'
-        ).length;
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-      }
-    });
+loadDashboardData() {
+  const today = new Date().toISOString().split('T')[0];
+  
+  forkJoin({
+    bookings: this.bookingService.getMyBookings(),
+    reviews: this.reviewService.getMyReviews()
+  }).subscribe({
+    next: ({ bookings, reviews }) => {
+      const reviewedBookingIds = new Set(reviews.data.map((r: any) => r.booking_id));
+      
+      this.stats.upcomingBookings = bookings.data.filter((b: any) => 
+        b.check_in >= today && b.status !== 'cancelled'
+      ).length;
+      
+      this.stats.pendingReviews = bookings.data.filter((b: any) => 
+        b.status === 'checked_out' && !reviewedBookingIds.has(b.id)
+      ).length;
+      
+      this.loading = false;
+    },
+    error: () => this.loading = false
+  });
 
-    // Cargar puntos usando guest
-    this.auth.currentUser$.pipe(first()).subscribe(user => {
-      if (user) {
-        this.guestService.getByUserId(user.id).subscribe({
-          next: (response: any) => {
-            const guest = response.data;
-            if (guest) {
-              this.loyaltyPointService.getBalance(guest.id).subscribe({
-                next: (balance) => {
-                  this.stats.pointsBalance = balance.balance;
-                },
-                error: (err) => console.error('Error cargando puntos:', err)
-              });
-            }
-          },
-          error: (err) => console.error('Error buscando guest:', err)
-        });
-      }
-    });
-  }
+  // Cargar puntos usando guest
+  this.auth.currentUser$.pipe(first()).subscribe(user => {
+    if (user) {
+      this.guestService.getByUserId(user.id).subscribe({
+        next: (response: any) => {
+          const guest = response.data;
+          if (guest) {
+            this.loyaltyPointService.getBalance(guest.id).subscribe({
+              next: (balance) => {
+                this.stats.pointsBalance = balance.balance;
+              },
+              error: (err) => console.error('Error cargando puntos:', err)
+            });
+          }
+        },
+        error: (err) => console.error('Error buscando guest:', err)
+      });
+    }
+  });
+}
 
 
     loadUnreadCount() {

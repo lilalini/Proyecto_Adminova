@@ -69,4 +69,9 @@ export class ReviewService {
   markAsHelpful(id: number): Observable<ReviewResponse> {
     return this.http.post<ReviewResponse>(`${this.apiUrl}/${id}/helpful`, {});
   }
+
+  getMyReviews(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/my`);
+  }
 }
+

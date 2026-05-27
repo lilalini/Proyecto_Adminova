@@ -70,7 +70,7 @@
 
            @if (getBookingStatus(booking) === 'checked_out') {
               <button 
-                (click)="generateInvoice()" 
+                (click)="downloadInvoice()" 
                 class="text-emerald-600 hover:text-emerald-800 text-sm font-medium flex items-center gap-1">
                 <app-icon-svg name="file-text" className="w-4 h-4"></app-icon-svg>
                 Factura

@@ -26,7 +26,7 @@
             <div class="bg-white rounded-xl shadow-lg overflow-hidden">
               <div class="p-4 flex justify-between items-center">
                 <div>
-                  <h3 class="font-semibold text-gray-800">{{ booking.accommodation.title }}</h3>
+                  <h3 class="font-semibold text-gray-800">{{ booking.accommodation?.title || 'Alojamiento' }}</h3>
                   <p class="text-sm text-gray-500 mt-1">
                     Estancia del {{ formatDate(booking.check_out) }} · {{ booking.stay_days }} noches
                   </p>
@@ -54,7 +54,7 @@
               <div class="p-4">
                 <div class="flex justify-between items-start">
                   <div>
-                    <h3 class="font-semibold text-gray-800">{{ review.accommodation.title }}</h3>
+                  <h3 class="font-semibold text-gray-800">{{ review.accommodation?.title || 'Alojamiento' }}</h3>
                     <div class="flex items-center gap-1 mt-1">
                       @for (star of getStars(review.rating); track $index) {
                         <app-icon-svg name="star" className="w-4 h-4 text-yellow-400 fill-current"></app-icon-svg>

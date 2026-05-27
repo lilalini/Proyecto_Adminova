@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 use App\Jobs\SendBookingReminder;
 use App\Models\Booking;
+use App\Jobs\UpdateCheckedOutBookings;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -20,5 +21,7 @@ Schedule::call(function () {
             SendBookingReminder::dispatch($booking);
         });
 })->daily();
+
+Schedule::job(new UpdateCheckedOutBookings)->daily();
 
 

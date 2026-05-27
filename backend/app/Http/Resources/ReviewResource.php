@@ -20,6 +20,7 @@ class ReviewResource extends JsonResource
             'booking' => new BookingResource($this->whenLoaded('booking')),
             'guest' => new GuestResource($this->whenLoaded('guest')),
             'user' => new UserResource($this->whenLoaded('user')),
+            'booking_id' => $this->booking_id,
             'rating' => $this->rating,
             'cleanliness_rating' => $this->cleanliness_rating,
             'communication_rating' => $this->communication_rating,

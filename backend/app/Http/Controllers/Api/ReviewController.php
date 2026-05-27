@@ -9,6 +9,9 @@ use App\Http\Resources\ReviewResource;
 use App\Models\Booking;
 use App\Models\Review;
 use Illuminate\Http\Request;
+use App\Models\Guest;
+use App\Models\LoyaltyPoint;
+
 
 class ReviewController extends Controller
 {
@@ -38,11 +41,19 @@ class ReviewController extends Controller
         $booking = Booking::find($data['booking_id']);
         $data['accommodation_id'] = $booking->accommodation_id;
         $data['guest_id'] = $request->user()->guest?->id;
-        $data['status'] = 'pending';
+        $data['status'] = 'published';
         $data['source'] = $data['source'] ?? 'direct';
         $data['is_verified'] = true;
 
         $review = Review::create($data);
+
+        LoyaltyPoint::create([
+            'guest_id' => $data['guest_id'],
+            'points' => 50,
+            'type' => 'earned',
+            'description' => 'Puntos por escribir una reseña',
+            'expiry_date' => now()->addYear(),
+        ]);
         $review->load(['accommodation', 'booking', 'guest']);
 
         return new ReviewResource($review);
@@ -91,5 +102,20 @@ class ReviewController extends Controller
             ->paginate(10);
 
         return response()->json(['data' => $reviews]);
+    }
+
+    public function myReviews(Request $request)
+    {
+        $user = $request->user();
+        
+        $guest = Guest::where('user_id', $user->id)->first();
+        
+        if (!$guest) {
+            return response()->json(['data' => []]);
+        }
+        
+        $reviews = Review::where('guest_id', $guest->id)->get();
+        
+        return ReviewResource::collection($reviews);
     }
 }

@@ -1,22 +1,22 @@
 <header class="bg-gradient-to-r from-indigo-700 via-purple-700 to-pink-700 text-white shadow-xl sticky top-0 z-50">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex justify-between items-center h-20">
+    <div class="flex justify-between items-center py-2 sm:py-3 md:py-4">
 
       <!-- Logo -->
       @if (userRole === 'owner') {
-        <div class="flex items-center space-x-3 cursor-default">
-          <img src="assets/images/logo2.png" alt="ADMINOVA" class="h-20 w-auto rounded-lg">
+        <div class="flex items-center space-x-2 sm:space-x-3 cursor-default">
+          <img src="assets/images/logo2.png" alt="ADMINOVA" class="h-10 sm:h-12 md:h-16 lg:h-20 w-auto rounded-lg">
           <div class="flex flex-col justify-center">
-            <h1 class="text-2xl font-bold tracking-tight">ADMINOVA</h1>
-            <p class="text-xs text-indigo-200 text-center">Gestión profesional</p>
+            <h1 class="text-lg sm:text-xl md:text-2xl font-bold tracking-tight">ADMINOVA</h1>
+            <p class="text-[10px] sm:text-xs text-indigo-200 text-center">Gestión profesional</p>
           </div>
         </div>
       } @else {
-        <a routerLink="/" class="flex items-center space-x-3">
-          <img src="assets/images/logo2.png" alt="ADMINOVA" class="h-20 w-auto rounded-lg">
+        <a routerLink="/" class="flex items-center space-x-2 sm:space-x-3">
+          <img src="assets/images/logo2.png" alt="ADMINOVA" class="h-10 sm:h-12 md:h-16 lg:h-20 w-auto rounded-lg">
           <div class="flex flex-col justify-center">
-            <h1 class="text-2xl font-bold tracking-tight">ADMINOVA</h1>
-            <p class="text-xs text-indigo-200 text-center">Gestión profesional</p>
+            <h1 class="text-lg sm:text-xl md:text-2xl font-bold tracking-tight">ADMINOVA</h1>
+            <p class="text-[10px] sm:text-xs text-indigo-200 text-center">Gestión profesional</p>
           </div>
         </a>
       }
@@ -41,7 +41,7 @@
           @if (userRole === 'staff') {
             <a routerLink="/staff/dashboard" class="text-white hover:text-pink-200 transition font-medium">Dashboard</a>
             <a routerLink="/staff/bookings" class="text-white hover:text-pink-200 transition font-medium">Reservas</a>
-            <a routerLink="staff/cleaning-tasks" class="text-white hover:text-pink-200 transition font-medium">Limpieza</a>
+            <a routerLink="/staff/cleaning-tasks" class="text-white hover:text-pink-200 transition font-medium">Limpieza</a>
           }
           <!-- guest -->
           @if (userRole === 'guest') {
@@ -53,23 +53,24 @@
       </nav>
 
       <!-- User menu / Auth buttons -->
-      <div class="flex items-center space-x-4">
+      <div class="flex items-center space-x-2 sm:space-x-4">
         @if (isLoggedIn) {
-          <div class="flex items-center space-x-4">
-            <div class="w-10 h-10 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
-              <span class="text-white font-semibold">{{ iniciales }}</span>
+          <div class="flex items-center space-x-2 sm:space-x-4">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
+              <span class="text-white font-semibold text-sm sm:text-base">{{ iniciales }}</span>
             </div>
+            <!-- Botón Salir solo visible en escritorio -->
             <button (click)="logout()" 
-                    class="text-white/80 hover:text-white text-sm hidden sm:block"
+                    class="text-white/80 hover:text-white text-xs sm:text-sm hidden md:block"
                     type="button"
                     title="Cerrar sesión">
               Salir
             </button>
           </div>
         } @else {
-          <div class="hidden sm:flex items-center space-x-4">
-            <a routerLink="/login" class="text-white hover:text-pink-200">Iniciar sesión</a>
-            <a routerLink="/register" class="bg-white text-indigo-700 px-4 py-2 rounded-lg hover:bg-indigo-50 transition">
+          <div class="hidden sm:flex items-center space-x-2 sm:space-x-4">
+            <a routerLink="/login" class="text-white hover:text-pink-200 text-sm sm:text-base">Iniciar sesión</a>
+            <a routerLink="/register" class="bg-white text-indigo-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-indigo-50 transition text-sm sm:text-base">
               Registrarse
             </a>
           </div>
@@ -77,53 +78,58 @@
 
         <!-- Mobile menu button -->
         <button (click)="toggleMobileMenu()" 
-                class="md:hidden text-white focus:outline-none"
+                class="md:hidden text-white focus:outline-none p-1"
                 type="button"
                 aria-label="Abrir menú"
                 title="Abrir menú de navegación">
-          <app-icon-svg name="menu" className="w-6 h-6"></app-icon-svg>
+          <app-icon-svg name="menu" class="w-6 h-6 sm:w-5 sm:h-5"></app-icon-svg>
         </button>
       </div>
     </div>
 
     <!-- Mobile Navigation -->
     @if (isMobileMenuOpen) {
-      <div class="md:hidden py-4 border-t border-white/20">
+      <div class="md:hidden py-3 sm:py-4 border-t border-white/20">
         <div class="flex justify-end mb-2">
           <button (click)="toggleMobileMenu()" 
                   type="button"
                   aria-label="Cerrar menú"
                   title="Cerrar menú de navegación"
                   class="text-white p-1">
-            <app-icon-svg name="x" className="w-5 h-5"></app-icon-svg>
+            <app-icon-svg name="x" class="w-5 h-5"></app-icon-svg>
           </button>
         </div>
-        <nav class="flex flex-col space-y-3">
+        <nav class="flex flex-col space-y-2 sm:space-y-3">
           @if (isLoggedIn) {
             @if (userRole === 'admin') {
-              <a routerLink="/admin/dashboard" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Dashboard</a>
-              <a routerLink="/accommodations" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Alojamientos</a>
-              <a routerLink="/bookings" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Reservas</a>
-              <a routerLink="/guests" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Huéspedes</a>
+              <a routerLink="/admin/dashboard" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1 text-sm sm:text-base">Dashboard</a>
+              <a routerLink="/accommodations" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1 text-sm sm:text-base">Alojamientos</a>
+              <a routerLink="/admin/bookings" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1 text-sm sm:text-base">Reservas</a>
+              <a routerLink="/admin/guests" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1 text-sm sm:text-base">Huéspedes</a>
             }
             @if (userRole === 'owner') {
-              <a routerLink="/owner/dashboard" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Dashboard</a>
-              <a routerLink="/owner/accommodations" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Mis alojamientos</a>
-              <a routerLink="/owner/bookings" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Reservas recibidas</a>
+              <a routerLink="/owner/dashboard" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1 text-sm sm:text-base">Dashboard</a>
+              <a routerLink="/owner/accommodations" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1 text-sm sm:text-base">Mis alojamientos</a>
+              <a routerLink="/owner/bookings" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1 text-sm sm:text-base">Reservas recibidas</a>
             }
             @if (userRole === 'staff') {
-              <a routerLink="/staff/dashboard" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Dashboard</a>
-              <a routerLink="/bookings" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Reservas</a>
-              <a routerLink="/cleaning" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Limpieza</a>
+              <a routerLink="/staff/dashboard" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1 text-sm sm:text-base">Dashboard</a>
+              <a routerLink="/staff/bookings" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1 text-sm sm:text-base">Reservas</a>
+              <a routerLink="/staff/cleaning-tasks" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1 text-sm sm:text-base">Limpieza</a>
             }
             @if (userRole === 'guest') {
-              <a routerLink="/guest/dashboard" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Mi área</a>
-              <a routerLink="/my-bookings" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Mis reservas</a>
-              <a routerLink="/guest/profile" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Mi perfil</a>
+              <a routerLink="/guest/dashboard" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1 text-sm sm:text-base">Mi área</a>
+              <a routerLink="/my-bookings" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1 text-sm sm:text-base">Mis reservas</a>
+              <a routerLink="/guest/profile" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1 text-sm sm:text-base">Mi perfil</a>
             }
+            <!-- Botón de logout dentro del menú móvil -->
+            <button (click)="logout(); toggleMobileMenu()" 
+                    class="text-white/80 hover:text-white py-2 text-sm sm:text-base text-left border-t border-white/20 mt-2 pt-3">
+              Cerrar sesión
+            </button>
           } @else {
-            <a routerLink="/login" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1">Iniciar sesión</a>
-            <a routerLink="/register" (click)="toggleMobileMenu()" class="bg-white text-indigo-700 px-4 py-2 rounded-lg inline-block text-center">Registrarse</a>
+            <a routerLink="/login" (click)="toggleMobileMenu()" class="text-white hover:text-pink-200 py-1 text-sm sm:text-base">Iniciar sesión</a>
+            <a routerLink="/register" (click)="toggleMobileMenu()" class="bg-white text-indigo-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg inline-block text-center text-sm sm:text-base">Registrarse</a>
           }
         </nav>
       </div>

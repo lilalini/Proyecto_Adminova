@@ -54,35 +54,31 @@ export class ReviewsComponent implements OnInit {
     });
   }
 
-  loadReviews() {
-    forkJoin({
-      bookings: this.bookingService.getMyBookings().pipe(catchError(() => of({ data: [] }))),
-      reviews: this.guestId
-        ? this.reviewService.getAll(1).pipe(catchError(() => of({ data: [] })))
-        : of({ data: [] })
-    }).subscribe({
-      next: ({ bookings, reviews }) => {
-        // Reservas completadas sin reseña
-        const reviewedBookingIds = new Set(
-          (reviews as any).data.map((r: any) => r.booking_id)
-        );
-
-        this.pendingReviews = (bookings as any).data.filter((b: any) =>
-          b.status === 'checked_out' && !reviewedBookingIds.has(b.id)
-        );
-
-        // Reseñas ya escritas
-        this.completedReviews = (reviews as any).data.filter((r: any) =>
-          r.guest_id === this.guestId
-        );
-
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-      }
-    });
-  }
+loadReviews() {
+  forkJoin({
+    bookings: this.bookingService.getMyBookings().pipe(catchError(() => of({ data: [] }))),
+    reviews: this.reviewService.getMyReviews().pipe(catchError(() => of({ data: [] })))
+  }).subscribe({
+    next: ({ bookings, reviews }) => {
+      console.log('bookings.data:', bookings.data);
+      console.log('reviews.data:', reviews.data);
+      
+      const reviewedBookingIds = new Set(reviews.data.map((r: any) => r.booking_id));
+      console.log('reviewedBookingIds:', Array.from(reviewedBookingIds));
+      
+      this.pendingReviews = bookings.data.filter((b: any) =>
+        b.status === 'checked_out' && !reviewedBookingIds.has(b.id)
+      );
+      console.log('pendingReviews:', this.pendingReviews);
+      
+      this.completedReviews = reviews.data;
+      this.loading = false;
+    },
+    error: () => {
+      this.loading = false;
+    }
+  });
+}
 
   openReviewModal(booking: any) {
     this.selectedBooking = booking;
