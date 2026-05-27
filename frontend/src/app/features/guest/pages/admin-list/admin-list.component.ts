@@ -4,11 +4,12 @@ import { RouterModule } from '@angular/router';
 import { GuestService } from '../../../../core/services/guest.service';
 import { Guest } from '../../../../core/models/guest.model';
 import { IconSvgComponent } from '../../../../shared/components/icon-svg/icon-svg.component';
+import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component'; 
 
 @Component({
   selector: 'app-guest-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, IconSvgComponent],
+  imports: [CommonModule, RouterModule, IconSvgComponent, SkeletonComponent],
   templateUrl: './admin-list.component.html',
 })
 export class GuestListComponent implements OnInit {
@@ -45,4 +46,12 @@ export class GuestListComponent implements OnInit {
       this.loadGuests(page);
     }
   }
+
+
+    // Método seguro para obtener iniciales
+    getInitials(guest: Guest): string {
+      const first = guest.first_name?.charAt(0) || '';
+      const last = guest.last_name?.charAt(0) || '';
+      return (first + last).toUpperCase();
+    }
 }

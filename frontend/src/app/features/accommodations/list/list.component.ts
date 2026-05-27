@@ -5,6 +5,7 @@ import { AccommodationService } from '../../../core/services/accommodation.servi
 import { IconSvgComponent } from '../../../shared/components/icon-svg/icon-svg.component';
 import { Router } from '@angular/router';
 import { Accommodation } from '../../../core/models/accommodation.model';
+import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
 
 @Component({
   selector: 'app-accommodations-list',
@@ -12,7 +13,8 @@ import { Accommodation } from '../../../core/models/accommodation.model';
   imports: [
     CommonModule, 
     RouterModule,
-    IconSvgComponent
+    IconSvgComponent,
+    SkeletonComponent
   ],
   templateUrl: './list.component.html',
 })

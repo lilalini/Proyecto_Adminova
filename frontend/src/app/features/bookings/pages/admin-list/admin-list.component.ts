@@ -4,12 +4,13 @@ import { RouterModule } from '@angular/router';
 import { BookingService } from '../../../../core/services/booking.service';
 import { Booking } from '../../../../core/models/booking.model';
 import { IconSvgComponent } from '../../../../shared/components/icon-svg/icon-svg.component';
+import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
 import { getBookingStatus } from '../../../../shared/utils/booking-status.util';
 
 @Component({
   selector: 'app-admin-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, IconSvgComponent],
+  imports: [CommonModule, RouterModule, IconSvgComponent, SkeletonComponent],
   templateUrl: './admin-list.component.html',
 })
 export class AdminListComponent implements OnInit {
