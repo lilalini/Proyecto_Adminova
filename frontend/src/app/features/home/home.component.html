@@ -30,6 +30,8 @@
             <input 
               type="date" 
               [(ngModel)]="searchCheckIn"
+              (ngModelChange)="onDateChange()"
+              [min]="todayDate"
               class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 text-gray-900"
               title="Fecha de entrada"
             />
@@ -39,8 +41,10 @@
           <div class="relative">
             <app-icon-svg name="calendar" className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"></app-icon-svg>
             <input 
-              type="date" 
+               type="date" 
               [(ngModel)]="searchCheckOut"
+              (ngModelChange)="onDateChange()"
+              [min]="searchCheckIn"
               class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 text-gray-900"
               title="Fecha de salida"
             />

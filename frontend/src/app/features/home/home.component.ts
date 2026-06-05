@@ -26,8 +26,35 @@ export class HomeComponent implements OnInit {
   searchCheckOut: string = '';
   searchGuests: number = 1;
   currentSort: string = 'newest';
+  todayDate: string = new Date().toISOString().split('T')[0];
 
   constructor(private publicService: PublicService) {}
+
+    onDateChange() {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      // Validar fecha de entrada
+      if (this.searchCheckIn) {
+        const checkInDate = new Date(this.searchCheckIn);
+        if (checkInDate < today) {
+          alert('La fecha de entrada no puede ser anterior a hoy');
+          this.searchCheckIn = '';
+          this.searchCheckOut = '';
+          return;
+        }
+      }
+      
+      // Validar que salida sea posterior a entrada
+      if (this.searchCheckIn && this.searchCheckOut) {
+        const checkInDate = new Date(this.searchCheckIn);
+        const checkOutDate = new Date(this.searchCheckOut);
+        if (checkOutDate <= checkInDate) {
+          alert('La fecha de salida debe ser posterior a la fecha de entrada');
+          this.searchCheckOut = '';
+        }
+      }
+    }
 
   ngOnInit() {
     this.search(1);

@@ -376,7 +376,7 @@
                   type="date"
                   [(ngModel)]="checkIn"
                   [min]="todayDate"
-                  (change)="onDateChange()"
+                  (ngModelChange)="onDateChange()"
                   class="w-full pl-12 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 text-sm"
                   placeholder="Llegada"
                 />
@@ -394,7 +394,7 @@
                   type="date"
                   [(ngModel)]="checkOut"
                   [min]="checkIn"
-                  (change)="onDateChange()"
+                  (ngModelChange)="onDateChange()"
                   class="w-full pl-12 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 text-sm"
                   placeholder="Salida"
                 />
