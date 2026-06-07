@@ -8,7 +8,7 @@ export class AuthInterceptor implements HttpInterceptor {
     const token = localStorage.getItem('auth_token');
 
     let headers: any = {
-      'Accept': 'application/json'  // ← Agrega esto
+      'Accept': 'application/json'  
     };
 
     if (token) {

@@ -209,6 +209,15 @@ public function myBookings(Request $request)
             'confirmed_at' => now(),
         ]);
 
+        // Añadir 250 puntos de fidelidad por reserva confirmada
+        LoyaltyPoint::create([
+            'guest_id'    => $booking->guest_id,
+            'points'      => 250,
+            'type'        => 'earned',
+            'description' => 'Puntos por reserva confirmada (ID: ' . $booking->id . ')',
+            'expiry_date' => now()->addYear(),
+        ]);
+
         // Crear notificación
         Notification::create([
             'notifiable_type' => 'App\\Models\\User',
