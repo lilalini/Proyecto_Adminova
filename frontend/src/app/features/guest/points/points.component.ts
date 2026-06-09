@@ -36,7 +36,10 @@ export class PointsComponent implements OnInit {
     this.loadPoints();
   }
 
-loadPoints() {
+
+
+
+  loadPoints() {
   this.auth.currentUser$.pipe(first()).subscribe(user => {
     if (!user) {
       this.loading = false;
@@ -47,18 +50,14 @@ loadPoints() {
       next: (response: any) => {
         const guest = response.data;
         if (guest) {
-          // Cargar saldo
-          this.loyaltyPointService.getBalance(guest.id).subscribe({
-            next: (balance: { balance: number }) => {
-              this.pointsBalance = balance.balance;
-            },
-            error: (err: any) => console.error('Error cargando saldo:', err)
-          });
-
-          // Cargar historial
-          this.loyaltyPointService.getHistory(guest.id).subscribe({
-            next: (response: any) => {
-              this.pointsHistory = response.data.map((point: any) => ({
+          // Ejecutar ambas peticiones en paralelo
+          Promise.all([
+            this.loyaltyPointService.getBalance(guest.id).toPromise(),
+            this.loyaltyPointService.getHistory(guest.id).toPromise()
+          ])
+            .then(([balanceResponse, historyResponse]: any) => {
+              this.pointsBalance = balanceResponse.balance;
+              this.pointsHistory = historyResponse.data.map((point: any) => ({
                 id: point.id,
                 date: point.created_at,
                 description: point.description,
@@ -67,12 +66,11 @@ loadPoints() {
                       (point.type === 'redeemed' ? 'redeemed' : 'other')
               }));
               this.loading = false;
-            },
-            error: (err: any) => {
-              console.error('Error cargando historial:', err);
+            })
+            .catch(err => {
+              console.error('Error cargando puntos:', err);
               this.loading = false;
-            }
-          });
+            });
         } else {
           this.loading = false;
         }
